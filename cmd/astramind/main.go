@@ -1,5 +1,5 @@
 package main
-
+import "strings"
 import (
 	"bufio"
 	"bytes"
@@ -40,7 +40,8 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Println("===================================")
-	fmt.Println("Simple AI Chatbot in Go")
+	fmt.Println("AstraMind v0.1.0")
+	fmt.Println("Intelligent Conversations. Infinite Possibilities.")
 	fmt.Println("Type 'exit' to quit")
 	fmt.Println("===================================")
 
@@ -49,8 +50,10 @@ func main() {
 		fmt.Print("\nYou: ")
 
 		userInput, _ := reader.ReadString('\n')
+		userInput = strings.TrimSpace(userInput)
 
-		if userInput == "exit\n" {
+		if userInput == "exit" || userInput == "quit" {
+			fmt.Println("Goodbye!")
 			break
 		}
 
@@ -101,6 +104,17 @@ func askAI(apiKey, prompt string) (string, error) {
 	}
 
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var body bytes.Buffer
+		body.ReadFrom(resp.Body)
+
+		return "", fmt.Errorf(
+			"API Error (%d): %s",
+			resp.StatusCode,
+			body.String(),
+		)
+	}
 
 	var result ChatResponse
 
