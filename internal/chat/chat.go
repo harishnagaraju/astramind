@@ -1,3 +1,4 @@
-</> Go
 package chat
-func Start()
+
+func Start() {
+}
