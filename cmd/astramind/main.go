@@ -30,15 +30,65 @@ type ChatResponse struct {
 	} `json:"choices"`
 }
 
+func loadHistory() ([]Message, error) {
+
+	data, err := os.ReadFile("data/chat_history.json")
+
+	if err != nil {
+
+		if os.IsNotExist(err) {
+			return []Message{}, nil
+		}
+
+		return nil, err
+	}
+
+	var messages []Message
+
+	err = json.Unmarshal(data, &messages)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return messages, nil
+}
+
+func saveHistory(messages []Message) error {
+
+	data, err := json.MarshalIndent(
+		messages,
+		"",
+		"  ",
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(
+		"data/chat_history.json",
+		data,
+		0644,
+	)
+}
+
 func main() {
 
 	err := godotenv.Load()
 	if err != nil {
-		fmt.Println("Could not load .env file")
+		fmt.Println("Could not load .env file", err)
 		return
 	}
 
 	apiKey := os.Getenv("OPENAI_API_KEY")
+        /*
+	if apiKey == "your_api_key_here" {
+   	    fmt.Println("Please update OPENAI_API_KEY in .env")
+	    return
+	}
+        */
+
 	model := os.Getenv("OPENAI_MODEL")
 
 	if apiKey == "" {
@@ -52,10 +102,25 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 
-	var conversation []Message
+	conversation, err := loadHistory()
+        /* temp fix below for testing only, this needs to be removed after API KEY is append FOR TESTING ONLY 
+        conversation = append(conversation, Message{
+    		Role:    "system",
+    		Content: "Persistence Test",
+	}) */
+
+	if err != nil {
+   	        fmt.Println("Warning: could not load history:", err)
+    		conversation = []Message{}
+	}
+
+        fmt.Printf(
+	  "Loaded %d messages from history.\n",
+	  len(conversation),
+        )
 
 	fmt.Println("===================================")
-	fmt.Println("AstraMind v0.2.1")
+	fmt.Println("AstraMind v0.3.0-dev")
 	fmt.Println("Intelligent Conversations. Infinite Possibilities.")
 	fmt.Println("Type '/help' for commands")
 	fmt.Println("===================================")
@@ -79,6 +144,7 @@ func main() {
 		switch userInput {
 
 		case "exit", "quit":
+			saveHistory(conversation)
 			fmt.Println("Goodbye!")
 			return
 
@@ -92,8 +158,15 @@ func main() {
 			continue
 
 		case "/clear":
-			conversation = nil
-			fmt.Println("Conversation memory cleared.")
+			conversation = []Message{}
+
+			err := saveHistory(conversation)
+
+			if err != nil {
+    				fmt.Println("Error clearing history:", err)
+			} else {
+    				fmt.Println("Conversation memory cleared.")
+			}
 			continue
 
 		case "/history":
