@@ -89,3 +89,25 @@ Astra — derived from the Latin word for "stars," symbolizing exploration, inte
 Mind — representing reasoning, learning, and artificial intelligence.
 
 Together, AstraMind represents an AI system designed to explore knowledge, assist users, and continuously evolve toward more advanced forms of intelligence.
+
+## Features
+
+* OpenAI-powered CLI chatbot
+* Conversation memory
+* `/help` command
+* `/history` command
+* `/clear` command
+* Environment-based configuration
+* GitHub Actions CI/CD
+* Release management
+
+## Commands
+
+| Command  | Description               |
+| -------- | ------------------------- |
+| /help    | Show available commands   |
+| /history | Show conversation history |
+| /clear   | Clear conversation memory |
+| exit     | Exit AstraMind            |
+| quit     | Exit AstraMind            |
+
