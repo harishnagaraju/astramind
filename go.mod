@@ -1,4 +1,4 @@
-module github.com/yourusername/astramind
+module github.com/harishnagaraju/astramind
 
 go 1.24
 
