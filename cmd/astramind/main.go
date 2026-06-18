@@ -1,5 +1,5 @@
 package main
-import "strings"
+
 import (
 	"bufio"
 	"bytes"
@@ -7,9 +7,12 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
+
+const MaxMessages = 20
 
 type ChatRequest struct {
 	Model    string    `json:"model"`
@@ -36,51 +39,135 @@ func main() {
 	}
 
 	apiKey := os.Getenv("OPENAI_API_KEY")
+	model := os.Getenv("OPENAI_MODEL")
+
+	if apiKey == "" {
+		fmt.Println("OPENAI_API_KEY not found in .env")
+		return
+	}
+
+	if model == "" {
+		model = "gpt-4o-mini"
+	}
 
 	reader := bufio.NewReader(os.Stdin)
 
+	var conversation []Message
+
 	fmt.Println("===================================")
-	fmt.Println("AstraMind v0.1.0")
+	fmt.Println("AstraMind v0.2.1")
 	fmt.Println("Intelligent Conversations. Infinite Possibilities.")
-	fmt.Println("Type 'exit' to quit")
+	fmt.Println("Type '/help' for commands")
 	fmt.Println("===================================")
 
 	for {
 
 		fmt.Print("\nYou: ")
 
-		userInput, _ := reader.ReadString('\n')
-		userInput = strings.TrimSpace(userInput)
-
-		if userInput == "exit" || userInput == "quit" {
-			fmt.Println("Goodbye!")
-			break
+		userInput, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println("Input Error:", err)
+			continue
 		}
 
-		reply, err := askAI(apiKey, userInput)
+		userInput = strings.TrimSpace(userInput)
+
+		if userInput == "" {
+			continue
+		}
+
+		switch userInput {
+
+		case "exit", "quit":
+			fmt.Println("Goodbye!")
+			return
+
+		case "/help":
+			fmt.Println("\nAvailable Commands:")
+			fmt.Println("/help      - Show help")
+			fmt.Println("/history   - Show conversation history")
+			fmt.Println("/clear     - Clear conversation memory")
+			fmt.Println("exit       - Exit AstraMind")
+			fmt.Println("quit       - Exit AstraMind")
+			continue
+
+		case "/clear":
+			conversation = nil
+			fmt.Println("Conversation memory cleared.")
+			continue
+
+		case "/history":
+
+			if len(conversation) == 0 {
+				fmt.Println("No conversation history.")
+				continue
+			}
+
+			fmt.Println("\nConversation History:")
+
+			for i, msg := range conversation {
+				fmt.Printf(
+					"%d. [%s] %s\n",
+					i+1,
+					msg.Role,
+					msg.Content,
+				)
+			}
+
+			continue
+		}
+
+		// Create temporary conversation
+		// Do NOT save until API succeeds.
+		tempConversation := append(conversation, Message{
+			Role:    "user",
+			Content: userInput,
+		})
+
+		reply, err := askAI(
+			apiKey,
+			model,
+			tempConversation,
+		)
 
 		if err != nil {
 			fmt.Println("Error:", err)
 			continue
 		}
 
+		// Save user message only after successful API response
+		conversation = tempConversation
+
+		// Save assistant response
+		conversation = append(conversation, Message{
+			Role:    "assistant",
+			Content: reply,
+		})
+
+		// Keep memory bounded
+		if len(conversation) > MaxMessages {
+			conversation = conversation[len(conversation)-MaxMessages:]
+		}
+
 		fmt.Println("\nAI:", reply)
 	}
 }
 
-func askAI(apiKey, prompt string) (string, error) {
+func askAI(
+	apiKey string,
+	model string,
+	messages []Message,
+) (string, error) {
 
 	reqBody := ChatRequest{
-		Model: "gpt-4o-mini",
-		Messages: []Message{
-			{
-				Role:    "user",
-				Content: prompt,
-			},
-		},
+		Model:    model,
+		Messages: messages,
 	}
 
-	jsonData, _ := json.Marshal(reqBody)
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		return "", err
+	}
 
 	req, err := http.NewRequest(
 		"POST",
@@ -98,7 +185,6 @@ func askAI(apiKey, prompt string) (string, error) {
 	client := &http.Client{}
 
 	resp, err := client.Do(req)
-
 	if err != nil {
 		return "", err
 	}
@@ -106,6 +192,7 @@ func askAI(apiKey, prompt string) (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+
 		var body bytes.Buffer
 		body.ReadFrom(resp.Body)
 
@@ -119,7 +206,6 @@ func askAI(apiKey, prompt string) (string, error) {
 	var result ChatResponse
 
 	err = json.NewDecoder(resp.Body).Decode(&result)
-
 	if err != nil {
 		return "", err
 	}
