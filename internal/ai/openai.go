@@ -1,2 +1,3 @@
 package ai
-func AskAI(prompt string) (string, error)
+func AskAI(prompt string) (string, error){
+}
