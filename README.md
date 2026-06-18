@@ -111,3 +111,7 @@ Together, AstraMind represents an AI system designed to explore knowledge, assis
 | exit     | Exit AstraMind            |
 | quit     | Exit AstraMind            |
 
+## Project Planning
+
+See [Roadmap](docs/roadmap.md) for upcoming releases and features.
+
