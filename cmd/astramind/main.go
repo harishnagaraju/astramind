@@ -87,6 +87,7 @@ func main() {
 			fmt.Println("/help      - Show help")
 			fmt.Println("/history   - Show conversation history")
 			fmt.Println("/clear     - Clear conversation memory")
+			fmt.Println("/stats     - Show session statistics")
 			fmt.Println("exit       - Exit AstraMind")
 			fmt.Println("quit       - Exit AstraMind")
 			continue
@@ -113,6 +114,48 @@ func main() {
 					msg.Content,
 				)
 			}
+
+			continue
+			
+		case "/stats":
+
+			userCount := 0
+			assistantCount := 0
+
+			for _, msg := range conversation {
+
+				switch msg.Role {
+
+				case "user":
+					userCount++
+
+				case "assistant":
+					assistantCount++
+				}
+			}
+
+			fmt.Println("\nSession Statistics")
+			fmt.Println("------------------")
+
+			fmt.Printf(
+				"User Messages: %d\n",
+				userCount,
+			)
+
+			fmt.Printf(
+				"Assistant Messages: %d\n",
+				assistantCount,
+			)
+
+			fmt.Printf(
+				"Memory Entries: %d\n",
+				len(conversation),
+			)
+
+			fmt.Printf(
+				"Current Model: %s\n",
+				model,
+			)
 
 			continue
 		}
