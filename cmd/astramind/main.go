@@ -1,5 +1,6 @@
 package main
-
+import "github.com/harishnagaraju/astramind/internal/storage"
+import "github.com/harishnagaraju/astramind/internal/models"
 import (
 	"bufio"
 	"bytes"
@@ -8,69 +9,25 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
 	"github.com/joho/godotenv"
 )
+
+/* func LoadHistory() ([]models.Message, error)
+func SaveHistory(messages []models.Message) error */
+
+var conversation []models.Message
 
 const MaxMessages = 20
 
 type ChatRequest struct {
 	Model    string    `json:"model"`
-	Messages []Message `json:"messages"`
-}
-
-type Message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	Messages []models.Message `json:"messages"`
 }
 
 type ChatResponse struct {
 	Choices []struct {
-		Message Message `json:"message"`
+		Message models.Message `json:"message"`
 	} `json:"choices"`
-}
-
-func loadHistory() ([]Message, error) {
-
-	data, err := os.ReadFile("data/chat_history.json")
-
-	if err != nil {
-
-		if os.IsNotExist(err) {
-			return []Message{}, nil
-		}
-
-		return nil, err
-	}
-
-	var messages []Message
-
-	err = json.Unmarshal(data, &messages)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return messages, nil
-}
-
-func saveHistory(messages []Message) error {
-
-	data, err := json.MarshalIndent(
-		messages,
-		"",
-		"  ",
-	)
-
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile(
-		"data/chat_history.json",
-		data,
-		0644,
-	)
 }
 
 func main() {
@@ -102,7 +59,7 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 
-	conversation, err := loadHistory()
+	conversation, err := storage.LoadHistory()
         /* temp fix below for testing only, this needs to be removed after API KEY is append FOR TESTING ONLY 
         conversation = append(conversation, Message{
     		Role:    "system",
@@ -111,7 +68,7 @@ func main() {
 
 	if err != nil {
    	        fmt.Println("Warning: could not load history:", err)
-    		conversation = []Message{}
+    		conversation = []models.Message{}
 	}
 
         fmt.Printf(
@@ -144,7 +101,7 @@ func main() {
 		switch userInput {
 
 		case "exit", "quit":
-			saveHistory(conversation)
+			storage.SaveHistory(conversation)
 			fmt.Println("Goodbye!")
 			return
 
@@ -158,9 +115,9 @@ func main() {
 			continue
 
 		case "/clear":
-			conversation = []Message{}
+			conversation = []models.Message{}
 
-			err := saveHistory(conversation)
+			err := storage.SaveHistory(conversation)
 
 			if err != nil {
     				fmt.Println("Error clearing history:", err)
@@ -192,7 +149,7 @@ func main() {
 
 		// Create temporary conversation
 		// Do NOT save until API succeeds.
-		tempConversation := append(conversation, Message{
+		tempConversation := append(conversation, models.Message{
 			Role:    "user",
 			Content: userInput,
 		})
@@ -212,7 +169,7 @@ func main() {
 		conversation = tempConversation
 
 		// Save assistant response
-		conversation = append(conversation, Message{
+		conversation = append(conversation, models.Message{
 			Role:    "assistant",
 			Content: reply,
 		})
@@ -229,7 +186,7 @@ func main() {
 func askAI(
 	apiKey string,
 	model string,
-	messages []Message,
+	messages []models.Message,
 ) (string, error) {
 
 	reqBody := ChatRequest{
