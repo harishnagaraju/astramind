@@ -3,13 +3,15 @@ package storage
 import (
 	"encoding/json"
 	"os"
+	"github.com/harishnagaraju/astramind/internal/config"
 	"github.com/harishnagaraju/astramind/internal/models"
 )
 
 func LoadHistory() ([]models.Message, error) {
 
-	data, err := os.ReadFile("data/chat_history.json")
-
+	/* data, err := os.ReadFile("data/chat_history.json")*/
+	data, err := os.ReadFile(config.HistoryFile)
+	
 	if err != nil {
 
 		if os.IsNotExist(err) {
@@ -44,7 +46,7 @@ func SaveHistory(messages []models.Message) error {
 	}
 
 	return os.WriteFile(
-		"data/chat_history.json",
+		config.HistoryFile,
 		data,
 		0644,
 	)

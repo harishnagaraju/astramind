@@ -1,4 +1,5 @@
 package main
+import "github.com/harishnagaraju/astramind/internal/config"
 import "github.com/harishnagaraju/astramind/internal/storage"
 import "github.com/harishnagaraju/astramind/internal/models"
 import (
@@ -17,7 +18,7 @@ func SaveHistory(messages []models.Message) error */
 
 var conversation []models.Message
 
-const MaxMessages = 20
+/*const MaxMessages = 20*/
 
 type ChatRequest struct {
 	Model    string    `json:"model"`
@@ -111,6 +112,7 @@ func main() {
 			fmt.Println("/history   - Show conversation history")
 			fmt.Println("/clear     - Clear conversation memory")
 			fmt.Println("/stats     - Show session statistics")
+			fmt.Println("/config    - Show configuration")
 			fmt.Println("exit       - Exit AstraMind")
 			fmt.Println("quit       - Exit AstraMind")
 			continue
@@ -125,6 +127,32 @@ func main() {
 			} else {
     				fmt.Println("Conversation memory cleared.")
 			}
+			continue
+		case "/config":
+
+			fmt.Println("\nCurrent Configuration")
+			fmt.Println("---------------------")
+
+			fmt.Printf(
+				"Model: %s\n",
+				model,
+			)
+
+			fmt.Printf(
+				"Max Messages: %d\n",
+				config.MaxMessages,
+			)
+
+			fmt.Printf(
+				"History Enabled: %t\n",
+				true,
+			)
+
+			fmt.Printf(
+				"History File: %s\n",
+				config.HistoryFile,
+			)
+
 			continue
 
 		case "/history":
@@ -218,8 +246,8 @@ func main() {
 		})
 
 		// Keep memory bounded
-		if len(conversation) > MaxMessages {
-			conversation = conversation[len(conversation)-MaxMessages:]
+		if len(conversation) > config.MaxMessages {
+			conversation = conversation[len(conversation)-config.MaxMessages:]
 		}
 
 		fmt.Println("\nAI:", reply)
