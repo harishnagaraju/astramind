@@ -1,5 +1,7 @@
 package main
-
+import "github.com/harishnagaraju/astramind/internal/config"
+import "github.com/harishnagaraju/astramind/internal/storage"
+import "github.com/harishnagaraju/astramind/internal/models"
 import (
 	"bufio"
 	"bytes"
@@ -8,25 +10,24 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
 	"github.com/joho/godotenv"
 )
 
-const MaxMessages = 20
+/* func LoadHistory() ([]models.Message, error)
+func SaveHistory(messages []models.Message) error */
+
+var conversation []models.Message
+
+/*const MaxMessages = 20*/
 
 type ChatRequest struct {
 	Model    string    `json:"model"`
-	Messages []Message `json:"messages"`
-}
-
-type Message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	Messages []models.Message `json:"messages"`
 }
 
 type ChatResponse struct {
 	Choices []struct {
-		Message Message `json:"message"`
+		Message models.Message `json:"message"`
 	} `json:"choices"`
 }
 
@@ -34,11 +35,18 @@ func main() {
 
 	err := godotenv.Load()
 	if err != nil {
-		fmt.Println("Could not load .env file")
+		fmt.Println("Could not load .env file", err)
 		return
 	}
 
 	apiKey := os.Getenv("OPENAI_API_KEY")
+        /*
+	if apiKey == "your_api_key_here" {
+   	    fmt.Println("Please update OPENAI_API_KEY in .env")
+	    return
+	}
+        */
+
 	model := os.Getenv("OPENAI_MODEL")
 
 	if apiKey == "" {
@@ -52,10 +60,25 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 
-	var conversation []Message
+	conversation, err := storage.LoadHistory()
+        /* temp fix below for testing only, this needs to be removed after API KEY is append FOR TESTING ONLY 
+        conversation = append(conversation, Message{
+    		Role:    "system",
+    		Content: "Persistence Test",
+	}) */
+
+	if err != nil {
+   	        fmt.Println("Warning: could not load history:", err)
+    		conversation = []models.Message{}
+	}
+
+        fmt.Printf(
+	  "Loaded %d messages from history.\n",
+	  len(conversation),
+        )
 
 	fmt.Println("===================================")
-	fmt.Println("AstraMind v0.2.1")
+	fmt.Printf("AstraMind %s\n", config.Version)
 	fmt.Println("Intelligent Conversations. Infinite Possibilities.")
 	fmt.Println("Type '/help' for commands")
 	fmt.Println("===================================")
@@ -79,21 +102,87 @@ func main() {
 		switch userInput {
 
 		case "exit", "quit":
+			storage.SaveHistory(conversation)
 			fmt.Println("Goodbye!")
 			return
 
 		case "/help":
 			fmt.Println("\nAvailable Commands:")
+			fmt.Println("/about     - About AstraMind")
 			fmt.Println("/help      - Show help")
 			fmt.Println("/history   - Show conversation history")
 			fmt.Println("/clear     - Clear conversation memory")
+			fmt.Println("/stats     - Show session statistics")
+			fmt.Println("/config    - Show configuration")
 			fmt.Println("exit       - Exit AstraMind")
 			fmt.Println("quit       - Exit AstraMind")
 			continue
 
 		case "/clear":
-			conversation = nil
-			fmt.Println("Conversation memory cleared.")
+			conversation = []models.Message{}
+
+			err := storage.SaveHistory(conversation)
+
+			if err != nil {
+    				fmt.Println("Error clearing history:", err)
+			} else {
+    				fmt.Println("Conversation memory cleared.")
+			}
+			continue
+			
+		case "/config":
+
+			fmt.Println("\nCurrent Configuration")
+			fmt.Println("---------------------")
+
+			fmt.Printf(
+				"Model: %s\n",
+				model,
+			)
+
+			fmt.Printf(
+				"Max Messages: %d\n",
+				config.MaxMessages,
+			)
+
+			fmt.Printf(
+				"History Enabled: %t\n",
+				true,
+			)
+
+			fmt.Printf(
+				"History File: %s\n",
+				config.HistoryFile,
+			)
+
+			continue
+		
+		case "/about":
+
+			fmt.Println("\nAstraMind")
+			fmt.Println("---------")
+
+			fmt.Printf(
+				"Version: %s\n",
+				config.Version,
+			)
+
+			fmt.Println("\nFeatures:")
+
+			fmt.Println("✓ Conversation Memory")
+			fmt.Println("✓ Persistent History")
+			fmt.Println("✓ Session Statistics")
+			fmt.Println("✓ Configuration Display")
+
+			fmt.Printf(
+				"\nModel: %s\n",
+				model,
+			)
+
+			fmt.Println(
+				"Repository: github.com/harishnagaraju/astramind",
+			)
+
 			continue
 
 		case "/history":
@@ -115,11 +204,53 @@ func main() {
 			}
 
 			continue
+			
+		case "/stats":
+
+			userCount := 0
+			assistantCount := 0
+
+			for _, msg := range conversation {
+
+				switch msg.Role {
+
+				case "user":
+					userCount++
+
+				case "assistant":
+					assistantCount++
+				}
+			}
+
+			fmt.Println("\nSession Statistics")
+			fmt.Println("------------------")
+
+			fmt.Printf(
+				"User Messages: %d\n",
+				userCount,
+			)
+
+			fmt.Printf(
+				"Assistant Messages: %d\n",
+				assistantCount,
+			)
+
+			fmt.Printf(
+				"Memory Entries: %d\n",
+				len(conversation),
+			)
+
+			fmt.Printf(
+				"Current Model: %s\n",
+				model,
+			)
+
+			continue
 		}
 
 		// Create temporary conversation
 		// Do NOT save until API succeeds.
-		tempConversation := append(conversation, Message{
+		tempConversation := append(conversation, models.Message{
 			Role:    "user",
 			Content: userInput,
 		})
@@ -139,14 +270,14 @@ func main() {
 		conversation = tempConversation
 
 		// Save assistant response
-		conversation = append(conversation, Message{
+		conversation = append(conversation, models.Message{
 			Role:    "assistant",
 			Content: reply,
 		})
 
 		// Keep memory bounded
-		if len(conversation) > MaxMessages {
-			conversation = conversation[len(conversation)-MaxMessages:]
+		if len(conversation) > config.MaxMessages {
+			conversation = conversation[len(conversation)-config.MaxMessages:]
 		}
 
 		fmt.Println("\nAI:", reply)
@@ -156,7 +287,7 @@ func main() {
 func askAI(
 	apiKey string,
 	model string,
-	messages []Message,
+	messages []models.Message,
 ) (string, error) {
 
 	reqBody := ChatRequest{
