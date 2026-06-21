@@ -78,7 +78,7 @@ func main() {
         )
 
 	fmt.Println("===================================")
-	fmt.Println("AstraMind v0.3.0-dev")
+	fmt.Printf("AstraMind %s\n", config.Version)
 	fmt.Println("Intelligent Conversations. Infinite Possibilities.")
 	fmt.Println("Type '/help' for commands")
 	fmt.Println("===================================")
@@ -108,6 +108,7 @@ func main() {
 
 		case "/help":
 			fmt.Println("\nAvailable Commands:")
+			fmt.Println("/about     - About AstraMind")
 			fmt.Println("/help      - Show help")
 			fmt.Println("/history   - Show conversation history")
 			fmt.Println("/clear     - Clear conversation memory")
@@ -128,6 +129,7 @@ func main() {
     				fmt.Println("Conversation memory cleared.")
 			}
 			continue
+			
 		case "/config":
 
 			fmt.Println("\nCurrent Configuration")
@@ -151,6 +153,34 @@ func main() {
 			fmt.Printf(
 				"History File: %s\n",
 				config.HistoryFile,
+			)
+
+			continue
+		
+		case "/about":
+
+			fmt.Println("\nAstraMind")
+			fmt.Println("---------")
+
+			fmt.Printf(
+				"Version: %s\n",
+				config.Version,
+			)
+
+			fmt.Println("\nFeatures:")
+
+			fmt.Println("✓ Conversation Memory")
+			fmt.Println("✓ Persistent History")
+			fmt.Println("✓ Session Statistics")
+			fmt.Println("✓ Configuration Display")
+
+			fmt.Printf(
+				"\nModel: %s\n",
+				model,
+			)
+
+			fmt.Println(
+				"Repository: github.com/harishnagaraju/astramind",
 			)
 
 			continue
