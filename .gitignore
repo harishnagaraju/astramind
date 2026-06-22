@@ -21,6 +21,7 @@ vendor/
 
 # Environment variables
 .env
+data/chat_history.json
 
 # IDE files
 .vscode/
