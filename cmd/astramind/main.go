@@ -327,10 +327,25 @@ func askAI(
 		var body bytes.Buffer
 		body.ReadFrom(resp.Body)
 
+		responseBody := body.String()
+
+		if resp.StatusCode == 429 &&
+			strings.Contains(responseBody, "insufficient_quota") {
+
+			return "", fmt.Errorf(
+				"OpenAI quota exceeded.\n\n" +
+					"Please check:\n" +
+					"- Billing settings\n" +
+					"- Usage limits\n" +
+					"- Available credits\n\n" +
+					"https://platform.openai.com/usage",
+			)
+		}
+
 		return "", fmt.Errorf(
 			"API Error (%d): %s",
 			resp.StatusCode,
-			body.String(),
+			responseBody,
 		)
 	}
 
