@@ -32,6 +32,8 @@ type ChatResponse struct {
 }
 
 func main() {
+	
+	activeSession := "default"
 
 	err := godotenv.Load()
 	if err != nil {
@@ -60,12 +62,8 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 
-	conversation, err := storage.LoadHistory()
-        /* temp fix below for testing only, this needs to be removed after API KEY is append FOR TESTING ONLY 
-        conversation = append(conversation, Message{
-    		Role:    "system",
-    		Content: "Persistence Test",
-	}) */
+	conversation, err := storage.LoadHistory(activeSession)
+       
 
 	if err != nil {
    	        fmt.Println("Warning: could not load history:", err)
@@ -85,7 +83,7 @@ func main() {
 
 	for {
 
-		fmt.Print("\nYou: ")
+		fmt.Print("\nYou: ", activeSession)
 
 		userInput, err := reader.ReadString('\n')
 		if err != nil {
@@ -102,7 +100,7 @@ func main() {
 		switch userInput {
 
 		case "exit", "quit":
-			storage.SaveHistory(conversation)
+			storage.SaveHistory(activeSession, conversation)
 			fmt.Println("Goodbye!")
 			return
 
@@ -121,7 +119,7 @@ func main() {
 		case "/clear":
 			conversation = []models.Message{}
 
-			err := storage.SaveHistory(conversation)
+			err := storage.SaveHistory(activeSession, conversation)
 
 			if err != nil {
     				fmt.Println("Error clearing history:", err)

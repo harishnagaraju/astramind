@@ -3,37 +3,65 @@ package storage
 import (
 	"encoding/json"
 	"os"
-	"github.com/harishnagaraju/astramind/internal/config"
+	"path/filepath"
+	/*"github.com/harishnagaraju/astramind/internal/config"*/
 	"github.com/harishnagaraju/astramind/internal/models"
 )
 
-func LoadHistory() ([]models.Message, error) {
+func sessionFile(session string) string {
 
-	/* data, err := os.ReadFile("data/chat_history.json")*/
-	data, err := os.ReadFile(config.HistoryFile)
-	
+	return filepath.Join(
+		"data",
+		"sessions",
+		session+".json",
+	)
+}
+
+func LoadHistory(
+	session string,
+) ([]models.Message, error) {
+
+	file := sessionFile(session)
+
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		return []models.Message{}, nil
+	}
+
+	data, err := os.ReadFile(file)
+
 	if err != nil {
-
-		if os.IsNotExist(err) {
-			return []models.Message{}, nil
-		}
-
 		return nil, err
 	}
 
 	var messages []models.Message
 
-	err = json.Unmarshal(data, &messages)
+	err = json.Unmarshal(
+		data,
+		&messages,
+	)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return messages, nil
-
 }
 
-func SaveHistory(messages []models.Message) error {
+func SaveHistory(
+	session string,
+	messages []models.Message,
+) error {
+
+	file := sessionFile(session)
+
+	err := os.MkdirAll(
+		filepath.Dir(file),
+		0755,
+	)
+
+	if err != nil {
+		return err
+	}
 
 	data, err := json.MarshalIndent(
 		messages,
@@ -46,9 +74,8 @@ func SaveHistory(messages []models.Message) error {
 	}
 
 	return os.WriteFile(
-		config.HistoryFile,
+		file,
 		data,
 		0644,
 	)
-
 }
