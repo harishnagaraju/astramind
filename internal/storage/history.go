@@ -20,6 +20,15 @@ func SessionExists(
     return err == nil
 }
 
+func DeleteSession(
+    session string,
+) error {
+
+    file := sessionFile(session)
+
+    return os.Remove(file)
+}
+
 func ListSessions() ([]string, error) {
 
     files, err := os.ReadDir("data/sessions")

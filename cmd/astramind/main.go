@@ -202,7 +202,68 @@ func main() {
 
 			continue
 		}
+		
+		if strings.HasPrefix(
+			userInput,
+			"/delete ",
+			){
 
+			sessionName := strings.TrimSpace(
+				strings.TrimPrefix(
+					userInput,
+					"/delete ",
+				),
+			)
+
+			if sessionName == "" {
+
+				fmt.Println(
+					"Usage: /delete <session-name>",
+				)
+
+				continue
+			}
+
+			if sessionName == "default" {
+
+				fmt.Println(
+					"Default session cannot be deleted.",
+				)
+
+				continue
+			}
+
+			if sessionName == activeSession {
+
+				fmt.Println(
+					"Cannot delete active session.",
+				)
+
+				continue
+			}
+
+			err := storage.DeleteSession(
+				sessionName,
+			)
+
+			if err != nil {
+
+				fmt.Println(
+					"Error:",
+					err,
+				)
+
+				continue
+			}
+
+			fmt.Printf(
+				"Deleted session: %s\n",
+				sessionName,
+			)
+
+			continue
+		}
+		
 		switch userInput {
 
 		case "exit", "quit":
@@ -221,6 +282,7 @@ func main() {
 			fmt.Println("/sessions  - List sessions")
 			fmt.Println("/new <name> - Create session")
 			fmt.Println("/load <name> - Load session")
+			fmt.Println("/delete <name> - Delete session")
 			fmt.Println("exit       - Exit AstraMind")
 			fmt.Println("quit       - Exit AstraMind")
 			continue
