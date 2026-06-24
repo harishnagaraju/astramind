@@ -22,6 +22,8 @@ vendor/
 # Environment variables
 .env
 data/chat_history.json
+data/sessions/*.json
+!data/sessions/.gitkeep
 
 # IDE files
 .vscode/

@@ -83,7 +83,7 @@ func main() {
 
 	for {
 
-		fmt.Print("\nYou: ", activeSession)
+		fmt.Printf("\n[%s] You: ", activeSession)
 
 		userInput, err := reader.ReadString('\n')
 		if err != nil {
