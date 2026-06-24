@@ -96,6 +96,112 @@ func main() {
 		if userInput == "" {
 			continue
 		}
+		if strings.HasPrefix(
+			userInput,
+			"/load ",
+			){
+
+			sessionName := strings.TrimSpace(
+				strings.TrimPrefix(
+					userInput,
+					"/load ",
+				),
+			)
+
+			if sessionName == "" {
+
+				fmt.Println(
+					"Usage: /load <session-name>",
+				)
+
+				continue
+			}
+
+			if !storage.SessionExists(
+				sessionName,
+			) {
+
+				fmt.Printf(
+					"Session '%s' does not exist.\n",
+					sessionName,
+				)
+
+				continue
+			}
+
+			messages, err :=
+				storage.LoadHistory(
+					sessionName,
+				)
+
+			if err != nil {
+
+				fmt.Println(
+					"Error:",
+					err,
+				)
+
+				continue
+			}
+
+			activeSession = sessionName
+
+			conversation = messages
+
+			fmt.Printf(
+				"Loaded session: %s\n",
+				sessionName,
+			)
+
+			continue
+		}
+		
+		if strings.HasPrefix(
+			userInput,
+			"/new ",
+			){
+
+			sessionName := strings.TrimSpace(
+				strings.TrimPrefix(
+					userInput,
+					"/new ",
+				),
+			)
+
+			if sessionName == "" {
+
+				fmt.Println(
+					"Usage: /new <session-name>",
+				)
+
+				continue
+			}
+
+			err := storage.CreateSession(
+				sessionName,
+			)
+
+			if err != nil {
+
+				fmt.Println(
+					"Error:",
+					err,
+				)
+
+				continue
+			}
+
+			activeSession = sessionName
+
+			conversation = []models.Message{}
+
+			fmt.Printf(
+				"Created and switched to session: %s\n",
+				sessionName,
+			)
+
+			continue
+		}
 
 		switch userInput {
 
@@ -113,6 +219,8 @@ func main() {
 			fmt.Println("/stats     - Show session statistics")
 			fmt.Println("/config    - Show configuration")
 			fmt.Println("/sessions  - List sessions")
+			fmt.Println("/new <name> - Create session")
+			fmt.Println("/load <name> - Load session")
 			fmt.Println("exit       - Exit AstraMind")
 			fmt.Println("quit       - Exit AstraMind")
 			continue

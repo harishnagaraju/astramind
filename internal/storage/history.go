@@ -9,6 +9,17 @@ import (
 	"github.com/harishnagaraju/astramind/internal/models"
 )
 
+func SessionExists(
+    session string,
+) bool {
+
+    file := sessionFile(session)
+
+    _, err := os.Stat(file)
+
+    return err == nil
+}
+
 func ListSessions() ([]string, error) {
 
     files, err := os.ReadDir("data/sessions")
@@ -42,6 +53,22 @@ func ListSessions() ([]string, error) {
     }
 
     return sessions, nil
+}
+
+func CreateSession(session string) error {
+
+    file := sessionFile(session)
+
+    if _, err := os.Stat(file); err == nil {
+        return nil
+    }
+
+    empty := []models.Message{}
+
+    return SaveHistory(
+        session,
+        empty,
+    )
 }
 
 func sessionFile(session string) string {
