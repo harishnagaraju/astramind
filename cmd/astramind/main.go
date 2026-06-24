@@ -112,6 +112,7 @@ func main() {
 			fmt.Println("/clear     - Clear conversation memory")
 			fmt.Println("/stats     - Show session statistics")
 			fmt.Println("/config    - Show configuration")
+			fmt.Println("/sessions  - List sessions")
 			fmt.Println("exit       - Exit AstraMind")
 			fmt.Println("quit       - Exit AstraMind")
 			continue
@@ -180,6 +181,39 @@ func main() {
 			fmt.Println(
 				"Repository: github.com/harishnagaraju/astramind",
 			)
+
+			continue
+		
+		case "/sessions":
+
+			sessions, err := storage.ListSessions()
+
+			if err != nil {
+
+				fmt.Println(
+					"Error loading sessions:",
+					err,
+				)
+
+				continue
+			}
+
+			fmt.Println("\nAvailable Sessions")
+			fmt.Println("------------------")
+
+			if len(sessions) == 0 {
+
+				fmt.Println(
+					"No sessions found.",
+				)
+
+				continue
+			}
+
+			for _, session := range sessions {
+
+				fmt.Println(session)
+			}
 
 			continue
 

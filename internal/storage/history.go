@@ -4,9 +4,45 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	/*"github.com/harishnagaraju/astramind/internal/config"*/
 	"github.com/harishnagaraju/astramind/internal/models"
 )
+
+func ListSessions() ([]string, error) {
+
+    files, err := os.ReadDir("data/sessions")
+    if err != nil {
+        return nil, err
+    }
+
+    sessions := []string{}
+
+    for _, file := range files {
+
+        if file.IsDir() {
+            continue
+        }
+
+        name := file.Name()
+
+        if filepath.Ext(name) != ".json" {
+            continue
+        }
+
+        sessionName := strings.TrimSuffix(
+            name,
+            ".json",
+        )
+
+        sessions = append(
+            sessions,
+            sessionName,
+        )
+    }
+
+    return sessions, nil
+}
 
 func sessionFile(session string) string {
 
