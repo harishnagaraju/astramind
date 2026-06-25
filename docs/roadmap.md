@@ -38,7 +38,7 @@
        - Tool calling and workflow automation
        - Enterprise integrations
 
-### Releases
+## Releases
     Current Development Version:
         * v0.4.1-dev
     Latest Stable Release:
@@ -47,32 +47,39 @@
         * v0.2.0
         * v0.1.0
 
-### Completed Features
+## Completed Features
+### Features Available Today
+**AI Assistant**
+   - OpenAI-compatible API integration.
+   - Interactive command-line chat.
+   - Environment-based configuration.
+   - Cross-platform support.
 
-Session Commands
-    /sessions
-    /new <session>
-    /load <session>
-    /delete <session>
-    
-Utility Commands
-    /help
-    /history
-    /clear
-    /stats
-    /config
-    /about
+**Conversation Management**    
+   - Conversation memory.
+   - Persistent chat history.
+   - Session-aware storage.
+   - Active session tracking.
 
-    * OpenAI-powered CLI chatbot
-    * Conversation memory
-    * Memory size limiting
-    * Improved error handling
-    * Environment-driven model selection
+**Session Commands**
+   - /sessions
+   - /new <session>
+   - /load <session>
+   - /delete <session>
+   
+**Utility Commands**
+   - /help
+   - /history
+   - /clear
+   - /stats
+   - /config
+   - /about
 
 ## Development Workflow
     * GitHub Actions CI/CD
-    * GitHub Releases
-    * Issue tracking workflow
-    * Feature branch workflow
+    * GitHub Issues & Milestones
+    * Release Management
+    * Semantic Versioning
+    * Modular Go Architecture
 
 
