@@ -41,72 +41,72 @@ The project is designed as both a learning platform and a foundation for future 
 
 # Release Management
 
- **v0.4.1 (In Progress)**
-    Export System - Planned:
+ ## v0.4.1 (In Progress)
+    **Export System - Planned:**
       •	Export current session.
       •	TXT export.
       •	Markdown export.
       •	Session export.
-  **v0.4.0**.
-    Multi-session support.
+  ## v0.4.0
+    **Multi-session support**
       •	Active session tracking.
       •	Session listing.
       •	Session creation.
       •	Session loading.
       •	Session deletion.
       •	Improved API error handling.
-  **v0.3.0**
-    Persistence and usability improvements.
+  ## v0.3.0
+    **Persistence and usability improvements**
       •	Persistent history storage.
       •	Statistics command.
       •	Configuration command.
       •	About command.
       •	Improved architecture.
-   **v0.2.x**
-    Conversation management.
+   ## v0.2.x
+    **Conversation management**
       •	Conversation memory.
       •	History support.
       •	Chat commands.
-  **v0.1.x**
-    Initial AstraMind foundation.
+  ## v0.1.x
+    **Initial AstraMind foundation**
       •	CLI chatbot.
       •	OpenAI integration.
       •	Environment configuration.
 
 ## Features Available till now
 
-**AI Assistant**
-    • OpenAI-compatible API integration.
-    • Interactive command-line chat.
-    • Environment-based configuration.
-    • Cross-platform support.
+    **AI Assistant**
+        • OpenAI-compatible API integration.
+        • Interactive command-line chat.
+        • Environment-based configuration.
+        • Cross-platform support.
     
-**Conversation Management**
-    • Conversation memory.
-    • Persistent chat history.
-    • Session-aware storage.
-    • Active session tracking.
+    **Conversation Management**
+        • Conversation memory.
+        • Persistent chat history.
+        • Session-aware storage.
+        • Active session tracking.
     
-**Session Commands**
-    •	/sessions
-    •	/new <session>
-    •	/load <session>
-    •	/delete <session>
+    **Session Commands**
+        •	/sessions
+        •	/new <session>
+        •	/load <session>
+        •	/delete <session>
     
-**Utility Commands**
-    •	/help
-    •	/history
-    •	/clear
-    •	/stats
-    •	/config
-    •	/about
+    **Utility Commands**
+        •	/help
+        •	/history
+        •	/clear
+        •	/stats
+        •	/config
+        •	/about
     
-**Developer Features**
-    •	GitHub Actions CI/CD
-    •	GitHub Issues & Milestones
-    •	Release Management
-    •	Semantic Versioning
-    •	Modular Go Architecture
+    **Developer Features**
+        •	GitHub Actions CI/CD
+        •	GitHub Issues & Milestones
+        •	Release Management
+        •	Semantic Versioning
+        •	Modular Go Architecture
 
 
 ## License
