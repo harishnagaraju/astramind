@@ -283,6 +283,7 @@ func main() {
 			fmt.Println("/new <name> - Create session")
 			fmt.Println("/load <name> - Load session")
 			fmt.Println("/delete <name> - Delete session")
+			fmt.Println("/export    - Export session")
 			fmt.Println("exit       - Exit AstraMind")
 			fmt.Println("quit       - Exit AstraMind")
 			continue
@@ -347,9 +348,35 @@ func main() {
 				"\nModel: %s\n",
 				model,
 			)
-
+			fmt.Println("Author: Harish Nagaraju")
+			fmt.Println("Company: RK Consulting")
+			
 			fmt.Println(
 				"Repository: github.com/harishnagaraju/astramind",
+			)
+
+			continue
+		
+		case "/export":
+
+			err := storage.ExportSession(
+				activeSession,
+				conversation,
+			)
+
+			if err != nil {
+
+				fmt.Println(
+					"Export failed:",
+					err,
+				)
+
+				continue
+			}
+
+			fmt.Printf(
+				"Session exported to exports/%s.txt\n",
+				activeSession,
 			)
 
 			continue
