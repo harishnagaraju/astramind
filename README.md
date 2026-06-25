@@ -133,7 +133,7 @@ Harish Nagaraju
 
 Software Architect | AI Engineer | Founder, RK Consulting
 
-- Website: https://www.rkconsulting.in
+- Website: https://www.rkconsulting.co.in
 - GitHub: https://github.com/harishnagaraju
 
 ## Maintainers
