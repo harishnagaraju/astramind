@@ -41,14 +41,14 @@ The project is designed as both a learning platform and a foundation for future 
 
 # Release Management
 * GitHub Actions CI/CD
- **v0.4.1 (In Progress)**
-    Export System
+ **v0.4.1 (In Progress)**.
+    Export System.
     Planned:
-      •	Export current session
-      •	TXT export
-      •	Markdown export
-      •	Session export
-  **v0.4.0**
+      •	Export current session.
+      •	TXT export.
+      •	Markdown export.
+      •	Session export.
+  **v0.4.0**.
     Multi-session support.
       •	Active session tracking
       •	Session listing
