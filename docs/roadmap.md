@@ -4,7 +4,6 @@
 # AstraMind v1.0.0 provides:
 
 ### Long-Term Features
-    - Single-user conversational AI
     - Real-time prompt-response interaction
     - CLI-based user experience
     - API-driven intelligence
@@ -41,12 +40,12 @@
 
 ### Releases
     Current Development Version:
-        v0.4.1-dev
+        * v0.4.1-dev
     Latest Stable Release:
-    * v0.4.0 
-    * v0.3.0
-    * v0.2.0
-    * v0.1.0
+        * v0.4.0 
+        * v0.3.0
+        * v0.2.0
+        * v0.1.0
 
 ### Completed Features
 
@@ -55,6 +54,7 @@ Session Commands
     /new <session>
     /load <session>
     /delete <session>
+    
 Utility Commands
     /help
     /history
@@ -65,33 +65,14 @@ Utility Commands
 
     * OpenAI-powered CLI chatbot
     * Conversation memory
-    * `/help` command
-    * `/history` command
-    * `/clear` command
     * Memory size limiting
     * Improved error handling
     * Environment-driven model selection
+
+## Development Workflow
     * GitHub Actions CI/CD
     * GitHub Releases
     * Issue tracking workflow
     * Feature branch workflow
 
-
-
-
----
-
-## Development Workflow
-
-1. Create Issue
-2. Create Feature Branch
-3. Implement Feature
-4. Test Locally
-5. Push Branch
-6. Create Pull Request
-7. Merge into Main
-8. Create Release
-9. Update Roadmap
-
----
 
