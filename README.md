@@ -10,8 +10,6 @@ Created and maintained by Harish Nagaraju.
 ![License](https://img.shields.io/badge/License-Apache%202.0-green)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
 
-Intelligent Conversations. Infinite Possibilities.
-
 AstraMind is an AI-powered chatbot built with Go, designed as a lightweight command-line assistant and foundation for future AI applications including RAG systems, AI agents, and enterprise copilots.
 
 ## Features
