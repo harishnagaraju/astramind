@@ -1,7 +1,11 @@
 </>
 
 # AstraMind
-![Go Build](https://github.com/harishnagaraju/astramind/actions/workflows/go.yml/badge.svg)
+Intelligent Conversations. Infinite Possibilities.
+
+Created and maintained by Harish Nagaraju.
+
+[![Go Build](https://github.com/harishnagaraju/astramind/actions/workflows/go.yml/badge.svg)](https://github.com/harishnagaraju/astramind/actions)
 ![Go](https://img.shields.io/badge/Go-1.24+-blue)
 ![License](https://img.shields.io/badge/License-Apache%202.0-green)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
