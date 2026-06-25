@@ -113,5 +113,26 @@ Together, AstraMind represents an AI system designed to explore knowledge, assis
 
 ## Project Planning
 
+
+
+## Project Owner
+
+Harish Nagaraju
+
+Software Architect | AI Engineer | Founder, RK Consulting
+
+- Website: https://www.rkconsulting.in
+- GitHub: https://github.com/harishnagaraju
+
+## Maintainers
+AstraMind is designed and maintained by Harish Nagaraju.
+
+| Name | Role |
+|--------|--------|
+| Harish Nagaraju | Creator & Lead Developer |
+
+harishnagaraju@rkconsulting.co.in
+harishnagaraju@gmail.com
+
 See [Roadmap](docs/roadmap.md) for upcoming releases and features.
 
