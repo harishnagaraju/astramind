@@ -40,7 +40,7 @@ The project is designed as both a learning platform and a foundation for future 
 - Current Version
 
 # Release Management
-* GitHub Actions CI/CD
+
  **v0.4.1 (In Progress)**.
     Export System.
     Planned:
