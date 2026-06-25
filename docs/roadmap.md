@@ -1,12 +1,19 @@
 
 # AstraMind Roadmap
 
-# AstraMind v1.0 provides:
+# AstraMind v1.0.0 provides:
 
+### Long-Term Features
     - Single-user conversational AI
     - Real-time prompt-response interaction
     - CLI-based user experience
     - API-driven intelligence
+    - Persistent memory
+    - Knowledge base
+    - Notes management
+    - Task tracking
+    - Personal assistant capabilities
+    - Multi-session chat support
 
 # Future Roadmap
     ## Phase 1
@@ -69,30 +76,7 @@ Utility Commands
     * Issue tracking workflow
     * Feature branch workflow
 
-### Closed Issues
 
-    * #1 Conversation Memory
-    * #2 Add /help command
-    * #3 Add /history command
-    * #4 Add /clear command
-
-### Open Issues
-
-    * #5 Add streaming responses
-
-# Version 1.0.0
-
-## Personal AI Assistant
-
-### Long-Term Features
-
-* Persistent memory
-* Knowledge base
-* Notes management
-* Task tracking
-* Personal assistant capabilities
-* Multi-session chat support
-* Enhanced CLI experience
 
 
 ---
