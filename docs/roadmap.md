@@ -32,16 +32,29 @@
        - Tool calling and workflow automation
        - Enterprise integrations
 
-## Current Status
-
 ### Releases
-
-    * v0.4.0 (Latest)
+    Current Development Version:
+        v0.4.1-dev
+    Latest Stable Release:
+    * v0.4.0 
     * v0.3.0
     * v0.2.0
     * v0.1.0
 
 ### Completed Features
+
+Session Commands
+    /sessions
+    /new <session>
+    /load <session>
+    /delete <session>
+Utility Commands
+    /help
+    /history
+    /clear
+    /stats
+    /config
+    /about
 
     * OpenAI-powered CLI chatbot
     * Conversation memory
@@ -67,10 +80,6 @@
 
     * #5 Add streaming responses
 
----
-
-
-
 # Version 1.0.0
 
 ## Personal AI Assistant
@@ -85,9 +94,6 @@
 * Multi-session chat support
 * Enhanced CLI experience
 
-### Vision
-
-AstraMind evolves from a simple CLI chatbot into a persistent personal AI assistant with memory, context awareness, and long-term knowledge retention.
 
 ---
 
