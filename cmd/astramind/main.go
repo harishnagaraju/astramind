@@ -44,10 +44,10 @@ func main() {
 
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	/*
-		if apiKey == "your_api_key_here" {
-	   	    fmt.Println("Please update OPENAI_API_KEY in .env")
-		    return
-		}
+			if apiKey == "your_api_key_here" {
+		   	    fmt.Println("Please update OPENAI_API_KEY in .env")
+			    return
+			}
 	*/
 
 	model := os.Getenv("OPENAI_MODEL")
