@@ -279,6 +279,8 @@ func main() {
 			fmt.Println("/clear     - Clear conversation memory")
 			fmt.Println("/stats     - Show session statistics")
 			fmt.Println("/config    - Show configuration")
+			fmt.Println("/export    - Export session (TXT)")
+			fmt.Println("/export md - Export session (Markdown)")
 			fmt.Println("/sessions  - List sessions")
 			fmt.Println("/new <name> - Create session")
 			fmt.Println("/load <name> - Load session")
@@ -357,27 +359,49 @@ func main() {
 
 			continue
 		
-		case "/export":
+		case "/export", "/export txt", "/export md":
 
-			err := storage.ExportSession(
-				activeSession,
-				conversation,
-			)
+				if len(conversation) == 0 {
+					fmt.Println("Nothing to export.")
+					continue
+				}
 
-			if err != nil {
+				switch userInput {
 
-				fmt.Println(
-					"Export failed:",
-					err,
-				)
+				case "/export", "/export txt":
 
-				continue
-			}
+					err := storage.ExportSession(
+						activeSession,
+						conversation,
+					)
 
-			fmt.Printf(
-				"Session exported to exports/%s.txt\n",
-				activeSession,
-			)
+					if err != nil {
+						fmt.Println("Export failed:", err)
+						continue
+					}
+
+					fmt.Printf(
+						"Session exported to exports/%s.txt\n",
+						activeSession,
+					)
+
+				case "/export md":
+
+					err := storage.ExportMarkdown(
+						activeSession,
+						conversation,
+					)
+
+					if err != nil {
+						fmt.Println("Export failed:", err)
+						continue
+					}
+
+					fmt.Printf(
+						"Session exported to exports/%s.md\n",
+						activeSession,
+					)
+				}
 
 			continue
 		
