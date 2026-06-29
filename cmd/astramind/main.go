@@ -3,6 +3,7 @@ package main
 import "github.com/harishnagaraju/astramind/internal/config"
 import "github.com/harishnagaraju/astramind/internal/storage"
 import "github.com/harishnagaraju/astramind/internal/models"
+import "github.com/harishnagaraju/astramind/internal/ai"
 import (
 	"bufio"
 	"bytes"
@@ -53,13 +54,27 @@ func main() {
 	model := os.Getenv("OPENAI_MODEL")
 
 	if apiKey == "" {
-		fmt.Println("OPENAI_API_KEY not found in .env")
+		fmt.Println("No OpenAI API key configured.")
+		fmt.Println("Using Mock AI Provider.")
 		return
 	}
 
 	if model == "" {
 		model = "gpt-4o-mini"
 	}
+
+	providerConfig := ai.ProviderConfig{
+		APIKey: apiKey,
+		Model:  model,
+	}
+
+	provider := ai.NewProvider(
+		providerConfig,
+	)
+
+	manager := ai.NewProviderManager(
+		provider,
+	)
 
 	reader := bufio.NewReader(os.Stdin)
 
@@ -508,10 +523,12 @@ func main() {
 			Content: userInput,
 		})
 
-		reply, err := askAI(
-			apiKey,
-			model,
-			tempConversation,
+		reply, err := manager.Chat(
+			ai.ChatRequest{
+				Model:    model,
+				APIKey:   apiKey,
+				Messages: tempConversation,
+			},
 		)
 
 		if err != nil {
