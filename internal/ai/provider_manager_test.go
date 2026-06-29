@@ -52,3 +52,19 @@ func TestProviderManagerChat(t *testing.T) {
 		)
 	}
 }
+
+func TestProviderManagerProviderName(t *testing.T) {
+
+	manager := NewProviderManager(
+		&MockProvider{},
+	)
+
+	if manager.ProviderName() != "Mock AI" {
+
+		t.Fatalf(
+			"Expected Mock AI but got %s",
+			manager.ProviderName(),
+		)
+
+	}
+}

@@ -6,11 +6,8 @@ import "github.com/harishnagaraju/astramind/internal/models"
 import "github.com/harishnagaraju/astramind/internal/ai"
 import (
 	"bufio"
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
-	"net/http"
 	"os"
 	"strings"
 )
@@ -21,17 +18,6 @@ func SaveHistory(messages []models.Message) error */
 var conversation []models.Message
 
 /*const MaxMessages = 20*/
-
-type ChatRequest struct {
-	Model    string           `json:"model"`
-	Messages []models.Message `json:"messages"`
-}
-
-type ChatResponse struct {
-	Choices []struct {
-		Message models.Message `json:"message"`
-	} `json:"choices"`
-}
 
 func main() {
 
@@ -301,6 +287,7 @@ func main() {
 			fmt.Println("/load <name> - Load session")
 			fmt.Println("/delete <name> - Delete session")
 			fmt.Println("/export    - Export session")
+			fmt.Println("/provider  - Show active AI provider")
 			fmt.Println("exit       - Exit AstraMind")
 			fmt.Println("quit       - Exit AstraMind")
 			continue
@@ -371,6 +358,27 @@ func main() {
 			fmt.Println(
 				"Repository: github.com/harishnagaraju/astramind",
 			)
+
+			continue
+
+		case "/provider":
+
+			fmt.Println()
+
+			fmt.Println("Current AI Provider")
+			fmt.Println("-------------------")
+
+			fmt.Printf(
+				"Provider : %s\n",
+				manager.ProviderName(),
+			)
+
+			fmt.Printf(
+				"Model    : %s\n",
+				model,
+			)
+
+			fmt.Println()
 
 			continue
 
@@ -552,83 +560,4 @@ func main() {
 
 		fmt.Println("\nAI:", reply)
 	}
-}
-
-func askAI(
-	apiKey string,
-	model string,
-	messages []models.Message,
-) (string, error) {
-
-	reqBody := ChatRequest{
-		Model:    model,
-		Messages: messages,
-	}
-
-	jsonData, err := json.Marshal(reqBody)
-	if err != nil {
-		return "", err
-	}
-
-	req, err := http.NewRequest(
-		"POST",
-		"https://api.openai.com/v1/chat/completions",
-		bytes.NewBuffer(jsonData),
-	)
-
-	if err != nil {
-		return "", err
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+apiKey)
-
-	client := &http.Client{}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-
-		var body bytes.Buffer
-		body.ReadFrom(resp.Body)
-
-		responseBody := body.String()
-
-		if resp.StatusCode == 429 &&
-			strings.Contains(responseBody, "insufficient_quota") {
-
-			return "", fmt.Errorf(
-				"OpenAI quota exceeded.\n\n" +
-					"Please check:\n" +
-					"- Billing settings\n" +
-					"- Usage limits\n" +
-					"- Available credits\n\n" +
-					"https://platform.openai.com/usage",
-			)
-		}
-
-		return "", fmt.Errorf(
-			"API Error (%d): %s",
-			resp.StatusCode,
-			responseBody,
-		)
-	}
-
-	var result ChatResponse
-
-	err = json.NewDecoder(resp.Body).Decode(&result)
-	if err != nil {
-		return "", err
-	}
-
-	if len(result.Choices) == 0 {
-		return "No response", nil
-	}
-
-	return result.Choices[0].Message.Content, nil
 }
