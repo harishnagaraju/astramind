@@ -11,7 +11,10 @@ func TestSaveAndLoadHistory(t *testing.T) {
 
 	session := "unit-test"
 
-	expected := testutil.SampleConversation()
+	expected := testutil.LoadConversation(
+		t,
+		"short",
+	)
 
 	err := SaveHistory(
 		session,

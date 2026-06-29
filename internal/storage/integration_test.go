@@ -21,7 +21,10 @@ func TestSessionWorkflow(t *testing.T) {
 	_ = os.Remove(mdFile)
 
 	// Sample conversation
-	expected := testutil.SampleConversation()
+	expected := testutil.LoadConversation(
+		t,
+		"long",
+	)
 
 	// Save session
 	err := SaveHistory(session, expected)

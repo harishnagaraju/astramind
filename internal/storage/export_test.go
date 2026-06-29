@@ -13,7 +13,10 @@ func TestExportTXT(t *testing.T) {
 
 	err := ExportSession(
 		session,
-		testutil.SampleConversation(),
+		testutil.LoadConversation(
+			t,
+			"short",
+		),
 	)
 
 	if err != nil {

@@ -13,7 +13,10 @@ func TestExportMarkdown(t *testing.T) {
 
 	err := ExportMarkdown(
 		session,
-		testutil.SampleConversation(),
+		testutil.LoadConversation(
+			t,
+			"short",
+		),
 	)
 
 	if err != nil {
