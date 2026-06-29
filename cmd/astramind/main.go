@@ -1,4 +1,5 @@
 package main
+
 import "github.com/harishnagaraju/astramind/internal/config"
 import "github.com/harishnagaraju/astramind/internal/storage"
 import "github.com/harishnagaraju/astramind/internal/models"
@@ -7,10 +8,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/joho/godotenv"
 	"net/http"
 	"os"
 	"strings"
-	"github.com/joho/godotenv"
 )
 
 /* func LoadHistory() ([]models.Message, error)
@@ -21,7 +22,7 @@ var conversation []models.Message
 /*const MaxMessages = 20*/
 
 type ChatRequest struct {
-	Model    string    `json:"model"`
+	Model    string           `json:"model"`
 	Messages []models.Message `json:"messages"`
 }
 
@@ -32,7 +33,7 @@ type ChatResponse struct {
 }
 
 func main() {
-	
+
 	activeSession := "default"
 
 	err := godotenv.Load()
@@ -42,12 +43,12 @@ func main() {
 	}
 
 	apiKey := os.Getenv("OPENAI_API_KEY")
-        /*
-	if apiKey == "your_api_key_here" {
-   	    fmt.Println("Please update OPENAI_API_KEY in .env")
-	    return
-	}
-        */
+	/*
+		if apiKey == "your_api_key_here" {
+	   	    fmt.Println("Please update OPENAI_API_KEY in .env")
+		    return
+		}
+	*/
 
 	model := os.Getenv("OPENAI_MODEL")
 
@@ -63,17 +64,16 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 
 	conversation, err := storage.LoadHistory(activeSession)
-       
 
 	if err != nil {
-   	        fmt.Println("Warning: could not load history:", err)
-    		conversation = []models.Message{}
+		fmt.Println("Warning: could not load history:", err)
+		conversation = []models.Message{}
 	}
 
-        fmt.Printf(
-	  "Loaded %d messages from history.\n",
-	  len(conversation),
-        )
+	fmt.Printf(
+		"Loaded %d messages from history.\n",
+		len(conversation),
+	)
 
 	fmt.Println("===================================")
 	fmt.Printf("AstraMind %s\n", config.Version)
@@ -99,7 +99,7 @@ func main() {
 		if strings.HasPrefix(
 			userInput,
 			"/load ",
-			){
+		) {
 
 			sessionName := strings.TrimSpace(
 				strings.TrimPrefix(
@@ -155,11 +155,11 @@ func main() {
 
 			continue
 		}
-		
+
 		if strings.HasPrefix(
 			userInput,
 			"/new ",
-			){
+		) {
 
 			sessionName := strings.TrimSpace(
 				strings.TrimPrefix(
@@ -202,11 +202,11 @@ func main() {
 
 			continue
 		}
-		
+
 		if strings.HasPrefix(
 			userInput,
 			"/delete ",
-			){
+		) {
 
 			sessionName := strings.TrimSpace(
 				strings.TrimPrefix(
@@ -263,7 +263,7 @@ func main() {
 
 			continue
 		}
-		
+
 		switch userInput {
 
 		case "exit", "quit":
@@ -296,12 +296,12 @@ func main() {
 			err := storage.SaveHistory(activeSession, conversation)
 
 			if err != nil {
-    				fmt.Println("Error clearing history:", err)
+				fmt.Println("Error clearing history:", err)
 			} else {
-    				fmt.Println("Conversation memory cleared.")
+				fmt.Println("Conversation memory cleared.")
 			}
 			continue
-			
+
 		case "/config":
 
 			fmt.Println("\nCurrent Configuration")
@@ -328,7 +328,7 @@ func main() {
 			)
 
 			continue
-		
+
 		case "/about":
 
 			fmt.Println("\nAstraMind")
@@ -352,59 +352,59 @@ func main() {
 			)
 			fmt.Println("Author: Harish Nagaraju")
 			fmt.Println("Company: RK Consulting")
-			
+
 			fmt.Println(
 				"Repository: github.com/harishnagaraju/astramind",
 			)
 
 			continue
-		
+
 		case "/export", "/export txt", "/export md":
 
-				if len(conversation) == 0 {
-					fmt.Println("Nothing to export.")
+			if len(conversation) == 0 {
+				fmt.Println("Nothing to export.")
+				continue
+			}
+
+			switch userInput {
+
+			case "/export", "/export txt":
+
+				err := storage.ExportSession(
+					activeSession,
+					conversation,
+				)
+
+				if err != nil {
+					fmt.Println("Export failed:", err)
 					continue
 				}
 
-				switch userInput {
+				fmt.Printf(
+					"Session exported to exports/%s.txt\n",
+					activeSession,
+				)
 
-				case "/export", "/export txt":
+			case "/export md":
 
-					err := storage.ExportSession(
-						activeSession,
-						conversation,
-					)
+				err := storage.ExportMarkdown(
+					activeSession,
+					conversation,
+				)
 
-					if err != nil {
-						fmt.Println("Export failed:", err)
-						continue
-					}
-
-					fmt.Printf(
-						"Session exported to exports/%s.txt\n",
-						activeSession,
-					)
-
-				case "/export md":
-
-					err := storage.ExportMarkdown(
-						activeSession,
-						conversation,
-					)
-
-					if err != nil {
-						fmt.Println("Export failed:", err)
-						continue
-					}
-
-					fmt.Printf(
-						"Session exported to exports/%s.md\n",
-						activeSession,
-					)
+				if err != nil {
+					fmt.Println("Export failed:", err)
+					continue
 				}
 
+				fmt.Printf(
+					"Session exported to exports/%s.md\n",
+					activeSession,
+				)
+			}
+
 			continue
-		
+
 		case "/sessions":
 
 			sessions, err := storage.ListSessions()
@@ -457,7 +457,7 @@ func main() {
 			}
 
 			continue
-			
+
 		case "/stats":
 
 			userCount := 0
