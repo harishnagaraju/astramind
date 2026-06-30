@@ -3,6 +3,7 @@ package storage
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -18,6 +19,11 @@ func ExportSession(
 		"exports/%s.txt",
 		session,
 	)
+
+	err := os.MkdirAll(filepath.Dir(file), 0755)
+	if err != nil {
+		return err
+	}
 
 	f, err := os.Create(file)
 	if err != nil {
