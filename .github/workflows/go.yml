@@ -55,6 +55,7 @@ jobs:
         go tool cover -html=tests/coverage/coverage.out -o tests/coverage/coverage.html
 
     - name: Upload Coverage Reports
+      if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
       uses: actions/upload-artifact@v4
       with:
         name: coverage-report
