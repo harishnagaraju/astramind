@@ -95,8 +95,7 @@ The project is designed as both a learning platform and a foundation for future 
     ./astramind
 
  ### Available Commands
- ```markdown
-  
+   
          | Command        |            Description     |
          |----------------|----------------------------|
          | /help          | Show help                  |
@@ -113,7 +112,7 @@ The project is designed as both a learning platform and a foundation for future 
          | /export md     | Export Markdown            |
          | /provider      | Show AI provider           |
 
-### Features Available till now
+## Features Available till now
 
     **AI Assistant**
         • OpenAI-compatible API integration.
@@ -164,12 +163,9 @@ Astra — derived from the Latin word for "stars," symbolizing exploration, inte
 Mind — representing reasoning, learning, and artificial intelligence.
 Together, AstraMind represents an AI system designed to explore knowledge, assist users, and continuously evolve toward more advanced forms of intelligence.
 
-
-
-
 ## Project Owner
 
-Harish Nagaraju
+**Harish Nagaraju**
 
 Software Architect | AI Engineer | Founder, RK Consulting
 
