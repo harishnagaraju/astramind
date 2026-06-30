@@ -26,3 +26,21 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+
+    - name: Build
+      run: ./scripts/build.sh
+
+    - name: Test
+      run: ./scripts/test.sh
+
+    - name: Coverage
+      run: ./scripts/coverage.sh
+
+    - name: Upload Coverage Reports
+      uses: actions/upload-artifact@v4
+      with:
+          name: coverage-report
+          path: |
+            tests/coverage/coverage.html
+            tests/coverage/coverage.txt
+            tests/coverage/coverage.out
