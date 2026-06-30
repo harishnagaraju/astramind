@@ -24,8 +24,9 @@ on:
 
 jobs:
 
-  build:
+  build-test:
     runs-on: ubuntu-latest
+    name: Build, Test & Coverage
     timeout-minutes: 10
     steps:
     - uses: actions/checkout@v4
