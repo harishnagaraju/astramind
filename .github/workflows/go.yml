@@ -45,3 +45,12 @@ jobs:
         go test -coverprofile=tests/coverage/coverage.out ./...
         go tool cover -func=tests/coverage/coverage.out > tests/coverage/coverage.txt
         go tool cover -html=tests/coverage/coverage.out -o tests/coverage/coverage.html
+
+    - name: Upload Coverage Reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: |
+          tests/coverage/coverage.out
+          tests/coverage/coverage.txt
+          tests/coverage/coverage.html
