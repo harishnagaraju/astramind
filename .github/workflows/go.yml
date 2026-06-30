@@ -29,7 +29,7 @@ jobs:
    
     - name: Format
       run: go fmt ./...
-	
+
     - name: Vet
       run: go vet ./...
 
