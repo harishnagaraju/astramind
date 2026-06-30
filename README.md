@@ -52,7 +52,7 @@ The project is designed as both a learning platform and a foundation for future 
 
 # Release Management
 
- ## v0.4.1 (In Progress)
+ ## v0.4.1 (Released)
     **Export System - Planned:**
       •	Export current session.
       •	TXT export.
