@@ -85,36 +85,35 @@ The project is designed as both a learning platform and a foundation for future 
       •	Environment configuration.
 
   ## Quick Start
-  
-  ```bash
-  git clone https://github.com/harishnagaraju/astramind.git
-  
-  cd astramind
-  
-  go build ./cmd/astramind
-  
-  ./astramind
+    ```bash
+    git clone https://github.com/harishnagaraju/astramind.git
+    
+    cd astramind
+    
+    go build ./cmd/astramind
+    
+    ./astramind
 
-```markdown
-## Commands
+ ### Available Commands
+ ```markdown
+  
+         | Command        |            Description     |
+         |----------------|----------------------------|
+         | /help          | Show help                  |
+         | /about         | About AstraMind            |
+         | /history       | Conversation history       |
+         | /clear         | Clear current conversation |
+         | /stats         | Session statistics         |
+         | /config        | Configuration              |
+         | /sessions      | List sessions              |
+         | /new <name>    | Create session             |
+         | /load <name>   | Load session               |
+         | /delete <name> | Delete session             |
+         | /export        | Export TXT                 |
+         | /export md     | Export Markdown            |
+         | /provider      | Show AI provider           |
 
-| Command        |            Description     |
-|----------------|----------------------------|
-| /help          | Show help                  |
-| /about         | About AstraMind            |
-| /history       | Conversation history       |
-| /clear         | Clear current conversation |
-| /stats         | Session statistics         |
-| /config        | Configuration              |
-| /sessions      | List sessions              |
-| /new <name>    | Create session             |
-| /load <name>   | Load session               |
-| /delete <name> | Delete session             |
-| /export        | Export TXT                 |
-| /export md     | Export Markdown            |
-| /provider      | Show AI provider           |
-
-## Features Available till now
+### Features Available till now
 
     **AI Assistant**
         • OpenAI-compatible API integration.
