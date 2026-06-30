@@ -10,7 +10,7 @@ Created and maintained by Harish Nagaraju.
 ![License](https://img.shields.io/badge/License-Apache%202.0-green)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
 
-AstraMind is an AI-powered chatbot built with Go, designed as a lightweight command-line assistant and foundation for future AI applications including RAG systems, AI agents, and enterprise copilots.
+AstraMind is a modular AI-powered command-line assistant written in Go. It provides a clean architecture for integrating multiple Large Language Model (LLM) providers while supporting session management, conversation persistence, export capabilities, automated testing, and a production-grade CI pipeline. AstraMind is designed to evolve into a complete AI platform supporting local models, search, streaming responses, and Retrieval-Augmented Generation (RAG).
 
 # Vision
 
@@ -20,24 +20,35 @@ AstraMind aims to become a flexible AI platform that combines conversational int
 AstraMind is a lightweight AI-powered chatbot built in Go that enables natural language conversations through Large Language Models (LLMs). Designed as a simple CLI application, AstraMind serves as a foundation for building advanced AI assistants, knowledge systems, and autonomous agents. AstraMind brings the power of Large Language Models (LLMs) to a simple command-line interface. It demonstrates how to integrate AI capabilities into applications using clean, maintainable Go code and industry-standard APIs.
 The project is designed as both a learning platform and a foundation for future AI-powered products. Starting as a lightweight CLI chatbot, AstraMind can evolve into a web-based assistant, Retrieval-Augmented Generation (RAG) system, enterprise copilot, multi-agent platform, or domain-specific AI solution.
 
-## Features
+## Current Features
 
-- AI-powered conversations
-- OpenAI-compatible API support
-- Interactive command-line chat interface
-- Integration with LLM APIs
-- Secure API key management using environment variables
-- Lightweight and fast Go implementation
-- Simple project structure for learning and extension
-- Cross-platform support (Linux, Windows, macOS)
-- Clean architecture suitable for future scaling
-- Technology Stack
-- Golang
-- REST APIs
-- JSON
-- Environment-based configuration
-- OpenAI-compatible LLM providers
-- Current Version
+### AI
+- Multi-provider AI architecture
+- OpenAI provider
+- Mock AI provider
+- Automatic provider failover
+
+### Conversation Management
+- Persistent conversation history
+- Multi-session support
+- Session creation, loading, deletion
+- Session statistics
+
+### Export
+- TXT export
+- Markdown export
+
+### Developer Experience
+- GitHub Actions CI
+- Automated testing
+- Coverage reporting
+- Regression test suite
+- Semantic versioning
+
+### Cross Platform
+- Windows
+- Linux
+- macOS
 
 # Release Management
 
@@ -72,6 +83,36 @@ The project is designed as both a learning platform and a foundation for future 
       •	CLI chatbot.
       •	OpenAI integration.
       •	Environment configuration.
+
+  ## Quick Start
+  
+  ```bash
+  git clone https://github.com/harishnagaraju/astramind.git
+  
+  cd astramind
+  
+  go build ./cmd/astramind
+  
+  ./astramind
+
+```markdown
+## Commands
+
+| Command        |            Description     |
+|----------------|----------------------------|
+| /help          | Show help                  |
+| /about         | About AstraMind            |
+| /history       | Conversation history       |
+| /clear         | Clear current conversation |
+| /stats         | Session statistics         |
+| /config        | Configuration              |
+| /sessions      | List sessions              |
+| /new <name>    | Create session             |
+| /load <name>   | Load session               |
+| /delete <name> | Delete session             |
+| /export        | Export TXT                 |
+| /export md     | Export Markdown            |
+| /provider      | Show AI provider           |
 
 ## Features Available till now
 
