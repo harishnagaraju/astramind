@@ -1,222 +1,408 @@
-
 # AstraMind Roadmap
 
-## Current Status
+---
 
-### Releases
+# AstraMind Vision
 
-* v0.1.0
-* v0.2.1 (Latest)
+**Intelligent Conversations. Infinite Possibilities.**
 
-### Completed Features
+AstraMind is evolving from a lightweight AI-powered CLI assistant into a modular AI platform capable of supporting conversational intelligence, knowledge retrieval, automation, enterprise integrations, and autonomous AI agents.
 
-* OpenAI-powered CLI chatbot
-* Conversation memory
-* `/help` command
-* `/history` command
-* `/clear` command
-* Memory size limiting
-* Improved error handling
-* Environment-driven model selection
-* GitHub Actions CI/CD
-* GitHub Releases
-* Issue tracking workflow
-* Feature branch workflow
+The project emphasizes:
 
-### Closed Issues
-
-* #1 Conversation Memory
-* #2 Add /help command
-* #3 Add /history command
-* #4 Add /clear command
-
-### Open Issues
-
-* #5 Add streaming responses
+- Clean Architecture
+- Extensible AI Provider Framework
+- High Performance
+- Cross-platform Support
+- Testability
+- Maintainability
+- Enterprise Readiness
 
 ---
 
-# Version 0.3.0
+# AstraMind v1.0.0 Vision
 
-## Issue #6: Persistent Chat History
+The long-term vision for AstraMind includes:
 
-### Goal
+- Real-time AI conversations
+- CLI and Web user interfaces
+- Multi-provider AI architecture
+- Local and Cloud LLM support
+- Persistent AI memory
+- Knowledge Base
+- RAG (Retrieval-Augmented Generation)
+- Semantic Search
+- Notes Management
+- Task Tracking
+- Personal AI Assistant
+- Multi-session conversations
+- Tool Calling
+- Workflow Automation
+- Multi-Agent Architecture
+- Enterprise Integrations
 
-Persist conversation history across AstraMind sessions.
+AstraMind v1.0 provides:
 
-### Features
-
-* Save conversations to JSON file
-* Load conversations on startup
-* Preserve chat context between executions
-* Store data under:
-
-```text
-data/chat_history.json
-```
-
-### Benefits
-
-* Long-term conversation continuity
-* Better user experience
-* Foundation for future memory features
-
----
-
-## Issue #7: Session Statistics
-
-### New Command
-
-```text
-/stats
-```
-
-### Example Output
-
-```text
-Messages Sent: 12
-Messages Received: 12
-Current Model: gpt-4o-mini
-Memory Entries: 24
-Session Duration: 18 minutes
-```
-
-### Benefits
-
-* Better visibility into chatbot usage
-* Useful for debugging and monitoring
-
----
-
-## Issue #8: Configuration Command
-
-### New Command
-
-```text
-/config
-```
-
-### Example Output
-
-```text
-Model: gpt-4o-mini
-Max Messages: 20
-History Enabled: true
-History File: data/chat_history.json
-```
-
-### Benefits
-
-* Easier troubleshooting
-* Improved transparency
+Single-user conversational AI
+Real-time prompt-response interaction
+CLI-based user experience
+API-driven intelligence
+Future Roadmap
+Phase 1
+CLI Chat Assistant
+Conversation history
+Configuration management
+Phase 2
+Web-based interface using React
+User authentication
+Session management
+Phase 3
+PostgreSQL-backed memory
+Persistent chat history
+User profiles
+Phase 4
+RAG (Retrieval-Augmented Generation)
+PDF and document ingestion
+Semantic search
+Vector database integration
+Phase 5
+Multi-agent architecture
+Autonomous task execution
+Tool calling and workflow automation
+Enterprise integrations
 
 ---
 
-# Version 0.4.0
+# Release Roadmap
 
-## Issue #5: Streaming Responses
-
-### Goal
-
-Display AI responses incrementally instead of waiting for the entire response.
-
-### Current Behavior
-
-```text
-AI: Entire response appears at once
-```
-
-### Target Behavior
-
-```text
-AI: Hello...
-AI: Hello, how...
-AI: Hello, how are...
-```
-
-### Benefits
-
-* Faster perceived response time
-* More natural conversational experience
+## v0.1.0
+### Initial Foundation
+- CLI chatbot
+- OpenAI integration
+- Environment configuration
 
 ---
 
-# Version 0.5.0
-
-## Internal Refactoring
-
-### Proposed Structure
-
-```text
-internal/
-├── ai/
-│   └── openai.go
-├── chat/
-│   ├── commands.go
-│   ├── history.go
-│   └── memory.go
-└── config/
-    └── config.go
-```
-
-### Goals
-
-* Cleaner architecture
-* Easier maintenance
-* Better testability
+## v0.2.0
+### Conversation Management
+- Conversation memory
+- Conversation history
+- Basic chat commands
 
 ---
 
-# Version 1.0.0
-
-## Personal AI Assistant
-
-### Long-Term Features
-
-* Persistent memory
-* Knowledge base
-* Notes management
-* Task tracking
-* Personal assistant capabilities
-* Multi-session chat support
-* Enhanced CLI experience
-
-### Vision
-
-AstraMind evolves from a simple CLI chatbot into a persistent personal AI assistant with memory, context awareness, and long-term knowledge retention.
+## v0.3.0
+### Persistence & Usability
+- Persistent chat history
+- Session statistics
+- Configuration command
+- About command
+- Improved architecture
 
 ---
 
-## Development Workflow
-
-1. Create Issue
-2. Create Feature Branch
-3. Implement Feature
-4. Test Locally
-5. Push Branch
-6. Create Pull Request
-7. Merge into Main
-8. Create Release
-9. Update Roadmap
+## v0.4.0
+### Multi-Session Support
+- Active session tracking
+- Session creation
+- Session loading
+- Session deletion
+- Session listing
+- Improved error handling
 
 ---
 
-## Next Immediate Action
+## v0.4.1 (Latest Stable Release)
 
-Create branch:
+### Export System
+- TXT Export
+- Markdown Export
+- Export current session
 
-```bash
-git checkout -b feature/v0.3.0-persistence
-```
+### AI Provider Framework
+- AI Provider abstraction
+- Provider Factory
+- Provider Manager
+- Mock AI Provider
+- OpenAI Provider
+- Automatic Provider Failover
 
-Implement:
+### Testing
+- Storage integration tests
+- Mock provider tests
+- Regression test suite
+- Coverage generation
 
-```text
-Issue #6 - Persistent Chat History
-```
+### CI/CD
+- GitHub Actions
+- go fmt
+- go vet
+- go build
+- go test
+- Coverage reports
+- Coverage artifacts
+- Workflow concurrency
+- Workflow timeout
+- Least-privilege permissions
 
-Target Release:
+### Architecture Improvements
+- Modular AI architecture
+- Improved storage architecture
+- Export subsystem
+- Session persistence improvements
 
-```text
-AstraMind v0.3.0
-```
+---
+
+## v0.5.0 (Current Development)
+
+### Streaming Responses
+- OpenAI streaming
+- Streaming renderer
+- Typing indicator
+
+---
+
+## v0.6.0
+
+### Search System
+- /search command
+- Search all sessions
+- Search results display
+
+---
+
+## v0.7.0
+
+### Local Models
+
+#### AI Providers
+- Provider selection
+- Ollama provider
+- Provider improvements
+
+---
+
+## v0.8.0
+
+### Knowledge Base
+
+- /kb add
+- Document storage
+- Document search
+- Question answering
+
+---
+
+## v0.9.0 (Planned)
+
+### Personal Assistant
+
+- Notes management
+- Task management
+- Daily planner
+- Calendar integration
+- Reminder system
+
+---
+
+## v1.0.0
+
+### Enterprise AI Platform
+
+- Web Interface
+- Authentication
+- PostgreSQL memory
+- User profiles
+- RAG
+- PDF ingestion
+- Semantic search
+- Vector databases
+- Multi-agent workflows
+- Tool calling
+- Enterprise integrations
+
+---
+
+# Long-Term Technical Roadmap
+
+## Phase 1
+### Core AI Assistant
+
+- CLI chatbot
+- Conversation management
+- Configuration management
+- Session persistence
+
+---
+
+## Phase 2
+### Modern User Experience
+
+- React frontend
+- Authentication
+- User profiles
+- Session synchronization
+
+---
+
+## Phase 3
+### Persistent Intelligence
+
+- PostgreSQL storage
+- Long-term memory
+- User preferences
+- Conversation analytics
+
+---
+
+## Phase 4
+### Knowledge Platform
+
+- RAG
+- PDF ingestion
+- Document indexing
+- Semantic search
+- Vector database integration
+
+---
+
+## Phase 5
+### Autonomous AI
+
+- Multi-agent architecture
+- Tool calling
+- Workflow automation
+- Enterprise integrations
+
+---
+
+# Current Project Status
+
+## AI Provider Framework
+
+- ✅ OpenAI Provider
+- ✅ Mock Provider
+- ✅ Provider Factory
+- ✅ Provider Manager
+- ✅ Automatic Provider Failover
+
+---
+
+## Conversation Management
+
+- ✅ Conversation memory
+- ✅ Persistent history
+- ✅ Session-aware storage
+- ✅ Multi-session support
+
+---
+
+## Export System
+
+- ✅ TXT export
+- ✅ Markdown export
+- ✅ Export current session
+
+---
+
+## Session Commands
+
+- ✅ /sessions
+- ✅ /new <session>
+- ✅ /load <session>
+- ✅ /delete <session>
+
+---
+
+## Utility Commands
+
+- ✅ /help
+- ✅ /history
+- ✅ /clear
+- ✅ /stats
+- ✅ /config
+- ✅ /about
+- ✅ /provider
+- ✅ /export
+- ✅ /export md
+
+---
+
+## Developer Experience
+
+- ✅ GitHub Actions CI
+- ✅ Automated testing
+- ✅ Regression suite
+- ✅ Coverage reporting
+- ✅ Semantic Versioning
+- ✅ GitHub Issues
+- ✅ GitHub Milestones
+- ✅ Modular Go Architecture
+
+---
+
+# Current Stable Features
+
+## AI Assistant
+
+- OpenAI-compatible API integration
+- Mock AI for offline development
+- Interactive command-line chat
+- Cross-platform support
+- Environment-based configuration
+
+---
+
+## Storage
+
+- Persistent conversations
+- Session storage
+- Conversation export
+- JSON-based storage
+
+---
+
+## Quality
+
+- Unit testing
+- Integration testing
+- Regression testing
+- Automated CI
+- Code formatting
+- Static analysis
+- Coverage reports
+
+---
+
+# Development Principles
+
+AstraMind follows the following engineering principles:
+
+- Clean Architecture
+- SOLID Principles
+- Modular Design
+- Incremental Development
+- Test-Driven Improvements
+- Continuous Integration
+- Continuous Refactoring
+- Semantic Versioning
+- GitHub Issue-Driven Development
+- Small, Reviewable Commits
+
+---
+
+# Current Release Status
+
+| Version | Status |
+|----------|--------|
+| v0.4.1 | ✅ Latest Stable Release |
+| v0.5.0 | 🚧 Current Development |
+| v0.6.0 | 📋 Planned |
+| v0.7.0 | 📋 Planned |
+| v0.8.0 | 📋 Planned |
+| v0.9.0 | 📋 Planned |
+| v1.0.0 | 🎯 Long-Term Vision |
+
+---
+
+**AstraMind continues to evolve through incremental, test-driven development with a strong focus on architecture, maintainability, and extensibility.**
