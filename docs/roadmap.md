@@ -40,8 +40,9 @@
 
 ## Releases
     Current Development Version:
-        * v0.4.1-dev
+        * v0.5.0-dev
     Latest Stable Release:
+        * v0.4.1
         * v0.4.0 
         * v0.3.0
         * v0.2.0
