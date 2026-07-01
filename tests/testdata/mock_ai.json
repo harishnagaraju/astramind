@@ -1,0 +1,26 @@
+[
+  {
+    "prompt": "hello",
+    "response": "Hello! Nice to meet you."
+  },
+  {
+    "prompt": "hi",
+    "response": "Hi! How can I help you today?"
+  },
+  {
+    "prompt": "how are you",
+    "response": "I'm doing great. Thanks for asking."
+  },
+  {
+    "prompt": "what is go",
+    "response": "Go is an open-source programming language developed by Google."
+  },
+  {
+    "prompt": "what is ai",
+    "response": "Artificial Intelligence enables computers to learn and solve problems."
+  },
+  {
+    "prompt": "bye",
+    "response": "Goodbye! Have a wonderful day."
+  }
+]

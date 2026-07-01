@@ -1,18 +1,33 @@
 # This workflow will build a golang project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 
-name: Go
+name: AstraMind CI
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+      - feature/**
+      - develop
+
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
+      - develop
 
 jobs:
 
-  build:
+  build-test:
     runs-on: ubuntu-latest
+    name: Build, Test & Coverage
+    timeout-minutes: 10
     steps:
     - uses: actions/checkout@v4
 
@@ -20,6 +35,12 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: '1.24'
+   
+    - name: Format
+      run: go fmt ./...
+
+    - name: Vet
+      run: go vet ./...
 
     - name: Build
       run: go build -v ./...
@@ -27,20 +48,19 @@ jobs:
     - name: Test
       run: go test -v ./...
 
-    - name: Build
-      run: ./scripts/build.sh
-
-    - name: Test
-      run: ./scripts/test.sh
-
-    - name: Coverage
-      run: ./scripts/coverage.sh
+    - name: Generate Coverage
+      run: |
+        mkdir -p tests/coverage
+        go test -coverprofile=tests/coverage/coverage.out ./...
+        go tool cover -func=tests/coverage/coverage.out > tests/coverage/coverage.txt
+        go tool cover -html=tests/coverage/coverage.out -o tests/coverage/coverage.html
 
     - name: Upload Coverage Reports
+      if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
       uses: actions/upload-artifact@v4
       with:
-          name: coverage-report
-          path: |
-            tests/coverage/coverage.html
-            tests/coverage/coverage.txt
-            tests/coverage/coverage.out
+        name: coverage-report
+        path: |
+          tests/coverage/coverage.out
+          tests/coverage/coverage.txt
+          tests/coverage/coverage.html

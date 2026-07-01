@@ -38,3 +38,8 @@ Thumbs.db
 
 # Coverage
 coverage.out
+
+# Coverage Reports
+tests/coverage/coverage.out
+tests/coverage/coverage.html
+tests/coverage/coverage.txt

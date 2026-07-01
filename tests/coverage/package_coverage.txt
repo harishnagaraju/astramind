@@ -1,0 +1,6 @@
+	github.com/harishnagaraju/astramind/cmd/astramind		coverage: 0.0% of statements
+ok  	github.com/harishnagaraju/astramind/internal/ai	(cached)	coverage: 56.0% of statements
+	github.com/harishnagaraju/astramind/internal/chat		?   	github.com/harishnagaraju/astramind/internal/config	[no test files]
+?   	github.com/harishnagaraju/astramind/internal/models	[no test files]
+ok  	github.com/harishnagaraju/astramind/internal/storage	0.089s	coverage: 60.0% of statements
+ok  	github.com/harishnagaraju/astramind/internal/testutil	(cached)	coverage: 64.3% of statements

@@ -10,74 +10,74 @@ import (
 )
 
 func SessionExists(
-    session string,
+	session string,
 ) bool {
 
-    file := sessionFile(session)
+	file := sessionFile(session)
 
-    _, err := os.Stat(file)
+	_, err := os.Stat(file)
 
-    return err == nil
+	return err == nil
 }
 
 func DeleteSession(
-    session string,
+	session string,
 ) error {
 
-    file := sessionFile(session)
+	file := sessionFile(session)
 
-    return os.Remove(file)
+	return os.Remove(file)
 }
 
 func ListSessions() ([]string, error) {
 
-    files, err := os.ReadDir("data/sessions")
-    if err != nil {
-        return nil, err
-    }
+	files, err := os.ReadDir("data/sessions")
+	if err != nil {
+		return nil, err
+	}
 
-    sessions := []string{}
+	sessions := []string{}
 
-    for _, file := range files {
+	for _, file := range files {
 
-        if file.IsDir() {
-            continue
-        }
+		if file.IsDir() {
+			continue
+		}
 
-        name := file.Name()
+		name := file.Name()
 
-        if filepath.Ext(name) != ".json" {
-            continue
-        }
+		if filepath.Ext(name) != ".json" {
+			continue
+		}
 
-        sessionName := strings.TrimSuffix(
-            name,
-            ".json",
-        )
+		sessionName := strings.TrimSuffix(
+			name,
+			".json",
+		)
 
-        sessions = append(
-            sessions,
-            sessionName,
-        )
-    }
+		sessions = append(
+			sessions,
+			sessionName,
+		)
+	}
 
-    return sessions, nil
+	return sessions, nil
 }
 
 func CreateSession(session string) error {
 
-    file := sessionFile(session)
+	file := sessionFile(session)
 
-    if _, err := os.Stat(file); err == nil {
-        return nil
-    }
+	if _, err := os.Stat(file); err == nil {
+		return nil
+	}
 
-    empty := []models.Message{}
+	empty := []models.Message{}
 
-    return SaveHistory(
-        session,
-        empty,
-    )
+	return SaveHistory(
+		session,
+		empty,
+	)
 }
 
 func sessionFile(session string) string {

@@ -1,0 +1,26 @@
+[
+  {
+    "role": "user",
+    "content": "こんにちは"
+  },
+  {
+    "role": "assistant",
+    "content": "こんにちは！"
+  },
+  {
+    "role": "user",
+    "content": "नमस्ते"
+  },
+  {
+    "role": "assistant",
+    "content": "नमस्ते!"
+  },
+  {
+    "role": "user",
+    "content": "😊"
+  },
+  {
+    "role": "assistant",
+    "content": "Unicode test successful."
+  }
+]

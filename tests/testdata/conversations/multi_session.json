@@ -1,0 +1,29 @@
+[
+  {
+    "session": "default",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hello"
+      }
+    ]
+  },
+  {
+    "session": "work",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Design API"
+      }
+    ]
+  },
+  {
+    "session": "trading",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Show NIFTY analysis"
+      }
+    ]
+  }
+]
