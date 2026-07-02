@@ -2,6 +2,7 @@ package ai
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -103,4 +104,24 @@ func (o *OpenAIProvider) Chat(
 			Message.
 			Content,
 		nil
+}
+
+func (p *OpenAIProvider) Stream(
+	ctx context.Context,
+	req StreamRequest,
+) (Stream, error) {
+
+	stream := &openAIStream{
+		events: make(chan StreamEvent),
+	}
+
+	go func() {
+		defer close(stream.events)
+
+		stream.events <- StreamEvent{
+			Type: StreamEventDone,
+		}
+	}()
+
+	return stream, nil
 }
