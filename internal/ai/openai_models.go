@@ -9,6 +9,7 @@ const (
 type OpenAIChatRequest struct {
 	Model    string           `json:"model"`
 	Messages []models.Message `json:"messages"`
+	Stream   bool             `json:"stream,omitempty"`
 }
 
 type OpenAIChatResponse struct {
