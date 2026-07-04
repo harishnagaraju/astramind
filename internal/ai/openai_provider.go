@@ -133,7 +133,31 @@ func (p *OpenAIProvider) Stream(
 		}
 	}()
 
-	_ = jsonData
+	httpReq, err := http.NewRequestWithContext(
+		ctx,
+		http.MethodPost,
+		openAIChatCompletionsEndpoint,
+		bytes.NewBuffer(jsonData),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	httpReq.Header.Set(
+		"Content-Type",
+		"application/json",
+	)
+
+	httpReq.Header.Set(
+		"Authorization",
+		"Bearer "+request.APIKey,
+	)
+
+	httpReq.Header.Set(
+		"Accept",
+		"text/event-stream",
+	)
 
 	return stream, nil
 }
