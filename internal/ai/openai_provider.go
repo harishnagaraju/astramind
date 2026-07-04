@@ -106,13 +106,25 @@ func (o *OpenAIProvider) Chat(
 
 func (p *OpenAIProvider) Stream(
 	ctx context.Context,
-	req ChatRequest,
+	request ChatRequest,
 ) (Stream, error) {
 
 	stream := &openAIStream{
 		events: make(chan StreamEvent),
 	}
 
+	reqBody := OpenAIChatRequest{
+		Model:    request.Model,
+		Messages: request.Messages,
+		Stream:   true,
+	}
+
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		return nil, err
+	}
+
+	// Temporary stub until HTTP request is added.
 	go func() {
 		defer close(stream.events)
 
@@ -120,6 +132,8 @@ func (p *OpenAIProvider) Stream(
 			Type: StreamEventDone,
 		}
 	}()
+
+	_ = jsonData
 
 	return stream, nil
 }
