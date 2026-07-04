@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-var openAIEndpoint = "https://api.openai.com/v1/chat/completions"
-
 type OpenAIProvider struct{}
 
 func (o *OpenAIProvider) Name() string {
@@ -33,7 +31,7 @@ func (o *OpenAIProvider) Chat(
 
 	req, err := http.NewRequest(
 		"POST",
-		openAIEndpoint,
+		openAIChatCompletionsEndpoint,
 		bytes.NewBuffer(jsonData),
 	)
 
