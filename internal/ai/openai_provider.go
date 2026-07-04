@@ -108,7 +108,7 @@ func (o *OpenAIProvider) Chat(
 
 func (p *OpenAIProvider) Stream(
 	ctx context.Context,
-	req StreamRequest,
+	req ChatRequest,
 ) (Stream, error) {
 
 	stream := &openAIStream{
