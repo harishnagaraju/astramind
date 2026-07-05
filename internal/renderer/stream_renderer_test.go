@@ -2,6 +2,7 @@ package renderer
 
 import (
 	"bytes"
+	"errors"
 	"testing"
 
 	"github.com/harishnagaraju/astramind/internal/ai"
@@ -73,4 +74,46 @@ func TestRenderTokens(t *testing.T) {
 		)
 	}
 
+}
+
+func TestRenderError(t *testing.T) {
+
+	expectedErr := errors.New("stream failure")
+
+	var output bytes.Buffer
+
+	renderer := New(&output)
+
+	stream := &mockStream{
+		events: make(chan ai.StreamEvent),
+	}
+
+	go func() {
+
+		stream.events <- ai.StreamEvent{
+			Type:    ai.StreamEventToken,
+			Content: "Hello",
+		}
+
+		stream.events <- ai.StreamEvent{
+			Type: ai.StreamEventError,
+			Err:  expectedErr,
+		}
+
+		close(stream.events)
+	}()
+
+	err := renderer.Render(stream)
+
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+
+	if err != expectedErr {
+		t.Fatalf(
+			"expected %v, got %v",
+			expectedErr,
+			err,
+		)
+	}
 }
