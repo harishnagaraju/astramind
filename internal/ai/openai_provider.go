@@ -166,7 +166,10 @@ func (p *OpenAIProvider) Stream(
 		return nil, err
 	}
 
-	defer resp.Body.Close()
+	go p.readStream(
+		resp.Body,
+		stream,
+	)
 
 	_ = resp
 
