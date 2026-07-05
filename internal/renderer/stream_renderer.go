@@ -3,6 +3,7 @@ package renderer
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/harishnagaraju/astramind/internal/ai"
 )
@@ -10,6 +11,11 @@ import (
 // StreamRenderer renders streaming AI responses.
 type StreamRenderer struct {
 	writer io.Writer
+	buffer strings.Builder
+}
+
+func (r *StreamRenderer) Text() string {
+	return r.buffer.String()
 }
 
 // New creates a new StreamRenderer.
@@ -31,10 +37,11 @@ func (r *StreamRenderer) Render(
 		switch event.Type {
 
 		case ai.StreamEventToken:
-			if _, err := fmt.Fprint(
-				r.writer,
-				event.Content,
-			); err != nil {
+			r.buffer.WriteString(event.Content)
+
+			_, err := fmt.Fprint(r.writer, event.Content)
+
+			if err != nil {
 				return err
 			}
 

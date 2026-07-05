@@ -5,8 +5,10 @@ import "github.com/harishnagaraju/astramind/internal/storage"
 import "github.com/harishnagaraju/astramind/internal/models"
 import "github.com/harishnagaraju/astramind/internal/ai"
 import "github.com/harishnagaraju/astramind/internal/chat"
+
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"github.com/joho/godotenv"
 	"os"
@@ -537,6 +539,8 @@ func main() {
 		})
 
 		reply, err := chatService.Chat(
+			context.Background(),
+			os.Stdout,
 			ai.ChatRequest{
 				Model:    model,
 				APIKey:   apiKey,
