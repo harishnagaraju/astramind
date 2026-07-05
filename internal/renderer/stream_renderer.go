@@ -1,6 +1,7 @@
 package renderer
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/harishnagaraju/astramind/internal/ai"
@@ -30,7 +31,12 @@ func (r *StreamRenderer) Render(
 		switch event.Type {
 
 		case ai.StreamEventToken:
-			// Token rendering will be added next.
+			if _, err := fmt.Fprint(
+				r.writer,
+				event.Content,
+			); err != nil {
+				return err
+			}
 
 		case ai.StreamEventDone:
 			return nil
