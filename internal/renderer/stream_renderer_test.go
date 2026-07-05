@@ -52,4 +52,25 @@ func TestRenderTokens(t *testing.T) {
 			err,
 		)
 	}
+
+	expectedOutput := "Hello World\n"
+
+	if output.String() != expectedOutput {
+		t.Fatalf(
+			"expected output %q, got %q",
+			expectedOutput,
+			output.String(),
+		)
+	}
+
+	expectedText := "Hello World"
+
+	if renderer.Text() != expectedText {
+		t.Fatalf(
+			"expected text %q, got %q",
+			expectedText,
+			renderer.Text(),
+		)
+	}
+
 }
