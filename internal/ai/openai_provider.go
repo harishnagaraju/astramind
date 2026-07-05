@@ -159,5 +159,16 @@ func (p *OpenAIProvider) Stream(
 		"text/event-stream",
 	)
 
+	client := &http.Client{}
+
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	_ = resp
+
 	return stream, nil
 }
