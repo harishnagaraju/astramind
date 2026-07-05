@@ -82,3 +82,44 @@ func TestReadStreamTokenAndDone(t *testing.T) {
 	}
 
 }
+
+func TestReadStreamInvalidJSON(t *testing.T) {
+
+	body := newTestStream(
+		`data: {invalid-json}
+            	 data: [DONE`,
+	)
+
+	stream := &openAIStream{
+		events: make(chan StreamEvent),
+	}
+
+	provider := &OpenAIProvider{}
+
+	go provider.readStream(body, stream)
+
+	var events []StreamEvent
+
+	for event := range stream.Events() {
+		events = append(events, event)
+	}
+
+	if len(events) != 1 {
+		t.Fatalf(
+			"expected 1 event, got %d",
+			len(events),
+		)
+	}
+
+	if events[0].Type != StreamEventError {
+		t.Fatalf(
+			"expected %q, got %q",
+			StreamEventError,
+			events[0].Type,
+		)
+	}
+
+	if events[0].Err == nil {
+		t.Fatal("expected JSON parsing error")
+	}
+}
