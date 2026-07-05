@@ -39,6 +39,10 @@ func (r *StreamRenderer) Render(
 			}
 
 		case ai.StreamEventDone:
+			if _, err := fmt.Fprintln(r.writer); err != nil {
+				return err
+			}
+
 			return nil
 
 		case ai.StreamEventError:
