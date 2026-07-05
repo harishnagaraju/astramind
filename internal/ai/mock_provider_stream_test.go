@@ -33,4 +33,40 @@ func TestMockProviderStream(t *testing.T) {
 			len(events),
 		)
 	}
+	expectedTokens := []string{
+		"Hello",
+		" from",
+		" Mock",
+		" AI!",
+	}
+
+	for i, token := range expectedTokens {
+
+		if events[i].Type != StreamEventToken {
+			t.Fatalf(
+				"event %d: expected %q, got %q",
+				i,
+				StreamEventToken,
+				events[i].Type,
+			)
+		}
+
+		if events[i].Content != token {
+			t.Fatalf(
+				"event %d: expected token %q, got %q",
+				i,
+				token,
+				events[i].Content,
+			)
+		}
+	}
+
+	if events[4].Type != StreamEventDone {
+		t.Fatalf(
+			"expected final event %q, got %q",
+			StreamEventDone,
+			events[4].Type,
+		)
+	}
+
 }
