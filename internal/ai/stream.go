@@ -3,12 +3,12 @@ package ai
 import "context"
 
 // StreamEventType identifies the kind of streamed event.
-type StreamEventType int
+type StreamEventType string
 
 const (
-	StreamEventToken StreamEventType = iota
-	StreamEventDone
-	StreamEventError
+	StreamEventToken StreamEventType = "token"
+	StreamEventDone  StreamEventType = "done"
+	StreamEventError StreamEventType = "error"
 )
 
 // StreamEvent represents a single event emitted by a provider.
