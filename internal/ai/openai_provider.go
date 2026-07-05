@@ -124,15 +124,6 @@ func (p *OpenAIProvider) Stream(
 		return nil, err
 	}
 
-	// Temporary stub until HTTP request is added.
-	go func() {
-		defer close(stream.events)
-
-		stream.events <- StreamEvent{
-			Type: StreamEventDone,
-		}
-	}()
-
 	httpReq, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
@@ -164,6 +155,20 @@ func (p *OpenAIProvider) Stream(
 	resp, err := client.Do(httpReq)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+
+		defer resp.Body.Close()
+
+		var body bytes.Buffer
+		body.ReadFrom(resp.Body)
+
+		return nil, fmt.Errorf(
+			"API Error (%d): %s",
+			resp.StatusCode,
+			body.String(),
+		)
 	}
 
 	go p.readStream(
