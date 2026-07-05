@@ -1,6 +1,9 @@
 package ai
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 type ProviderManager struct {
 	provider Provider
@@ -62,4 +65,23 @@ func (pm *ProviderManager) Chat(
 	pm.provider = pm.fallback
 
 	return pm.provider.Chat(request)
+}
+
+func (pm *ProviderManager) Stream(
+	ctx context.Context,
+	request ChatRequest,
+) (Stream, error) {
+
+	streamingProvider, ok := pm.provider.(StreamingProvider)
+	if !ok {
+		return nil, fmt.Errorf(
+			"provider %s does not support streaming",
+			pm.provider.Name(),
+		)
+	}
+
+	return streamingProvider.Stream(
+		ctx,
+		request,
+	)
 }
