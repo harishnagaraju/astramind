@@ -41,4 +41,44 @@ func TestReadStreamTokenAndDone(t *testing.T) {
 		)
 	}
 
+	if events[0].Type != StreamEventToken {
+		t.Fatalf(
+			"expected first event to be %q, got %q",
+			StreamEventToken,
+			events[0].Type,
+		)
+	}
+
+	if events[0].Content != "Hello" {
+		t.Fatalf(
+			"expected first token %q, got %q",
+			"Hello",
+			events[0].Content,
+		)
+	}
+
+	if events[1].Type != StreamEventToken {
+		t.Fatalf(
+			"expected second event to be %q, got %q",
+			StreamEventToken,
+			events[1].Type,
+		)
+	}
+
+	if events[1].Content != " World" {
+		t.Fatalf(
+			"expected second token %q, got %q",
+			" World",
+			events[1].Content,
+		)
+	}
+
+	if events[2].Type != StreamEventDone {
+		t.Fatalf(
+			"expected final event to be %q, got %q",
+			StreamEventDone,
+			events[2].Type,
+		)
+	}
+
 }
