@@ -3,6 +3,7 @@ package ai
 import (
 	"bufio"
 	"io"
+	"strings"
 )
 
 // readStream reads the OpenAI streaming response.
@@ -20,8 +21,42 @@ func (p *OpenAIProvider) readStream(
 
 	for scanner.Scan() {
 
-		line := scanner.Text()
+		line := strings.TrimSpace(scanner.Text())
 
-		_ = line
+		// Skip empty lines.
+		if line == "" {
+			continue
+		}
+
+		// Ignore anything that is not an SSE data event.
+		if !strings.HasPrefix(line, "data:") {
+			continue
+		}
+
+		// Remove the SSE prefix.
+		data := strings.TrimSpace(
+			strings.TrimPrefix(line, "data:"),
+		)
+
+		// End of stream.
+		if data == "[DONE]" {
+
+			stream.events <- StreamEvent{
+				Type: StreamEventDone,
+			}
+
+			return
+		}
+
+		// JSON parsing will be implemented in the next step.
+		_ = data
+	}
+
+	if err := scanner.Err(); err != nil {
+
+		stream.events <- StreamEvent{
+			Type: StreamEventError,
+			Err:  err,
+		}
 	}
 }
