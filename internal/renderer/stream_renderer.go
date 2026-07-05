@@ -14,7 +14,25 @@ func New() *StreamRenderer {
 
 // Render will consume streaming events.
 //
-// The implementation will be added in the next step.
-func (r *StreamRenderer) Render(stream ai.Stream) error {
+
+func (r *StreamRenderer) Render(
+	stream ai.Stream,
+) error {
+
+	for event := range stream.Events() {
+
+		switch event.Type {
+
+		case ai.StreamEventToken:
+			// Token rendering will be added next.
+
+		case ai.StreamEventDone:
+			return nil
+
+		case ai.StreamEventError:
+			return event.Err
+		}
+	}
+
 	return nil
 }
