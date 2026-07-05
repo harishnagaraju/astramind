@@ -16,3 +16,10 @@ func NewService(
 		manager: manager,
 	}
 }
+
+func (s *Service) Chat(
+	request ai.ChatRequest,
+) (string, error) {
+
+	return s.manager.Chat(request)
+}

@@ -4,6 +4,7 @@ import "github.com/harishnagaraju/astramind/internal/config"
 import "github.com/harishnagaraju/astramind/internal/storage"
 import "github.com/harishnagaraju/astramind/internal/models"
 import "github.com/harishnagaraju/astramind/internal/ai"
+import "github.com/harishnagaraju/astramind/internal/chat"
 import (
 	"bufio"
 	"fmt"
@@ -60,6 +61,10 @@ func main() {
 
 	manager := ai.NewProviderManager(
 		provider,
+	)
+
+	chatService := chat.NewService(
+		manager,
 	)
 
 	reader := bufio.NewReader(os.Stdin)
@@ -531,7 +536,7 @@ func main() {
 			Content: userInput,
 		})
 
-		reply, err := manager.Chat(
+		reply, err := chatService.Chat(
 			ai.ChatRequest{
 				Model:    model,
 				APIKey:   apiKey,
