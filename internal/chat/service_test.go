@@ -31,7 +31,23 @@ func TestServiceStreaming(t *testing.T) {
 		)
 	}
 
-	if reply == "" {
-		t.Fatal("expected non-empty reply")
+	expectedReply := "Hello from Mock AI!"
+
+	if reply != expectedReply {
+		t.Fatalf(
+			"expected reply %q, got %q",
+			expectedReply,
+			reply,
+		)
+	}
+
+	expectedOutput := expectedReply + "\n"
+
+	if output.String() != expectedOutput {
+		t.Fatalf(
+			"expected output %q, got %q",
+			expectedOutput,
+			output.String(),
+		)
 	}
 }
