@@ -2,6 +2,7 @@ package ai
 
 import (
 	"bufio"
+	"encoding/json"
 	"io"
 	"strings"
 )
@@ -48,8 +49,24 @@ func (p *OpenAIProvider) readStream(
 			return
 		}
 
-		// JSON parsing will be implemented in the next step.
-		_ = data
+		var response OpenAIStreamResponse
+
+		err := json.Unmarshal(
+			[]byte(data),
+			&response,
+		)
+
+		if err != nil {
+			stream.events <- StreamEvent{
+				Type: StreamEventError,
+				Err:  err,
+			}
+			return
+		}
+
+		// Token emission will be implemented in the next step.
+		_ = response
+
 	}
 
 	if err := scanner.Err(); err != nil {

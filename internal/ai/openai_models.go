@@ -17,3 +17,16 @@ type OpenAIChatResponse struct {
 		Message models.Message `json:"message"`
 	} `json:"choices"`
 }
+
+type OpenAIStreamResponse struct {
+	Choices []OpenAIStreamChoice `json:"choices"`
+}
+
+type OpenAIStreamChoice struct {
+	Delta OpenAIStreamDelta `json:"delta"`
+}
+
+type OpenAIStreamDelta struct {
+	Content string `json:"content,omitempty"`
+	Role    string `json:"role,omitempty"`
+}
