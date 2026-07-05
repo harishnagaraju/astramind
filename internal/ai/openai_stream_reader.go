@@ -64,8 +64,22 @@ func (p *OpenAIProvider) readStream(
 			return
 		}
 
-		// Token emission will be implemented in the next step.
-		_ = response
+		// Token emission
+		if len(response.Choices) == 0 {
+			continue
+		}
+
+		content := response.Choices[0].Delta.Content
+
+		// Ignore empty chunks (for example, role-only events).
+		if content == "" {
+			continue
+		}
+
+		stream.events <- StreamEvent{
+			Type:    StreamEventToken,
+			Content: content,
+		}
 
 	}
 
