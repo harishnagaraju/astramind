@@ -4,9 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"strings"
 )
 
 type OpenAIProvider struct {
@@ -31,7 +29,7 @@ func (o *OpenAIProvider) Chat(
 		return "", err
 	}
 
-	endpoint := o.baseURL + "/chat/completions"
+	endpoint := o.chatCompletionsEndpoint()
 
 	req, err := http.NewRequest(
 		http.MethodPost,
@@ -46,6 +44,16 @@ func (o *OpenAIProvider) Chat(
 	req.Header.Set(
 		"Content-Type",
 		"application/json",
+	)
+
+	req.Header.Set(
+		"HTTP-Referer",
+		"https://github.com/harishnagaraju/astramind",
+	)
+
+	req.Header.Set(
+		"X-Title",
+		"AstraMind",
 	)
 
 	req.Header.Set(
@@ -69,19 +77,7 @@ func (o *OpenAIProvider) Chat(
 
 		responseBody := body.String()
 
-		if resp.StatusCode == 429 &&
-			strings.Contains(
-				responseBody,
-				"insufficient_quota",
-			) {
-
-			return "", fmt.Errorf(
-				"OpenAI quota exceeded.",
-			)
-		}
-
-		return "", fmt.Errorf(
-			"API Error (%d): %s",
+		return "", handleAPIError(
 			resp.StatusCode,
 			responseBody,
 		)
@@ -128,7 +124,7 @@ func (p *OpenAIProvider) Stream(
 		return nil, err
 	}
 
-	endpoint := p.baseURL + "/chat/completions"
+	endpoint := p.chatCompletionsEndpoint()
 
 	httpReq, err := http.NewRequestWithContext(
 		ctx,
@@ -152,6 +148,16 @@ func (p *OpenAIProvider) Stream(
 	)
 
 	httpReq.Header.Set(
+		"HTTP-Referer",
+		"https://github.com/harishnagaraju/astramind",
+	)
+
+	httpReq.Header.Set(
+		"X-Title",
+		"AstraMind",
+	)
+
+	httpReq.Header.Set(
 		"Accept",
 		"text/event-stream",
 	)
@@ -170,8 +176,7 @@ func (p *OpenAIProvider) Stream(
 		var body bytes.Buffer
 		body.ReadFrom(resp.Body)
 
-		return nil, fmt.Errorf(
-			"API Error (%d): %s",
+		return nil, handleAPIError(
 			resp.StatusCode,
 			body.String(),
 		)
@@ -185,4 +190,8 @@ func (p *OpenAIProvider) Stream(
 	_ = resp
 
 	return stream, nil
+}
+
+func (p *OpenAIProvider) chatCompletionsEndpoint() string {
+	return p.baseURL + "/chat/completions"
 }

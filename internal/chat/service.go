@@ -25,7 +25,7 @@ func (s *Service) Chat(
 	ctx context.Context,
 	writer io.Writer,
 	request ai.ChatRequest,
-) (string, error) {
+) (string, bool, error) {
 
 	streamingProvider, ok := s.manager.Provider().(ai.StreamingProvider)
 
@@ -37,17 +37,19 @@ func (s *Service) Chat(
 		)
 
 		if err != nil {
-			return "", err
+			return "", false, err
 		}
 
 		r := renderer.New(writer)
 
 		if err := r.Render(stream); err != nil {
-			return "", err
+			return "", true, err
 		}
 
-		return r.Text(), nil
+		return r.Text(), true, nil
 	}
 
-	return s.manager.Chat(request)
+	reply, err := s.manager.Chat(request)
+
+	return reply, false, err
 }

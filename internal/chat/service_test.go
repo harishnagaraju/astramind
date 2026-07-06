@@ -18,7 +18,7 @@ func TestServiceStreaming(t *testing.T) {
 
 	var output bytes.Buffer
 
-	reply, err := service.Chat(
+	reply, streamed, err := service.Chat(
 		context.Background(),
 		&output,
 		ai.ChatRequest{},
@@ -29,6 +29,10 @@ func TestServiceStreaming(t *testing.T) {
 			"unexpected error: %v",
 			err,
 		)
+	}
+
+	if !streamed {
+		t.Fatal("expected streaming response")
 	}
 
 	expectedReply := "Hello from Mock AI!"

@@ -328,6 +328,11 @@ func main() {
 			)
 
 			fmt.Printf(
+				"Base URL: %s\n",
+				baseURL,
+			)
+
+			fmt.Printf(
 				"Max Messages: %d\n",
 				config.MaxMessages,
 			)
@@ -544,7 +549,7 @@ func main() {
 			Content: userInput,
 		})
 
-		reply, err := chatService.Chat(
+		reply, streamed, err := chatService.Chat(
 			context.Background(),
 			os.Stdout,
 			ai.ChatRequest{
@@ -573,6 +578,8 @@ func main() {
 			conversation = conversation[len(conversation)-config.MaxMessages:]
 		}
 
-		fmt.Println("\nAI:", reply)
+		if !streamed {
+			fmt.Println("\nAI:", reply)
+		}
 	}
 }
