@@ -1,7 +1,7 @@
 package config
 
 const (
-	Version     = "v0.4.1-dev"
+	Version     = "v0.5.0"
 	MaxMessages = 20
 	HistoryFile = "data/chat_history.json"
 )

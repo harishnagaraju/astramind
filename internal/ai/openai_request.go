@@ -27,13 +27,23 @@ func (p *OpenAIProvider) buildRequest(
 	httpReq, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
-		openAIChatCompletionsEndpoint,
+		p.chatCompletionsEndpoint(),
 		bytes.NewBuffer(jsonData),
 	)
 
 	if err != nil {
 		return nil, err
 	}
+
+	httpReq.Header.Set(
+		"HTTP-Referer",
+		"https://github.com/harishnagaraju/astramind",
+	)
+
+	httpReq.Header.Set(
+		"X-Title",
+		"AstraMind",
+	)
 
 	httpReq.Header.Set(
 		"Content-Type",

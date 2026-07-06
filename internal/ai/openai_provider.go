@@ -19,47 +19,15 @@ func (o *OpenAIProvider) Chat(
 	request ChatRequest,
 ) (string, error) {
 
-	reqBody := OpenAIChatRequest{
-		Model:    request.Model,
-		Messages: request.Messages,
-	}
-
-	jsonData, err := json.Marshal(reqBody)
-	if err != nil {
-		return "", err
-	}
-
-	endpoint := o.chatCompletionsEndpoint()
-
-	req, err := http.NewRequest(
-		http.MethodPost,
-		endpoint,
-		bytes.NewBuffer(jsonData),
+	req, err := o.buildRequest(
+		context.Background(),
+		request,
+		false,
 	)
 
 	if err != nil {
 		return "", err
 	}
-
-	req.Header.Set(
-		"Content-Type",
-		"application/json",
-	)
-
-	req.Header.Set(
-		"HTTP-Referer",
-		"https://github.com/harishnagaraju/astramind",
-	)
-
-	req.Header.Set(
-		"X-Title",
-		"AstraMind",
-	)
-
-	req.Header.Set(
-		"Authorization",
-		"Bearer "+request.APIKey,
-	)
 
 	client := &http.Client{}
 
@@ -75,11 +43,9 @@ func (o *OpenAIProvider) Chat(
 		var body bytes.Buffer
 		body.ReadFrom(resp.Body)
 
-		responseBody := body.String()
-
 		return "", handleAPIError(
 			resp.StatusCode,
-			responseBody,
+			body.String(),
 		)
 	}
 
@@ -113,54 +79,15 @@ func (p *OpenAIProvider) Stream(
 		events: make(chan StreamEvent),
 	}
 
-	reqBody := OpenAIChatRequest{
-		Model:    request.Model,
-		Messages: request.Messages,
-		Stream:   true,
-	}
-
-	jsonData, err := json.Marshal(reqBody)
-	if err != nil {
-		return nil, err
-	}
-
-	endpoint := p.chatCompletionsEndpoint()
-
-	httpReq, err := http.NewRequestWithContext(
+	httpReq, err := p.buildRequest(
 		ctx,
-		http.MethodPost,
-		endpoint,
-		bytes.NewBuffer(jsonData),
+		request,
+		true,
 	)
 
 	if err != nil {
 		return nil, err
 	}
-
-	httpReq.Header.Set(
-		"Content-Type",
-		"application/json",
-	)
-
-	httpReq.Header.Set(
-		"Authorization",
-		"Bearer "+request.APIKey,
-	)
-
-	httpReq.Header.Set(
-		"HTTP-Referer",
-		"https://github.com/harishnagaraju/astramind",
-	)
-
-	httpReq.Header.Set(
-		"X-Title",
-		"AstraMind",
-	)
-
-	httpReq.Header.Set(
-		"Accept",
-		"text/event-stream",
-	)
 
 	client := &http.Client{}
 
@@ -186,8 +113,6 @@ func (p *OpenAIProvider) Stream(
 		resp.Body,
 		stream,
 	)
-
-	_ = resp
 
 	return stream, nil
 }
