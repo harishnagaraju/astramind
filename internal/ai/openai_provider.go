@@ -9,7 +9,9 @@ import (
 	"strings"
 )
 
-type OpenAIProvider struct{}
+type OpenAIProvider struct {
+	baseURL string
+}
 
 func (o *OpenAIProvider) Name() string {
 	return "OpenAI"
@@ -29,9 +31,11 @@ func (o *OpenAIProvider) Chat(
 		return "", err
 	}
 
+	endpoint := o.baseURL + "/chat/completions"
+
 	req, err := http.NewRequest(
-		"POST",
-		openAIChatCompletionsEndpoint,
+		http.MethodPost,
+		endpoint,
 		bytes.NewBuffer(jsonData),
 	)
 
@@ -124,10 +128,12 @@ func (p *OpenAIProvider) Stream(
 		return nil, err
 	}
 
+	endpoint := p.baseURL + "/chat/completions"
+
 	httpReq, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
-		openAIChatCompletionsEndpoint,
+		endpoint,
 		bytes.NewBuffer(jsonData),
 	)
 

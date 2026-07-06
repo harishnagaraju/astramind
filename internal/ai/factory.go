@@ -14,12 +14,16 @@ func NewProvider(
 		return &MockProvider{}
 
 	case "openai":
-		return &OpenAIProvider{}
+		return &OpenAIProvider{
+			baseURL: cfg.BaseURL,
+		}
 	}
 
 	if strings.TrimSpace(cfg.APIKey) == "" {
 		return &MockProvider{}
 	}
 
-	return &OpenAIProvider{}
+	return &OpenAIProvider{
+		baseURL: cfg.BaseURL,
+	}
 }

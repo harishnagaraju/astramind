@@ -41,6 +41,7 @@ func main() {
 	*/
 
 	model := os.Getenv("OPENAI_MODEL")
+	baseURL := os.Getenv("OPENAI_BASE_URL")
 
 	if apiKey == "" {
 		fmt.Println("No OpenAI API key configured.")
@@ -52,9 +53,14 @@ func main() {
 		model = "gpt-4o-mini"
 	}
 
+	if baseURL == "" {
+		baseURL = "https://api.openai.com/v1"
+	}
+
 	providerConfig := ai.ProviderConfig{
-		APIKey: apiKey,
-		Model:  model,
+		APIKey:  apiKey,
+		Model:   model,
+		BaseURL: baseURL,
 	}
 
 	provider := ai.NewProvider(
