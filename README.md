@@ -9,7 +9,7 @@ Created and maintained by Harish Nagaraju.
 ![Go](https://img.shields.io/badge/Go-1.24+-blue)
 ![License](https://img.shields.io/badge/License-Apache%202.0-green)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
-Current Stable Release: **v0.4.1**
+Current Stable Release: **v0.5.0**
 
 AstraMind is a modular, AI-powered command-line assistant built in Go that provides a clean, scalable foundation for developing intelligent applications using Large Language Models (LLMs). Designed with a production-ready architecture, it supports multiple AI providers, conversation and session management, persistent chat history, export capabilities, automated testing, and a modern CI/CD pipeline.
 
@@ -21,13 +21,21 @@ AstraMind aims to become a flexible AI platform that combines conversational int
 
 # Current Features
 
-## AI Assistant
+## AI Providers
 - Multi-provider AI architecture
 - OpenAI-compatible API integration
+- OpenRouter integration
+- Configurable API base URL
+- Configurable AI model selection
 - Mock AI provider
 - Automatic provider failover
-- Interactive command-line interface (CLI)
-- Environment-based configuration
+
+## Streaming Responses
+- Real-time token streaming
+- Streaming renderer
+- Automatic fallback to non-streaming providers
+- Mock streaming provider
+- End-to-end streaming support
 
 ## Conversation Management
 - Conversation memory
@@ -35,29 +43,43 @@ AstraMind aims to become a flexible AI platform that combines conversational int
 - Multi-session support
 - Active session tracking
 - Session statistics
+- Automatic history persistence
+- Configurable conversation memory limits
 
 ## Session Commands
-- /sessions
-- /new <session>
-- /load <session>
-- /delete <session>
-- /export
-- /export md
+- `/sessions`
+- `/new <session>`
+- `/load <session>`
+- `/delete <session>`
+- `/export`
+- `/export md`
 
 ## Utility Commands
-- /help
-- /provider
-- /history
-- /clear
-- /stats
-- /config
-- /about
+- `/help`
+- `/provider`
+- `/history`
+- `/clear`
+- `/stats`
+- `/config`
+- `/about`
+
+## Export Features
+- Plain text export
+- Markdown export
 
 ## Developer Features
 - Modular Go architecture
+- Provider abstraction layer
+- Streaming provider interface
+- Configurable request builder
+- Structured error handling
 - GitHub Actions CI/CD
 - Automated testing
-- Coverage reporting
+- Unit tests
+- Integration tests
+- Streaming integration tests
+- HTTP error integration tests
+- Mock provider testing
 - Regression test suite
 - GitHub Issues & Milestones
 - Release management
@@ -67,7 +89,6 @@ AstraMind aims to become a flexible AI platform that combines conversational int
 - Windows
 - Linux
 - macOS
-
 
 ## Quick Start
     
@@ -79,6 +100,31 @@ cd astramind
 go build ./cmd/astramind
 
 ./astramind
+```
+AstraMind supports any OpenAI-compatible API endpoint through the OPENAI_BASE_URL configuration.
+
+## Environment Variables
+
+```env
+OPENAI_API_KEY=your_api_key
+OPENAI_MODEL=openrouter/auto
+OPENAI_BASE_URL=https://openrouter.ai/api/v1
+```
+## Testing
+
+Run the complete test suite:
+
+```bash
+go test -v ./...
+```
+
+The project includes:
+
+- Unit tests
+- Integration tests
+- Streaming integration tests
+- HTTP error tests
+- Mock provider tests
 ```
 
 ## Available Commands
@@ -99,46 +145,92 @@ go build ./cmd/astramind
 | /export md     | Export current session as Markdown|
 | /provider      | Show AI provider                  |
 
+## Streaming Responses
+AstraMind supports real-time streaming responses from compatible AI providers.
+
+Benefits include:
+
+- Lower perceived latency
+- Token-by-token rendering
+- Improved interactive experience
+- Automatic fallback for providers without streaming support
+
+# Project Structure
+cmd/
+    astramind/
+
+internal/
+    ai/
+    chat/
+    config/
+    models/
+    renderer/
+    storage/
+    testutil/
+
+exports/
+data/
 
 # Release Management
 
+## v0.5.0
+**Streaming Responses & Provider Enhancements**
+- Real-time AI streaming responses.
+- Streaming renderer for token-by-token output.
+- OpenRouter integration.
+- Configurable API base URL.
+- Configurable AI model selection.
+- Shared HTTP request builder.
+- Improved HTTP error handling.
+- Mock streaming provider.
+- End-to-end streaming integration.
+- HTTP integration tests using `httptest.Server`.
+- Streaming integration tests.
+- HTTP error integration tests.
+- Enhanced provider architecture.
+- Improved OpenAI-compatible API support.
+
 ## v0.4.1
-### Highlights
-- Conversation Export (TXT & Markdown)
-- AI Provider Framework
-- Automatic Provider Failover
-- Mock AI Provider
-- OpenAI Provider
-- GitHub Actions CI
-- Regression Test Suite
+**AI Provider Framework & Export**
+- Conversation export (TXT & Markdown).
+- AI provider abstraction.
+- Automatic provider failover.
+- Mock AI provider.
+- OpenAI provider implementation.
+- GitHub Actions CI pipeline.
+- Regression test suite.
+
 ## v0.4.0
-**Multi-session support**
+**Multi-Session Support**
 - Active session tracking.
 - Session listing.
 - Session creation.
 - Session loading.
 - Session deletion.
 - Improved API error handling.
+
 ## v0.3.0
-**Persistence and usability improvements**
-- Persistent history storage.
-- Statistics command.
+**Persistence & Usability Improvements**
+- Persistent conversation history.
+- Session statistics.
 - Configuration command.
 - About command.
-- Improved architecture.
+- Improved internal architecture.
+
 ## v0.2.x
-**Conversation management**
+**Conversation Management**
 - Conversation memory.
-- History support.
-- Chat commands.
+- Conversation history.
+- Interactive chat commands.
+
 ## v0.1.x
-**Initial AstraMind foundation**
-- CLI chatbot.
+**Initial Foundation**
+- Command-line AI assistant.
 - OpenAI integration.
-- Environment configuration.
+- Environment-based configuration.
+- Modular project structure.
 
 ## Technology Stack
-
 - Go 1.24+
 - OpenAI-compatible APIs
 - JSON
@@ -148,7 +240,6 @@ go build ./cmd/astramind
 - Markdown
 
 ## Architecture
-
 AstraMind follows a modular architecture consisting of:
 
 - AI Provider Framework
@@ -159,7 +250,6 @@ AstraMind follows a modular architecture consisting of:
 - Test Utilities
 
 ## License
-
 Apache License 2.0
 
 This project is licensed under the Apache License 2.0 - see the LICENSE file for details.
@@ -172,7 +262,6 @@ Mind — representing reasoning, learning, and artificial intelligence.
 Together, AstraMind represents an AI system designed to explore knowledge, assist users, and continuously evolve toward more advanced forms of intelligence.
 
 ## Project Owner
-
 **Harish Nagaraju**
 
 Software Architect | AI Engineer | Founder, RK Consulting

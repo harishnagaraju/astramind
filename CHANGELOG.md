@@ -5,6 +5,85 @@ All notable changes to AstraMind are documented in this file.
 The project follows [Semantic Versioning](https://semver.org/).
 
 ---
+# v0.5.0 - 2026-07-06
+
+## Highlights
+
+This release introduces real-time streaming AI responses, OpenRouter integration, configurable OpenAI-compatible endpoints, improved provider architecture, and a comprehensive integration testing framework. AstraMind now supports streaming and non-streaming providers through a unified interface while significantly improving maintainability and test coverage.
+
+## Added
+
+### Streaming Responses
+- Real-time token-by-token AI streaming.
+- Streaming renderer for terminal output.
+- Streaming provider interface.
+- Mock streaming provider.
+- Automatic fallback for non-streaming providers.
+
+### OpenAI-Compatible Providers
+- OpenRouter integration.
+- Configurable API base URL.
+- Configurable AI model selection.
+- Shared HTTP request builder.
+- Improved provider abstraction.
+
+### Integration Testing
+- HTTP integration tests using `httptest.Server`.
+- Streaming integration tests.
+- HTTP error integration tests.
+- Invalid JSON response tests.
+- End-to-end provider validation without external services.
+
+### Configuration
+- `OPENAI_BASE_URL` environment variable.
+- Support for OpenAI-compatible APIs.
+- Runtime provider configuration improvements.
+
+## Improved
+
+### AI Provider Framework
+- Reduced duplicated request construction.
+- Cleaner provider implementation.
+- Improved request handling.
+- Better error propagation.
+- More maintainable streaming architecture.
+
+### Testing
+- Expanded automated test suite.
+- Increased integration test coverage.
+- Improved provider validation.
+- Enhanced streaming validation.
+
+### Developer Experience
+- Cleaner internal architecture.
+- Better separation of provider responsibilities.
+- Improved code maintainability.
+- Simplified future provider integrations.
+
+## Fixed
+
+- Streaming response handling.
+- Provider request construction.
+- HTTP error handling consistency.
+- OpenAI-compatible endpoint support.
+- Runtime streaming stability.
+
+## Testing
+
+Validated successfully with:
+
+- Unit tests
+- Integration tests
+- Streaming integration tests
+- HTTP error integration tests
+- Mock provider tests
+- Mock streaming provider tests
+- Provider manager tests
+- Renderer tests
+- Storage tests
+- Runtime validation against OpenRouter
+
+---
 
 # v0.4.1 - 2026-07-01
 

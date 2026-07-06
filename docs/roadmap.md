@@ -112,7 +112,7 @@ Enterprise integrations
 
 ---
 
-## v0.4.1 (Latest Stable Release)
+## v0.4.1
 
 ### Export System
 - TXT Export
@@ -153,49 +153,44 @@ Enterprise integrations
 
 ---
 
-## v0.5.0 (Current Development)
-
-### Streaming Responses
+## v0.5.0 (Latest Stable Release)- Streaming Responses
 - OpenAI streaming
 - Streaming renderer
 - Typing indicator
 
 ---
 
-## v0.6.0
-
-### Search System
+## v0.6.0 - Search System
 - /search command
+- Search conversations
 - Search all sessions
 - Search results display
 
 ---
 
-## v0.7.0
+## v0.7.0 - Local Models
 
-### Local Models
-
-#### AI Providers
 - Provider selection
-- Ollama provider
-- Provider improvements
+- Ollama integration
+- Local LLM support
+- CPU/GPU model execution
 
 ---
 
-## v0.8.0
+## v0.8.0 - Knowledge Base
 
-### Knowledge Base
-
-- /kb add
+- /kb command - add
 - Document storage
 - Document search
+- Question answering
+- Document indexing
+- Knowledge base management
+- Semantic search
 - Question answering
 
 ---
 
-## v0.9.0 (Planned)
-
-### Personal Assistant
+## v0.9.0 (Planned) - Personal Assistant
 
 - Notes management
 - Task management
@@ -205,9 +200,7 @@ Enterprise integrations
 
 ---
 
-## v1.0.0
-
-### Enterprise AI Platform
+## v1.0.0 - Enterprise AI Platform
 
 - Web Interface
 - Authentication
