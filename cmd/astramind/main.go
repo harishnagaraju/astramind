@@ -278,6 +278,35 @@ func main() {
 			continue
 		}
 
+		if strings.HasPrefix(userInput, "/search ") || userInput == "/search" {
+
+			query := strings.TrimSpace(
+				strings.TrimPrefix(userInput, "/search"),
+			)
+
+			if query == "" {
+				fmt.Println("Usage: /search <text>")
+				continue
+			}
+
+			results := storage.SearchMessages(conversation, query)
+
+			if len(results) == 0 {
+				fmt.Println("No matches found.")
+				continue
+			}
+
+			fmt.Printf("Found %d match(es):\n\n", len(results))
+
+			for _, result := range results {
+				fmt.Printf("[%d] %s\n", result.Index+1, result.Role)
+				fmt.Println(result.Content)
+				fmt.Println()
+			}
+
+			continue
+		}
+
 		switch userInput {
 
 		case "exit", "quit":
@@ -296,6 +325,7 @@ func main() {
 			fmt.Println("/export    - Export session (TXT)")
 			fmt.Println("/export md - Export session (Markdown)")
 			fmt.Println("/sessions  - List sessions")
+			fmt.Println("/search <text> - Search current conversation")
 			fmt.Println("/new <name> - Create session")
 			fmt.Println("/load <name> - Load session")
 			fmt.Println("/delete <name> - Delete session")
