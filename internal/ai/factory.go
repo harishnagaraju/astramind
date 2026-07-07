@@ -2,9 +2,8 @@ package ai
 
 import "strings"
 
-func NewProvider(
-	cfg ProviderConfig,
-) Provider {
+// NewProvider creates a provider instance based on the configuration.
+func NewProvider(cfg ProviderConfig) Provider {
 
 	switch strings.ToLower(
 		strings.TrimSpace(cfg.Provider),
@@ -16,6 +15,11 @@ func NewProvider(
 	case "openai":
 		return &OpenAIProvider{
 			baseURL: cfg.BaseURL,
+		}
+
+	case "ollama":
+		return &OllamaProvider{
+			baseURL: "http://localhost:11434",
 		}
 	}
 
