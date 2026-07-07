@@ -3,6 +3,33 @@
 All notable changes to AstraMind are documented in this file.
 
 The project follows [Semantic Versioning](https://semver.org/).
+---
+## v0.6.0 - 2026-07-07
+
+### Added
+
+- Added `/search` command to search the current conversation.
+- Added `/searchall` command to search across all saved sessions.
+- Added case-insensitive conversation search.
+- Added grouped search results by session.
+- Added reusable search renderer.
+- Added search models for current and multi-session search.
+
+### Improved
+
+- Improved search result presentation.
+- Improved session grouping for multi-session search.
+
+### Fixed
+
+- Fixed conversation persistence after successful AI responses.
+- Fixed search across sessions by ensuring conversations are saved immediately.
+- Improved session consistency when switching between conversations.
+
+### Tests
+
+- Added unit tests for conversation search.
+- Added integration tests for multi-session search.
 
 ---
 # v0.5.0 - 2026-07-06

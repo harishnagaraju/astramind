@@ -5,6 +5,7 @@ import "github.com/harishnagaraju/astramind/internal/storage"
 import "github.com/harishnagaraju/astramind/internal/models"
 import "github.com/harishnagaraju/astramind/internal/ai"
 import "github.com/harishnagaraju/astramind/internal/chat"
+import "github.com/harishnagaraju/astramind/internal/renderer"
 
 import (
 	"bufio"
@@ -296,13 +297,7 @@ func main() {
 				continue
 			}
 
-			fmt.Printf("Found %d match(es):\n\n", len(results))
-
-			for _, result := range results {
-				fmt.Printf("[%d] %s\n", result.Index+1, result.Role)
-				fmt.Println(result.Content)
-				fmt.Println()
-			}
+			renderer.RenderSearchResults(results)
 
 			continue
 		}
@@ -329,15 +324,7 @@ func main() {
 				continue
 			}
 
-			fmt.Printf("Found %d match(es):\n\n", len(results))
-
-			for _, result := range results {
-
-				fmt.Printf("Session : %s\n", result.Session)
-				fmt.Printf("[%d] %s\n", result.Index+1, result.Role)
-				fmt.Println(result.Content)
-				fmt.Println()
-			}
+			renderer.RenderSessionSearchResults(results)
 
 			continue
 		}
@@ -638,6 +625,10 @@ func main() {
 			Role:    "assistant",
 			Content: reply,
 		})
+
+		if err := storage.SaveHistory(activeSession, conversation); err != nil {
+			fmt.Println("Warning: failed to save conversation:", err)
+		}
 
 		// Keep memory bounded
 		if len(conversation) > config.MaxMessages {

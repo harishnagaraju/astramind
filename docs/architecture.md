@@ -125,6 +125,41 @@ astramind/
 ├── go.mod
 └── go.sum
 ```
+CLI
+ │
+ ├── Commands
+ │
+ ├── Search Renderer
+ │
+ ├── Chat Service
+ │
+ └── Storage
+
+Search System
+
+/search
+
+↓
+
+SearchMessages()
+
+↓
+
+Renderer
+
+/searchall
+
+↓
+
+SearchAllSessions()
+
+↓
+
+SearchMessages()
+
+↓
+
+Renderer
 
 ---
 
