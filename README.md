@@ -9,7 +9,7 @@ Created and maintained by Harish Nagaraju.
 ![Go](https://img.shields.io/badge/Go-1.24+-blue)
 ![License](https://img.shields.io/badge/License-Apache%202.0-green)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
-Current Stable Release: **v0.5.0**
+Current Stable Release: **v0.6.0**
 
 AstraMind is a modular, AI-powered command-line assistant built in Go that provides a clean, scalable foundation for developing intelligent applications using Large Language Models (LLMs). Designed with a production-ready architecture, it supports multiple AI providers, conversation and session management, persistent chat history, export capabilities, automated testing, and a modern CI/CD pipeline.
 
