@@ -46,6 +46,13 @@ AstraMind aims to become a flexible AI platform that combines conversational int
 - Automatic history persistence
 - Configurable conversation memory limits
 
+### Conversation Search
+
+- Search current conversation
+- Search across all saved sessions
+- Case-insensitive search
+- Session-grouped search results
+
 ## Session Commands
 - `/sessions`
 - `/new <session>`
@@ -58,12 +65,14 @@ AstraMind aims to become a flexible AI platform that combines conversational int
 - `/help`
 - `/provider`
 - `/history`
+- `/search`
+- `/searchall`
 - `/clear`
 - `/stats`
 - `/config`
 - `/about`
 
-## Export Features
+## Session Export 
 - Plain text export
 - Markdown export
 
@@ -129,21 +138,23 @@ The project includes:
 
 ## Available Commands
    
-| Command        |            Description            |
-|----------------|-----------------------------------|
-| /help          | Show help                         |
-| /about         | About AstraMind                   |
-| /history       | Conversation history              |
-| /clear         | Clear current conversation        |
-| /stats         | Session statistics                |
-| /config        | Configuration                     |
-| /sessions      | List sessions                     |
-| /new <name>    | Create session                    |
-| /load <name>   | Load session                      |
-| /delete <name> | Delete session                    |
-| /export        | Export current session as TXT     |
-| /export md     | Export current session as Markdown|
-| /provider      | Show AI provider                  |
+| Command        	|            Description            |
+|-----------------------|-----------------------------------|
+| /help          	| Show help                         |
+| /about         	| About AstraMind                   |
+| /history       	| Conversation history              |
+| /clear         	| Clear current conversation        |
+| /stats         	| Session statistics                |
+| /config        	| Configuration                     |
+| /sessions      	| List sessions                     |
+| /new <name>    	| Create session                    |
+| /load <name>   	| Load session                      |
+| /delete <name> 	| Delete session                    |
+| /export        	| Export current session as TXT     |
+| /export md     	| Export current session as Markdown|
+| /provider      	| Show AI provider                  |
+| /search <text> 	| Search current converstation      |
+| /searchall <text> 	| Search across all sessions        |
 
 ## Streaming Responses
 AstraMind supports real-time streaming responses from compatible AI providers.
@@ -172,6 +183,20 @@ exports/
 data/
 
 # Release Management
+
+## v0.6.0
+**Search System**
+- Search current conversation using `/search`.
+- Search across all saved sessions using `/searchall`.
+- Case-insensitive conversation search.
+- Session-grouped search results.
+- Dedicated search result renderer.
+- Reusable search engine for current and multi-session search.
+- Search result data models for extensibility.
+- Unit tests for conversation search.
+- Integration tests for multi-session search.
+- Improved conversation persistence across sessions.
+- Improved search result presentation
 
 ## v0.5.0
 **Streaming Responses & Provider Enhancements**

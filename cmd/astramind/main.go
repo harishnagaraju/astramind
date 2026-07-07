@@ -5,6 +5,7 @@ import "github.com/harishnagaraju/astramind/internal/storage"
 import "github.com/harishnagaraju/astramind/internal/models"
 import "github.com/harishnagaraju/astramind/internal/ai"
 import "github.com/harishnagaraju/astramind/internal/chat"
+import "github.com/harishnagaraju/astramind/internal/renderer"
 
 import (
 	"bufio"
@@ -278,6 +279,56 @@ func main() {
 			continue
 		}
 
+		if strings.HasPrefix(userInput, "/search ") || userInput == "/search" {
+
+			query := strings.TrimSpace(
+				strings.TrimPrefix(userInput, "/search"),
+			)
+
+			if query == "" {
+				fmt.Println("Usage: /search <text>")
+				continue
+			}
+
+			results := storage.SearchMessages(conversation, query)
+
+			if len(results) == 0 {
+				fmt.Println("No matches found.")
+				continue
+			}
+
+			renderer.RenderSearchResults(results)
+
+			continue
+		}
+
+		if strings.HasPrefix(userInput, "/searchall ") || userInput == "/searchall" {
+
+			query := strings.TrimSpace(
+				strings.TrimPrefix(userInput, "/searchall"),
+			)
+
+			if query == "" {
+				fmt.Println("Usage: /searchall <text>")
+				continue
+			}
+
+			results, err := storage.SearchAllSessions(query)
+			if err != nil {
+				fmt.Println("Search failed:", err)
+				continue
+			}
+
+			if len(results) == 0 {
+				fmt.Println("No matches found.")
+				continue
+			}
+
+			renderer.RenderSessionSearchResults(results)
+
+			continue
+		}
+
 		switch userInput {
 
 		case "exit", "quit":
@@ -296,6 +347,8 @@ func main() {
 			fmt.Println("/export    - Export session (TXT)")
 			fmt.Println("/export md - Export session (Markdown)")
 			fmt.Println("/sessions  - List sessions")
+			fmt.Println("/search <text> - Search current conversation")
+			fmt.Println("/searchall <text> - Search all conversation")
 			fmt.Println("/new <name> - Create session")
 			fmt.Println("/load <name> - Load session")
 			fmt.Println("/delete <name> - Delete session")
@@ -572,6 +625,10 @@ func main() {
 			Role:    "assistant",
 			Content: reply,
 		})
+
+		if err := storage.SaveHistory(activeSession, conversation); err != nil {
+			fmt.Println("Warning: failed to save conversation:", err)
+		}
 
 		// Keep memory bounded
 		if len(conversation) > config.MaxMessages {
