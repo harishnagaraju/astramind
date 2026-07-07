@@ -388,9 +388,9 @@ AstraMind follows the following engineering principles:
 
 | Version | Status |
 |----------|--------|
-| v0.4.1 | ✅ Latest Stable Release |
-| v0.5.0 | 🚧 Current Development |
-| v0.6.0 | 📋 Planned |
+| v0.4.1 | old Stable Release|
+| v0.5.0 | ✅ Latest Stable Release|
+| v0.6.0 | 🚧 Current Development |
 | v0.7.0 | 📋 Planned |
 | v0.8.0 | 📋 Planned |
 | v0.9.0 | 📋 Planned |
