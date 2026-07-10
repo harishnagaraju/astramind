@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // JSONStorage stores documents as JSON files.
@@ -85,7 +86,9 @@ func (s *JSONStorage) ListDocuments() ([]Document, error) {
 			continue
 		}
 
-		doc, err := s.LoadDocument(name := strings.TrimSuffix(file.Name(), filepath.Ext(file.Name())))
+		name := strings.TrimSuffix(file.Name(), filepath.Ext(file.Name()))
+
+		doc, err := s.LoadDocument(name)
 		if err != nil {
 			continue
 		}
