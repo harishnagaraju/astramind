@@ -12,6 +12,7 @@ func buildOllamaRequest(
 	baseURL string,
 	model string,
 	request ChatRequest,
+	stream bool,
 ) (*http.Request, error) {
 
 	if model == "" {
@@ -20,7 +21,7 @@ func buildOllamaRequest(
 
 	ollamaReq := OllamaChatRequest{
 		Model:  model,
-		Stream: false,
+		Stream: stream,
 	}
 
 	for _, msg := range request.Messages {

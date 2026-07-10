@@ -21,18 +21,29 @@ AstraMind aims to become a flexible AI platform that combines conversational int
 
 # Current Features
 
+## Multiple AI Providers
+- OpenAI
+- OpenRouter
+- Ollama
+- Mock AI
+
 ## AI Providers
 - Multi-provider AI architecture
 - OpenAI-compatible API integration
 - OpenRouter integration
+- Native Ollama integration
+- Local LLM support
 - Configurable API base URL
 - Configurable AI model selection
+- Runtime provider selection
 - Mock AI provider
-- Automatic provider failover
+- Automatic provider failov
 
 ## Streaming Responses
 - Real-time token streaming
 - Streaming renderer
+- OpenAI streaming
+- Ollama streaming
 - Automatic fallback to non-streaming providers
 - Mock streaming provider
 - End-to-end streaming support
@@ -114,11 +125,59 @@ AstraMind supports any OpenAI-compatible API endpoint through the OPENAI_BASE_UR
 
 ## Environment Variables
 
+### OpenAI
+
 ```env
+AI_PROVIDER=openai
+OPENAI_API_KEY=your_api_key
+OPENAI_MODEL=gpt-4o-mini
+OPENAI_BASE_URL=https://api.openai.com/v1
+```
+
+### OpenRouter
+
+```env
+AI_PROVIDER=openrouter
 OPENAI_API_KEY=your_api_key
 OPENAI_MODEL=openrouter/auto
 OPENAI_BASE_URL=https://openrouter.ai/api/v1
 ```
+
+### Ollama
+
+```env
+AI_PROVIDER=ollama
+OPENAI_MODEL=gemma3:1b
+OPENAI_BASE_URL=http://localhost:11434
+```
+
+## Testing
+Run the complete test suite:
+
+```bash
+go test -v ./...
+```
+
+## Using Ollama
+
+Install Ollama
+
+```bash
+https://ollama.com
+```
+
+Download a model
+
+```bash
+ollama pull gemma3:1b
+```
+
+Run the model
+
+```bash
+ollama run gemma3:1b
+```
+
 ## Testing
 
 Run the complete test suite:
@@ -130,10 +189,22 @@ go test -v ./...
 The project includes:
 
 - Unit tests
-- Integration tests
+- Provider integration tests
 - Streaming integration tests
 - HTTP error tests
+- Invalid JSON tests
+- Connection failure tests
 - Mock provider tests
+- Regression tests
+
+## Supported AI Providers
+
+| Provider   | Local | Streaming | Status |
+|------------|:-----:|:---------:|:------:|
+| Mock AI    | N/A   | ✅        | ✅     |
+| OpenAI     | ❌    | ✅        | ✅     |
+| OpenRouter | ❌    | ✅        | ✅     |
+| Ollama     | ✅    | ✅        | ✅     |
 
 
 ## Available Commands
@@ -257,7 +328,9 @@ data/
 
 ## Technology Stack
 - Go 1.24+
-- OpenAI-compatible APIs
+- OpenAI APIs
+- OpenRouter
+- Ollama
 - JSON
 - REST APIs
 - GitHub Actions
@@ -268,8 +341,12 @@ data/
 AstraMind follows a modular architecture consisting of:
 
 - AI Provider Framework
+- Provider Factory
+- Provider Manager
+- Streaming Framework
 - Storage Layer
 - Chat Engine
+- Renderer
 - Configuration
 - Export System
 - Test Utilities

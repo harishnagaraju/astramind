@@ -2,6 +2,7 @@ package ai
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 )
@@ -30,6 +31,7 @@ func (o *OllamaProvider) Chat(
 		o.baseURL,
 		model,
 		request,
+		false,
 	)
 	if err != nil {
 		return "", err
@@ -70,4 +72,60 @@ func (o *OllamaProvider) Chat(
 	}
 
 	return result.Message.Content, nil
+}
+
+func (p *OllamaProvider) Stream(
+	ctx context.Context,
+	request ChatRequest,
+) (Stream, error) {
+
+	stream := &ollamaStream{
+		events: make(chan StreamEvent),
+	}
+
+	model := p.model
+	if model == "" {
+		model = "llama3"
+	}
+
+	httpReq, err := buildOllamaRequest(
+		p.baseURL,
+		model,
+		request,
+		true,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{}
+
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+
+		defer resp.Body.Close()
+
+		var body bytes.Buffer
+		body.ReadFrom(resp.Body)
+
+		return nil, handleAPIError(
+			resp.StatusCode,
+			body.String(),
+		)
+	}
+
+	go func() {
+		defer resp.Body.Close()
+		readOllamaStream(
+			resp.Body,
+			stream.events,
+		)
+	}()
+
+	return stream, nil
 }
