@@ -255,6 +255,24 @@ data/
 
 # Release Management
 
+## v0.7.0
+**Native Ollama Integration**
+
+- Native Ollama provider.
+- Local Large Language Model (LLM) support.
+- Runtime provider selection.
+- Local model configuration.
+- Ollama streaming support.
+- Streaming parser for Ollama responses.
+- Shared request builder.
+- Integration tests for Ollama.
+- HTTP error handling tests.
+- Invalid JSON handling tests.
+- Connection failure tests.
+- Streaming integration tests.
+- Verified with Gemma3:1b.
+- Improved provider architecture
+
 ## v0.6.0
 **Search System**
 - Search current conversation using `/search`.
