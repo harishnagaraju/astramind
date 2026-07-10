@@ -150,14 +150,6 @@ AI_PROVIDER=ollama
 OPENAI_MODEL=gemma3:1b
 OPENAI_BASE_URL=http://localhost:11434
 ```
-
-## Testing
-Run the complete test suite:
-
-```bash
-go test -v ./...
-```
-
 ## Using Ollama
 
 Install Ollama
