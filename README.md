@@ -230,9 +230,9 @@ Benefits include:
 - Automatic fallback for providers without streaming support
 
 # Project Structure
+```
 cmd/
     astramind/
-
 internal/
     ai/
     chat/
@@ -244,6 +244,7 @@ internal/
 
 exports/
 data/
+```
 
 # Release Management
 
