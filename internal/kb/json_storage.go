@@ -85,7 +85,7 @@ func (s *JSONStorage) ListDocuments() ([]Document, error) {
 			continue
 		}
 
-		doc, err := s.LoadDocument(file.Name()[:len(file.Name())-5])
+		doc, err := s.LoadDocument(name := strings.TrimSuffix(file.Name(), filepath.Ext(file.Name())))
 		if err != nil {
 			continue
 		}
@@ -95,7 +95,3 @@ func (s *JSONStorage) ListDocuments() ([]Document, error) {
 
 	return documents, nil
 }
-
-
-
-
