@@ -64,3 +64,23 @@ func TestExplicitOpenAIProvider(t *testing.T) {
 		)
 	}
 }
+
+func TestExplicitOllamaProvider(t *testing.T) {
+
+	p := NewProvider(
+		ProviderConfig{
+			Provider: "ollama",
+		},
+	)
+
+	if p == nil {
+		t.Fatal("Expected provider but got nil")
+	}
+
+	if p.Name() != "Ollama" {
+		t.Fatalf(
+			"Expected Ollama but got %s",
+			p.Name(),
+		)
+	}
+}

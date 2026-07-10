@@ -4,6 +4,51 @@ All notable changes to AstraMind are documented in this file.
 
 The project follows [Semantic Versioning](https://semver.org/).
 ---
+## [v0.7.0] - 2026-07-10
+
+### Added
+
+- Native Ollama provider
+- Local LLM support through Ollama
+- Runtime provider selection
+- Streaming support for Ollama
+- Streaming integration tests
+- HTTP error handling tests
+- Invalid JSON handling tests
+- Connection failure tests
+
+### Improved
+
+- Provider factory architecture
+- Provider manager
+- Streaming abstraction
+- Request builder reuse
+- Test coverage
+
+### Supported Providers
+
+- Mock AI
+- OpenAI
+- OpenRouter
+- Ollama
+
+### Tested
+
+- go fmt
+- go vet
+- go build
+- go test -v ./...
+
+### Verified
+
+- Local Ollama installation
+- Gemma3:1b model
+- Conversation history
+- Session persistence
+- Provider switching
+- Streaming implementation
+
+---
 ## v0.6.0 - 2026-07-07
 
 ### Added

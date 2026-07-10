@@ -29,6 +29,12 @@ func (s *Service) Chat(
 
 	streamingProvider, ok := s.manager.Provider().(ai.StreamingProvider)
 
+	/* if ok {
+		println("STREAMING ENABLED")
+	} else {
+		println("STREAMING DISABLED")
+	} */
+
 	if ok {
 
 		stream, err := streamingProvider.Stream(
