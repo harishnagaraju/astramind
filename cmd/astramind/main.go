@@ -33,18 +33,15 @@ func main() {
 		return
 	}
 
-	apiKey := os.Getenv("OPENAI_API_KEY")
-	/*
-			if apiKey == "your_api_key_here" {
-		   	    fmt.Println("Please update OPENAI_API_KEY in .env")
-			    return
-			}
-	*/
+	providerName := strings.TrimSpace(
+		os.Getenv("AI_PROVIDER"),
+	)
 
+	apiKey := os.Getenv("OPENAI_API_KEY")
 	model := os.Getenv("OPENAI_MODEL")
 	baseURL := os.Getenv("OPENAI_BASE_URL")
 
-	if apiKey == "" {
+	if providerName != "ollama" && apiKey == "" {
 		fmt.Println("No OpenAI API key configured.")
 		fmt.Println("Using Mock AI Provider.")
 		return
@@ -58,10 +55,15 @@ func main() {
 		baseURL = "https://api.openai.com/v1"
 	}
 
+	if providerName == "" {
+		providerName = "openai"
+	}
+
 	providerConfig := ai.ProviderConfig{
-		APIKey:  apiKey,
-		Model:   model,
-		BaseURL: baseURL,
+		Provider: providerName,
+		APIKey:   apiKey,
+		Model:    model,
+		BaseURL:  baseURL,
 	}
 
 	provider := ai.NewProvider(

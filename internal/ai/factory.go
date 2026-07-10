@@ -18,11 +18,24 @@ func NewProvider(cfg ProviderConfig) Provider {
 		}
 
 	case "ollama":
+
+		baseURL := strings.TrimSpace(cfg.BaseURL)
+		if baseURL == "" {
+			baseURL = "http://localhost:11434"
+		}
+
+		model := strings.TrimSpace(cfg.Model)
+		if model == "" {
+			model = "llama3"
+		}
+
 		return &OllamaProvider{
-			baseURL: "http://localhost:11434",
+			baseURL: baseURL,
+			model:   model,
 		}
 	}
 
+	// Backward-compatible fallback behavior.
 	if strings.TrimSpace(cfg.APIKey) == "" {
 		return &MockProvider{}
 	}
