@@ -23,8 +23,16 @@ func (m *Manager) SaveDocument(doc *Document) error {
 	return m.storage.SaveDocument(doc)
 }
 
+func (m *Manager) SaveChunks(chunks []Chunk) error {
+	return m.storage.SaveChunks(chunks)
+}
+
 func (m *Manager) LoadDocument(id string) (*Document, error) {
 	return m.storage.LoadDocument(id)
+}
+
+func (m *Manager) LoadChunks(documentID string) ([]Chunk, error) {
+	return m.storage.LoadChunks(documentID)
 }
 
 func (m *Manager) DeleteDocument(id string) error {
@@ -65,9 +73,20 @@ func (m *Manager) ImportDocument(path string) (*Document, error) {
 		Content:    string(data),
 		CreatedAt:  time.Now(),
 		ModifiedAt: info.ModTime(),
-		ChunkCount: 0,
 	}
 
+	// Split the document into chunks.
+	chunks := ChunkDocument(doc, DefaultChunkSize, DefaultOverlap)
+
+	// Record the number of generated chunks.
+	doc.ChunkCount = len(chunks)
+
+	// Persist the chunks.
+	if err := m.SaveChunks(chunks); err != nil {
+		return nil, err
+	}
+
+	// Persist the document.
 	if err := m.SaveDocument(doc); err != nil {
 		return nil, err
 	}

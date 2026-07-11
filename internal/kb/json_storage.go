@@ -103,14 +103,55 @@ func (s *JSONStorage) ListDocuments() ([]Document, error) {
 }
 
 func (s *JSONStorage) SaveChunks(chunks []Chunk) error {
-	return nil
+	if len(chunks) == 0 {
+		return nil
+	}
+
+	if err := os.MkdirAll(s.chunksDir(), 0755); err != nil {
+		return err
+	}
+
+	data, err := json.MarshalIndent(chunks, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	documentID := chunks[0].DocumentID
+
+	return os.WriteFile(
+		s.chunkPath(documentID),
+		data,
+		0644,
+	)
 }
 
 func (s *JSONStorage) LoadChunks(documentID string) ([]Chunk, error) {
-	return nil, nil
+	data, err := os.ReadFile(s.chunkPath(documentID))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return []Chunk{}, nil
+		}
+		return nil, err
+	}
+
+	var chunks []Chunk
+
+	if err := json.Unmarshal(data, &chunks); err != nil {
+		return nil, err
+	}
+
+	return chunks, nil
 }
 
 func (s *JSONStorage) DeleteChunks(documentID string) error {
+	err := os.Remove(s.chunkPath(documentID))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+
 	return nil
 }
 
@@ -120,4 +161,11 @@ func (s *JSONStorage) documentsDir() string {
 
 func (s *JSONStorage) chunksDir() string {
 	return filepath.Join(s.directory, "chunks")
+}
+
+func (s *JSONStorage) chunkPath(documentID string) string {
+	return filepath.Join(
+		s.chunksDir(),
+		documentID+".json",
+	)
 }
