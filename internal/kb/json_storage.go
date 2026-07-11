@@ -20,11 +20,14 @@ func NewJSONStorage(directory string) *JSONStorage {
 }
 
 func (s *JSONStorage) documentPath(id string) string {
-	return filepath.Join(s.directory, id+".json")
+	return filepath.Join(
+		s.documentsDir(),
+		id+".json",
+	)
 }
 
 func (s *JSONStorage) SaveDocument(doc *Document) error {
-	if err := os.MkdirAll(s.directory, 0755); err != nil {
+	if err := os.MkdirAll(s.documentsDir(), 0755); err != nil {
 		return err
 	}
 
@@ -97,4 +100,24 @@ func (s *JSONStorage) ListDocuments() ([]Document, error) {
 	}
 
 	return documents, nil
+}
+
+func (s *JSONStorage) SaveChunks(chunks []Chunk) error {
+	return nil
+}
+
+func (s *JSONStorage) LoadChunks(documentID string) ([]Chunk, error) {
+	return nil, nil
+}
+
+func (s *JSONStorage) DeleteChunks(documentID string) error {
+	return nil
+}
+
+func (s *JSONStorage) documentsDir() string {
+	return filepath.Join(s.directory, "documents")
+}
+
+func (s *JSONStorage) chunksDir() string {
+	return filepath.Join(s.directory, "chunks")
 }
