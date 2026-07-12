@@ -1,6 +1,7 @@
 package chat
 
 import "strings"
+import "fmt"
 
 // HandleKnowledgeCommand processes /kb commands.
 func (s *Service) HandleKnowledgeCommand(input string) (bool, error) {
@@ -24,6 +25,9 @@ func (s *Service) HandleKnowledgeCommand(input string) (bool, error) {
 	case "import":
 		return true, s.handleKBImport(fields)
 
+	case "list":
+		return true, s.handleKBList()
+
 	default:
 		return true, ErrInvalidCommand
 	}
@@ -45,6 +49,32 @@ func (s *Service) handleKBImport(args []string) error {
 	}
 
 	println("Imported:", doc.Name)
+
+	return nil
+}
+
+func (s *Service) handleKBList() error {
+
+	documents, err := s.deps.KnowledgeBase.ListKnowledge()
+	if err != nil {
+		return err
+	}
+
+	if len(documents) == 0 {
+		fmt.Println("Knowledge base is empty.")
+		return nil
+	}
+
+	fmt.Println("Knowledge Base Documents")
+	fmt.Println("------------------------")
+
+	for _, doc := range documents {
+		fmt.Printf(
+			"%s (%d chunks)\n",
+			doc.Name,
+			doc.ChunkCount,
+		)
+	}
 
 	return nil
 }
