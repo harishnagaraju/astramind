@@ -25,7 +25,7 @@ func (s *Service) HandleKnowledgeCommand(input string) (bool, error) {
 		return true, s.handleKBImport(fields)
 
 	default:
-		return true, nil
+		return true, ErrInvalidCommand
 	}
 }
 
@@ -39,7 +39,12 @@ func (s *Service) handleKBImport(args []string) error {
 		return ErrKnowledgeBaseUnavailable
 	}
 
-	_, err := s.deps.KnowledgeBase.ImportDocument(args[2])
+	doc, err := s.deps.KnowledgeBase.ImportDocument(args[2])
+	if err != nil {
+		return err
+	}
 
-	return err
+	println("Imported:", doc.Name)
+
+	return nil
 }

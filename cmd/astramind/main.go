@@ -6,6 +6,7 @@ import "github.com/harishnagaraju/astramind/internal/models"
 import "github.com/harishnagaraju/astramind/internal/ai"
 import "github.com/harishnagaraju/astramind/internal/chat"
 import "github.com/harishnagaraju/astramind/internal/renderer"
+import "github.com/harishnagaraju/astramind/internal/kb"
 
 import (
 	"bufio"
@@ -74,9 +75,13 @@ func main() {
 		provider,
 	)
 
+	kbStorage := kb.NewJSONStorage("data")
+	kbManager := kb.NewManager(kbStorage)
+
 	service := chat.NewService(
 		chat.Dependencies{
 			ProviderManager: manager,
+			KnowledgeBase:   kbManager,
 		},
 	)
 
@@ -111,6 +116,16 @@ func main() {
 		}
 
 		userInput = strings.TrimSpace(userInput)
+
+		handled, err := service.HandleKnowledgeCommand(userInput)
+		if err != nil {
+			fmt.Println("Error:", err)
+			continue
+		}
+
+		if handled {
+			continue
+		}
 
 		if userInput == "" {
 			continue
@@ -353,6 +368,10 @@ func main() {
 			fmt.Println("/sessions  - List sessions")
 			fmt.Println("/search <text> - Search current conversation")
 			fmt.Println("/searchall <text> - Search all conversation")
+			fmt.Println()
+			fmt.Println("Knowledge Base")
+			fmt.Println("/kb import <file> - Import a text or markdown document")
+
 			fmt.Println("/new <name> - Create session")
 			fmt.Println("/load <name> - Load session")
 			fmt.Println("/delete <name> - Delete session")

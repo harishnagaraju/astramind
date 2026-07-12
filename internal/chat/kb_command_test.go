@@ -53,3 +53,18 @@ func TestHandleKnowledgeCommandRoot(t *testing.T) {
 		t.Fatal("expected command to be handled")
 	}
 }
+
+func TestHandleKnowledgeCommandInvalidSubcommand(t *testing.T) {
+
+	service := &Service{}
+
+	handled, err := service.HandleKnowledgeCommand("/kb foo")
+
+	if !handled {
+		t.Fatal("expected command to be handled")
+	}
+
+	if err == nil {
+		t.Fatal("expected invalid command error")
+	}
+}
