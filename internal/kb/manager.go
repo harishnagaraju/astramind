@@ -39,6 +39,51 @@ func (m *Manager) DeleteDocument(id string) error {
 	return m.storage.DeleteDocument(id)
 }
 
+func (m *Manager) DeleteChunks(documentID string) error {
+	return m.storage.DeleteChunks(documentID)
+}
+
+// ListKnowledge returns all knowledge base documents.
+func (m *Manager) ListKnowledge() ([]Document, error) {
+	return m.ListDocuments()
+}
+
+// GetKnowledge returns a knowledge base document by ID.
+func (m *Manager) GetKnowledge(documentID string) (*Document, error) {
+	return m.LoadDocument(documentID)
+}
+
+// RemoveKnowledge removes a document and its chunks.
+func (m *Manager) RemoveKnowledge(documentID string) error {
+
+	if err := m.DeleteChunks(documentID); err != nil {
+		return err
+	}
+
+	if err := m.DeleteDocument(documentID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ClearKnowledge removes every knowledge base document.
+func (m *Manager) ClearKnowledge() error {
+
+	documents, err := m.ListKnowledge()
+	if err != nil {
+		return err
+	}
+
+	for _, doc := range documents {
+		if err := m.RemoveKnowledge(doc.ID); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *Manager) ListDocuments() ([]Document, error) {
 	return m.storage.ListDocuments()
 }
