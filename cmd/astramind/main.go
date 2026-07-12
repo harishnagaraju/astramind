@@ -74,8 +74,10 @@ func main() {
 		provider,
 	)
 
-	chatService := chat.NewService(
-		manager,
+	service := chat.NewService(
+		chat.Dependencies{
+			ProviderManager: manager,
+		},
 	)
 
 	reader := bufio.NewReader(os.Stdin)
@@ -604,7 +606,7 @@ func main() {
 			Content: userInput,
 		})
 
-		reply, streamed, err := chatService.Chat(
+		reply, streamed, err := service.Chat(
 			context.Background(),
 			os.Stdout,
 			ai.ChatRequest{

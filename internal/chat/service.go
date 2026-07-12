@@ -5,19 +5,28 @@ import (
 	"io"
 
 	"github.com/harishnagaraju/astramind/internal/ai"
+	"github.com/harishnagaraju/astramind/internal/kb"
 	"github.com/harishnagaraju/astramind/internal/renderer"
 )
 
+// Dependencies contains all services used by the chat package.
+// New subsystem dependencies should be added here instead of
+// directly expanding the Service struct.
+type Dependencies struct {
+	ProviderManager *ai.ProviderManager
+	KnowledgeBase   *kb.Manager
+}
+
 type Service struct {
-	manager *ai.ProviderManager
+	deps Dependencies
 }
 
 func NewService(
-	manager *ai.ProviderManager,
+	deps Dependencies,
 ) *Service {
 
 	return &Service{
-		manager: manager,
+		deps: deps,
 	}
 }
 
@@ -27,7 +36,7 @@ func (s *Service) Chat(
 	request ai.ChatRequest,
 ) (string, bool, error) {
 
-	streamingProvider, ok := s.manager.Provider().(ai.StreamingProvider)
+	streamingProvider, ok := s.deps.ProviderManager.Provider().(ai.StreamingProvider)
 
 	/* if ok {
 		println("STREAMING ENABLED")
@@ -55,7 +64,7 @@ func (s *Service) Chat(
 		return r.Text(), true, nil
 	}
 
-	reply, err := s.manager.Chat(request)
+	reply, err := s.deps.ProviderManager.Chat(request)
 
 	return reply, false, err
 }

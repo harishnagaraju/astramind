@@ -14,7 +14,11 @@ func TestServiceStreaming(t *testing.T) {
 
 	manager := ai.NewProviderManager(provider)
 
-	service := NewService(manager)
+	service := NewService(
+		Dependencies{
+			ProviderManager: manager,
+		},
+	)
 
 	var output bytes.Buffer
 
