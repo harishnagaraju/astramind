@@ -138,3 +138,10 @@ func (m *Manager) ImportDocument(path string) (*Document, error) {
 
 	return doc, nil
 }
+
+func (m *Manager) Search(query string) ([]SearchResult, error) {
+
+	repository := NewRepository(m)
+
+	return repository.Search(query)
+}

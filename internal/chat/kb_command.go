@@ -28,6 +28,9 @@ func (s *Service) HandleKnowledgeCommand(input string) (bool, error) {
 	case "list":
 		return true, s.handleKBList()
 
+	case "search":
+		return true, s.handleKBSearch(fields)
+
 	default:
 		return true, ErrInvalidCommand
 	}
@@ -73,6 +76,38 @@ func (s *Service) handleKBList() error {
 			"%s (%d chunks)\n",
 			doc.Name,
 			doc.ChunkCount,
+		)
+	}
+
+	return nil
+}
+
+func (s *Service) handleKBSearch(args []string) error {
+
+	if len(args) < 3 {
+		return ErrInvalidCommand
+	}
+
+	query := strings.Join(args[2:], " ")
+
+	results, err := s.deps.KnowledgeBase.Search(query)
+	if err != nil {
+		return err
+	}
+
+	if len(results) == 0 {
+		fmt.Println("No matching knowledge found.")
+		return nil
+	}
+
+	fmt.Println("Knowledge Search Results")
+	fmt.Println("------------------------")
+
+	for _, chunk := range results {
+		fmt.Printf(
+			"[%s]\n%s\n\n",
+			chunk.DocumentID,
+			chunk.Content,
 		)
 	}
 
