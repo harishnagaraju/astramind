@@ -76,7 +76,7 @@ func (s *JSONStorage) DeleteDocument(id string) error {
 func (s *JSONStorage) ListDocuments() ([]Document, error) {
 	var documents []Document
 
-	files, err := os.ReadDir(s.directory)
+	files, err := os.ReadDir(s.documentsDir())
 	if err != nil {
 		if os.IsNotExist(err) {
 			return documents, nil
@@ -86,6 +86,10 @@ func (s *JSONStorage) ListDocuments() ([]Document, error) {
 
 	for _, file := range files {
 		if file.IsDir() {
+			continue
+		}
+
+		if filepath.Ext(file.Name()) != ".json" {
 			continue
 		}
 
