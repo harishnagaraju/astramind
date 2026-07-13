@@ -34,6 +34,9 @@ func (s *Service) HandleKnowledgeCommand(input string) (bool, error) {
 	case "remove":
 		return true, s.handleKBRemove(fields)
 
+	case "clear":
+		return true, s.handleKBClear()
+
 	default:
 		return true, ErrInvalidCommand
 	}
@@ -127,6 +130,17 @@ func (s *Service) handleKBRemove(args []string) error {
 	}
 
 	fmt.Println("Removed:", documentID)
+
+	return nil
+}
+
+func (s *Service) handleKBClear() error {
+
+	if err := s.deps.KnowledgeBase.ClearKnowledge(); err != nil {
+		return err
+	}
+
+	fmt.Println("Knowledge base cleared.")
 
 	return nil
 }
