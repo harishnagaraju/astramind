@@ -9,7 +9,7 @@ Created and maintained by Harish Nagaraju.
 ![Go](https://img.shields.io/badge/Go-1.24+-blue)
 ![License](https://img.shields.io/badge/License-Apache%202.0-green)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
-Current Stable Release: **v0.7.0**
+Current Stable Release: **v0.8.0**
 
 AstraMind is a modular, AI-powered command-line assistant built in Go that provides a clean, scalable foundation for developing intelligent applications using Large Language Models (LLMs). Designed with a production-ready architecture, it supports multiple AI providers, conversation and session management, persistent chat history, export capabilities, automated testing, and a modern CI/CD pipeline.
 
@@ -20,6 +20,16 @@ Built with simplicity, maintainability, and extensibility in mind, AstraMind dem
 AstraMind aims to become a flexible AI platform that combines conversational intelligence, knowledge retrieval, automation, and decision support into a single extensible ecosystem. The project emphasizes simplicity, performance, and scalability while leveraging the strengths of the Go programming language.
 
 # Current Features
+
+## Knowledge Base
+
+- Import text and Markdown documents
+- Automatic document chunking
+- Persistent JSON document storage
+- Persistent chunk storage
+- Keyword search
+- Knowledge Base statistics
+- Knowledge Base management
 
 ## Multiple AI Providers
 - OpenAI
@@ -63,6 +73,14 @@ AstraMind aims to become a flexible AI platform that combines conversational int
 - Search across all saved sessions
 - Case-insensitive search
 - Session-grouped search results
+
+## Knowledge Base Commands
+- `/kb import <file>`   Import a text or markdown document
+- `/kb list`            List imported documents
+- `/kb search <text>`   Search the knowledge base
+- `/kb remove <id>`     Remove a document
+- `/kb clear`           Remove all documents
+- `/kb stats`           Show knowledge base statistics
 
 ## Session Commands
 - `/sessions`
@@ -202,7 +220,7 @@ The project includes:
 ## Available Commands
    
 | Command        	|            Description            |
-|-----------------------|-----------------------------------|
+|-------------------|-----------------------------------|
 | /help          	| Show help                         |
 | /about         	| About AstraMind                   |
 | /history       	| Conversation history              |
@@ -217,7 +235,55 @@ The project includes:
 | /export md     	| Export current session as Markdown|
 | /provider      	| Show AI provider                  |
 | /search <text> 	| Search current converstation      |
-| /searchall <text> 	| Search across all sessions        |
+| /searchall <text>	| Search across all sessions        |
+
+## Knowledge Base
+
+AstraMind includes a built-in Knowledge Base that allows users to import local
+text and Markdown documents for later retrieval.
+
+Imported documents are automatically:
+
+- assigned a unique identifier
+- split into chunks
+- stored on disk
+- indexed for keyword search
+
+The Knowledge Base is designed as the foundation for Retrieval-Augmented
+Generation (RAG) in future releases.
+
+### Example
+
+/kb import notes.txt
+
+Imported: notes.txt
+
+/kb list
+
+Knowledge Base Documents
+------------------------
+8f3a2d...
+
+Name : notes.txt
+Chunks : 1
+
+/kb search architecture
+
+Found 3 matching chunks
+
+/kb stats
+
+Documents : 1
+Chunks : 1
+
+/kb remove 8f3a2d...
+
+Removed
+
+/kb clear
+
+Knowledge base cleared.
+
 
 ## Streaming Responses
 AstraMind supports real-time streaming responses from compatible AI providers.
@@ -247,6 +313,31 @@ data/
 ```
 
 # Release Management
+
+## v0.8.0
+**Knowledge Base**
+
+- Built-in Knowledge Base framework.
+- Document import for text and Markdown files.
+- Automatic document chunking with configurable chunk size and overlap.
+- Persistent document storage using JSON.
+- Persistent chunk storage.
+- Repository layer for chunk management.
+- Keyword-based Knowledge Base search.
+- Prompt builder for Retrieval-Augmented Generation (RAG).
+- Knowledge Base management API.
+- Knowledge Base statistics.
+- CLI commands:
+  - `/kb import`
+  - `/kb list`
+  - `/kb search`
+  - `/kb remove`
+  - `/kb clear`
+  - `/kb stats`
+- Improved storage architecture for future database backends.
+- Comprehensive unit tests for Knowledge Base components.
+- End-to-end CLI validation for Knowledge Base workflows.
+- Foundation for future RAG integration.
 
 ## v0.7.0
 **Native Ollama Integration**

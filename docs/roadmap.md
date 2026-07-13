@@ -179,14 +179,20 @@ Enterprise integrations
 
 ## v0.8.0 - Knowledge Base
 
-- /kb command - add
-- Document storage
-- Document search
-- Question answering
-- Document indexing
-- Knowledge base management
-- Semantic search
-- Question answering
+- /kb import
+- /kb list
+- /kb search
+- /kb remove
+- /kb clear
+- /kb stats
+- Text and Markdown document import
+- Automatic document chunking
+- Persistent document storage
+- Persistent chunk storage
+- Keyword search
+- Prompt builder for future RAG
+- Knowledge Base management
+- Repository abstraction
 
 ---
 
@@ -320,7 +326,19 @@ Enterprise integrations
 - ✅ /export md
 
 ---
+## Knowledge Base Commands
 
+- ✅ /kb import
+- ✅ /kb list
+- ✅ /kb search
+- ✅ /kb remove
+- ✅ /kb clear
+- ✅ /kb stats
+- ✅ Document chunking
+- ✅ Repository
+- ✅ Prompt builder
+
+---
 ## Developer Experience
 
 - ✅ GitHub Actions CI

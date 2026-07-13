@@ -1,0 +1,19 @@
+# Knowledge Base Integration Test
+
+/kb clear
+
+/kb import tests/integration/data/notes1.txt
+
+/kb import tests/integration/data/notes2.txt
+
+/kb list
+
+/kb stats
+
+/kb search Knowledge
+
+/kb clear
+
+/kb list
+
+exit

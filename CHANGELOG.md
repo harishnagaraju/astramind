@@ -4,7 +4,79 @@ All notable changes to AstraMind are documented in this file.
 
 The project follows [Semantic Versioning](https://semver.org/).
 ---
-## [v0.7.0] - 2026-07-10
+---
+## [v0.8.0] - 2026-07-13
+
+### Highlights
+
+This release introduces AstraMind's first Knowledge Base implementation, providing document import, persistent storage, automatic chunking, keyword search, knowledge management commands, and the architectural foundation for Retrieval-Augmented Generation (RAG).
+
+### Added
+
+#### Knowledge Base
+
+- Built-in Knowledge Base framework
+- Text document import
+- Markdown document import
+- Automatic document chunking
+- Persistent document storage
+- Persistent chunk storage
+- Repository abstraction
+- Keyword search engine
+- Prompt builder for future RAG support
+- Knowledge Base statistics
+- Knowledge Base management API
+
+#### CLI Commands
+
+- `/kb import <file>`
+- `/kb list`
+- `/kb search <text>`
+- `/kb remove <id>`
+- `/kb clear`
+- `/kb stats`
+
+#### Testing
+
+- Knowledge Base unit tests
+- Repository tests
+- Search tests
+- Prompt builder tests
+- Management tests
+- CLI command tests
+- End-to-end Knowledge Base workflow validation
+
+### Improved
+
+- Chat service architecture
+- Dependency injection for future extensibility
+- Storage abstraction
+- Repository design
+- Internal package organization
+- Command dispatch architecture
+- Overall extensibility for future RAG integration
+
+### Tested
+
+- go fmt
+- go vet
+- go build
+- go test -v ./...
+
+### Verified
+
+- Document import
+- Persistent Knowledge Base storage
+- Chunk generation
+- Keyword search
+- Knowledge Base statistics
+- Document removal
+- Knowledge Base clearing
+- Complete `/kb` command workflow
+
+---
+
+## [v0.7.0] 
 
 ### Added
 
@@ -49,7 +121,7 @@ The project follows [Semantic Versioning](https://semver.org/).
 - Streaming implementation
 
 ---
-## v0.6.0 - 2026-07-07
+## v0.6.0 
 
 ### Added
 
@@ -77,7 +149,7 @@ The project follows [Semantic Versioning](https://semver.org/).
 - Added integration tests for multi-session search.
 
 ---
-# v0.5.0 - 2026-07-06
+# v0.5.0 
 
 ## Highlights
 
@@ -157,7 +229,7 @@ Validated successfully with:
 
 ---
 
-# v0.4.1 - 2026-07-01
+# v0.4.1 
 
 ## Highlights
 

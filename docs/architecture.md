@@ -52,6 +52,26 @@ The application is designed around extensible provider abstractions, making it e
 ```
 
 ---
+CLI
+ │
+ ▼
+Command Dispatcher
+ │
+ ├───────────────┐
+ │               │
+ ▼               ▼
+Chat Service   Knowledge Base
+ │               │
+ ▼               ▼
+Provider     KB Manager
+Manager         │
+ │              ▼
+ ▼         Repository
+AI              │
+                ▼
+          JSON Storage
+
+---
 
 # Streaming Architecture
 
@@ -125,6 +145,17 @@ astramind/
 ├── go.mod
 └── go.sum
 ```
+internal/
+    kb/
+        chunk.go
+        manager.go
+        repository.go
+        search.go
+        prompt.go
+        storage.go
+        json_storage.go
+        stats.go
+
 CLI
  │
  ├── Commands
@@ -164,6 +195,17 @@ Renderer
 ---
 
 # Core Components
+
+## Knowledge Base
+
+Responsible for:
+
+- Document import
+- Chunk generation
+- Repository management
+- Keyword search
+- Prompt generation
+- Knowledge Base statistics
 
 ## CLI Layer
 
@@ -220,6 +262,9 @@ Future providers:
 Responsible for:
 
 - Conversation persistence
+- Knowledge Base storage
+- Chunk storage
+- Repository abstraction
 - Session management
 - Export
 - History loading
@@ -285,6 +330,16 @@ Using `httptest.Server`:
 
 # Current Capabilities
 
+## Knowledge Base
+
+- Document import
+- Automatic chunking
+- Persistent storage
+- Chunk repository
+- Keyword search
+- Prompt builder
+- Knowledge Base management
+
 ## AI
 
 - Multi-provider architecture
@@ -345,11 +400,19 @@ Local Models
 
 Knowledge Base
 
-- Document storage
-- Document indexing
+- Document import
+- Persistent storage
+- Chunk repository
+- Keyword search
+- Prompt builder
+- Knowledge Base management
+
+Future
+
+- Embeddings
 - Semantic search
-- Question answering
-- Retrieval-Augmented Generation (RAG)
+- Vector database
+- Retrieval-Augmented Generation
 
 ---
 

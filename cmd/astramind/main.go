@@ -85,6 +85,17 @@ func main() {
 		},
 	)
 
+	// Script execution mode.
+	if len(os.Args) == 3 && os.Args[1] == "--script" {
+
+		if err := service.ExecuteScript(os.Args[2]); err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		}
+
+		return
+	}
+
 	reader := bufio.NewReader(os.Stdin)
 
 	conversation, err := storage.LoadHistory(activeSession)
