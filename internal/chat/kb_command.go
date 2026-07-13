@@ -37,6 +37,9 @@ func (s *Service) HandleKnowledgeCommand(input string) (bool, error) {
 	case "clear":
 		return true, s.handleKBClear()
 
+	case "stats":
+		return true, s.handleKBStats()
+
 	default:
 		return true, ErrInvalidCommand
 	}
@@ -141,6 +144,21 @@ func (s *Service) handleKBClear() error {
 	}
 
 	fmt.Println("Knowledge base cleared.")
+
+	return nil
+}
+
+func (s *Service) handleKBStats() error {
+
+	stats, err := s.deps.KnowledgeBase.Stats()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Knowledge Base Statistics")
+	fmt.Println("-------------------------")
+	fmt.Printf("Documents : %d\n", stats.DocumentCount)
+	fmt.Printf("Chunks    : %d\n", stats.ChunkCount)
 
 	return nil
 }

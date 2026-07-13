@@ -145,3 +145,22 @@ func (m *Manager) Search(query string) ([]SearchResult, error) {
 
 	return repository.Search(query)
 }
+
+// Stats returns knowledge base statistics.
+func (m *Manager) Stats() (*Stats, error) {
+
+	documents, err := m.ListKnowledge()
+	if err != nil {
+		return nil, err
+	}
+
+	stats := &Stats{
+		DocumentCount: len(documents),
+	}
+
+	for _, doc := range documents {
+		stats.ChunkCount += doc.ChunkCount
+	}
+
+	return stats, nil
+}

@@ -375,6 +375,7 @@ func main() {
 			fmt.Println("/kb search <text> - Search the knowledge base")
 			fmt.Println("/kb remove <id>   - Remove a document")
 			fmt.Println("/kb clear         - Remove all documents")
+			fmt.Println("/kb stats         - Show knowledge base statistics")
 			fmt.Println()
 			fmt.Println("/new <name> - Create session")
 			fmt.Println("/load <name> - Load session")

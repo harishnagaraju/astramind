@@ -1,6 +1,25 @@
 package chat
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/harishnagaraju/astramind/internal/ai"
+	"github.com/harishnagaraju/astramind/internal/kb"
+)
+
+func newTestService(t *testing.T) *Service {
+	t.Helper()
+
+	providerManager := ai.NewProviderManager(&ai.MockProvider{})
+
+	storage := kb.NewJSONStorage(t.TempDir())
+	kbManager := kb.NewManager(storage)
+
+	return NewService(Dependencies{
+		ProviderManager: providerManager,
+		KnowledgeBase:   kbManager,
+	})
+}
 
 func TestHandleKnowledgeCommand(t *testing.T) {
 	service := &Service{}
@@ -66,5 +85,20 @@ func TestHandleKnowledgeCommandInvalidSubcommand(t *testing.T) {
 
 	if err == nil {
 		t.Fatal("expected invalid command error")
+	}
+}
+
+func TestHandleKBStats(t *testing.T) {
+
+	service := newTestService(t)
+
+	handled, err := service.HandleKnowledgeCommand("/kb stats")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !handled {
+		t.Fatal("expected command to be handled")
 	}
 }
