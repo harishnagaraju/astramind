@@ -31,6 +31,9 @@ func (s *Service) HandleKnowledgeCommand(input string) (bool, error) {
 	case "search":
 		return true, s.handleKBSearch(fields)
 
+	case "remove":
+		return true, s.handleKBRemove(fields)
+
 	default:
 		return true, ErrInvalidCommand
 	}
@@ -72,13 +75,10 @@ func (s *Service) handleKBList() error {
 	fmt.Println("------------------------")
 
 	for _, doc := range documents {
-		fmt.Printf(
-			"%s (%d chunks)\n",
-			doc.Name,
-			doc.ChunkCount,
-		)
+		fmt.Printf(" %s\n", doc.ID)
+		fmt.Printf(" Name   : %s\n", doc.Name)
+		fmt.Printf(" Chunks : %d\n\n", doc.ChunkCount)
 	}
-
 	return nil
 }
 
@@ -110,6 +110,23 @@ func (s *Service) handleKBSearch(args []string) error {
 			chunk.Content,
 		)
 	}
+
+	return nil
+}
+
+func (s *Service) handleKBRemove(args []string) error {
+
+	if len(args) != 3 {
+		return ErrInvalidCommand
+	}
+
+	documentID := args[2]
+
+	if err := s.deps.KnowledgeBase.RemoveKnowledge(documentID); err != nil {
+		return err
+	}
+
+	fmt.Println("Removed:", documentID)
 
 	return nil
 }

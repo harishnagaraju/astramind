@@ -373,6 +373,7 @@ func main() {
 			fmt.Println("/kb import <file> - Import a text or markdown document")
 			fmt.Println("/kb list          - List imported documents")
 			fmt.Println("/kb search <text> - Search the knowledge base")
+			fmt.Println("/kb remove <id>   - Remove a document")
 
 			fmt.Println("/new <name> - Create session")
 			fmt.Println("/load <name> - Load session")
