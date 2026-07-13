@@ -188,24 +188,97 @@ Run the model
 ollama run gemma3:1b
 ```
 
-## Testing
+# Testing
 
-Run the complete test suite:
+AstraMind includes a comprehensive automated testing framework covering unit, integration, and regression testing.
+
+## Unit Tests
+
+Run the complete unit test suite:
 
 ```bash
 go test -v ./...
 ```
 
-The project includes:
+The unit test suite includes:
 
-- Unit tests
-- Provider integration tests
-- Streaming integration tests
-- HTTP error tests
-- Invalid JSON tests
-- Connection failure tests
-- Mock provider tests
-- Regression tests
+* Unit tests
+* Provider integration tests
+* Streaming integration tests
+* HTTP error handling tests
+* Invalid JSON handling tests
+* Connection failure tests
+* Mock provider tests
+* Regression tests
+
+## Integration Tests
+
+Run the complete integration test suite.
+
+### Windows
+
+```cmd
+tests\integration\run_all.bat
+```
+
+### Linux / macOS
+
+```bash
+./tests/integration/run_all.sh
+```
+
+The integration suite automatically performs:
+
+* Code formatting validation
+* Static analysis (`go vet`)
+* Project build verification
+* Complete unit test execution
+* End-to-end Knowledge Base workflow testing
+
+## Knowledge Base Integration Test
+
+Run only the Knowledge Base integration tests.
+
+### Windows
+
+```cmd
+tests\integration\run_kb.bat
+```
+
+### Linux / macOS
+
+```bash
+./tests/integration/run_kb.sh
+```
+
+The Knowledge Base integration test validates the complete workflow:
+
+* Import documents
+* List documents
+* Display Knowledge Base statistics
+* Search the Knowledge Base
+* Remove documents
+* Clear the Knowledge Base
+
+## Script Execution
+
+AstraMind supports automated command execution using script files.
+
+Example:
+
+### Windows
+
+```cmd
+astramind.exe --script tests\integration\commands\kb.txt
+```
+
+### Linux / macOS
+
+```bash
+./astramind --script tests/integration/commands/kb.txt
+```
+
+This capability provides a reusable foundation for automated integration testing, continuous integration (CI), and future regression test suites.
 
 ## Supported AI Providers
 
