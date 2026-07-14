@@ -16,18 +16,21 @@ import (
 
 func (a *App) runInteractive() error {
 
+	var err error
 	reader := bufio.NewReader(os.Stdin)
 
-	conversation, err := storage.LoadHistory(a.activeSession)
+	a.runtime.Conversation, err = storage.LoadHistory(
+		a.activeSession,
+	)
 
 	if err != nil {
 		fmt.Println("Warning: could not load history:", err)
-		conversation = []models.Message{}
+		a.runtime.Conversation = []models.Message{}
 	}
 
 	fmt.Printf(
 		"Loaded %d messages from history.\n",
-		len(conversation),
+		len(a.runtime.Conversation),
 	)
 
 	fmt.Println("===================================")
@@ -112,7 +115,7 @@ func (a *App) runInteractive() error {
 
 			a.activeSession = sessionName
 
-			conversation = messages
+			a.runtime.Conversation = messages
 
 			fmt.Printf(
 				"Loaded session: %s\n",
@@ -159,7 +162,7 @@ func (a *App) runInteractive() error {
 
 			a.activeSession = sessionName
 
-			conversation = []models.Message{}
+			a.runtime.Conversation = []models.Message{}
 
 			fmt.Printf(
 				"Created and switched to session: %s\n",
@@ -241,7 +244,7 @@ func (a *App) runInteractive() error {
 				continue
 			}
 
-			results := storage.SearchMessages(conversation, query)
+			results := storage.SearchMessages(a.runtime.Conversation, query)
 
 			if len(results) == 0 {
 				fmt.Println("No matches found.")
@@ -283,14 +286,14 @@ func (a *App) runInteractive() error {
 		switch userInput {
 
 		case "exit", "quit":
-			storage.SaveHistory(a.activeSession, conversation)
+			storage.SaveHistory(a.activeSession, a.runtime.Conversation)
 			fmt.Println("Goodbye!")
 			return nil
 
 		case "/clear":
-			conversation = []models.Message{}
+			a.runtime.Conversation = []models.Message{}
 
-			err := storage.SaveHistory(a.activeSession, conversation)
+			err := storage.SaveHistory(a.activeSession, a.runtime.Conversation)
 
 			if err != nil {
 				fmt.Println("Error clearing history:", err)
@@ -301,7 +304,7 @@ func (a *App) runInteractive() error {
 
 		case "/export", "/export txt", "/export md":
 
-			if len(conversation) == 0 {
+			if len(a.runtime.Conversation) == 0 {
 				fmt.Println("Nothing to export.")
 				continue
 			}
@@ -312,7 +315,7 @@ func (a *App) runInteractive() error {
 
 				err := storage.ExportSession(
 					a.activeSession,
-					conversation,
+					a.runtime.Conversation,
 				)
 
 				if err != nil {
@@ -329,7 +332,7 @@ func (a *App) runInteractive() error {
 
 				err := storage.ExportMarkdown(
 					a.activeSession,
-					conversation,
+					a.runtime.Conversation,
 				)
 
 				if err != nil {
@@ -380,14 +383,14 @@ func (a *App) runInteractive() error {
 
 		case "/history":
 
-			if len(conversation) == 0 {
+			if len(a.runtime.Conversation) == 0 {
 				fmt.Println("No conversation history.")
 				continue
 			}
 
 			fmt.Println("\nConversation History:")
 
-			for i, msg := range conversation {
+			for i, msg := range a.runtime.Conversation {
 				fmt.Printf(
 					"%d. [%s] %s\n",
 					i+1,
@@ -403,7 +406,7 @@ func (a *App) runInteractive() error {
 			userCount := 0
 			assistantCount := 0
 
-			for _, msg := range conversation {
+			for _, msg := range a.runtime.Conversation {
 
 				switch msg.Role {
 
@@ -430,7 +433,7 @@ func (a *App) runInteractive() error {
 
 			fmt.Printf(
 				"Memory Entries: %d\n",
-				len(conversation),
+				len(a.runtime.Conversation),
 			)
 
 			fmt.Printf(
@@ -443,7 +446,7 @@ func (a *App) runInteractive() error {
 
 		// Create temporary conversation
 		// Do NOT save until API succeeds.
-		tempConversation := append(conversation, models.Message{
+		updatedConversation := append(a.runtime.Conversation, models.Message{
 			Role:    "user",
 			Content: userInput,
 		})
@@ -454,7 +457,7 @@ func (a *App) runInteractive() error {
 			ai.ChatRequest{
 				Model:    a.model,
 				APIKey:   a.apiKey,
-				Messages: tempConversation,
+				Messages: updatedConversation,
 			},
 		)
 
@@ -464,21 +467,21 @@ func (a *App) runInteractive() error {
 		}
 
 		// Save user message only after successful API response
-		conversation = tempConversation
+		a.runtime.Conversation = updatedConversation
 
 		// Save assistant response
-		conversation = append(conversation, models.Message{
+		a.runtime.Conversation = append(a.runtime.Conversation, models.Message{
 			Role:    "assistant",
 			Content: reply,
 		})
 
-		if err := storage.SaveHistory(a.activeSession, conversation); err != nil {
+		if err := storage.SaveHistory(a.activeSession, a.runtime.Conversation); err != nil {
 			fmt.Println("Warning: failed to save conversation:", err)
 		}
 
 		// Keep memory bounded
-		if len(conversation) > config.MaxMessages {
-			conversation = conversation[len(conversation)-config.MaxMessages:]
+		if len(a.runtime.Conversation) > config.MaxMessages {
+			a.runtime.Conversation = a.runtime.Conversation[len(a.runtime.Conversation)-config.MaxMessages:]
 		}
 
 		if !streamed {

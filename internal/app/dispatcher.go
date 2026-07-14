@@ -17,16 +17,7 @@ func newDispatcher(app *App) *commandDispatcher {
 
 	// Register commands here.
 	d.commands = []Command{
-		&helpCommand{
-			app: app,
-		},
-		&aboutCommand{
-			app: app,
-		},
-		&configCommand{
-			app: app,
-		},
-		&providerCommand{
+		&builtinCommand{
 			app: app,
 		},
 	}

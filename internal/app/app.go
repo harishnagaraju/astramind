@@ -3,6 +3,7 @@ package app
 type App struct {
 	deps         Dependencies
 	dispatcher   *commandDispatcher
+	runtime      RuntimeContext
 	apiKey       string
 	model        string
 	baseURL      string
