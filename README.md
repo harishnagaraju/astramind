@@ -527,9 +527,9 @@ AstraMind follows a modular architecture consisting of:
 - Test Utilities
 
 ## License
-Apache License 2.0
+AGPL 3.0
 
-This project is licensed under the Apache License 2.0 - see the LICENSE file for details.
+This project is licensed under the AGPL 3.0 - see the LICENSE file for details.
 
 # About
 ## Why AstraMind?
