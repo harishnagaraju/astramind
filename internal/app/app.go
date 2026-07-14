@@ -1,14 +1,22 @@
 package app
 
-// App represents the AstraMind application.
-//
-// At the beginning of v0.9.0 it is intentionally empty.
-// Additional dependencies will be added incrementally during
-// the architecture refactoring.
+import (
+	"github.com/harishnagaraju/astramind/internal/ai"
+	"github.com/harishnagaraju/astramind/internal/chat"
+	"github.com/harishnagaraju/astramind/internal/kb"
+)
+
 type App struct {
+	manager   *ai.ProviderManager
+	kbManager *kb.Manager
+	service   *chat.Service
+
+	apiKey       string
+	model        string
+	baseURL      string
+	providerName string
 }
 
-// New creates a new application instance.
 func New() *App {
 	return &App{}
 }

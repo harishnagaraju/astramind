@@ -4,15 +4,12 @@ import "github.com/harishnagaraju/astramind/internal/config"
 import "github.com/harishnagaraju/astramind/internal/storage"
 import "github.com/harishnagaraju/astramind/internal/models"
 import "github.com/harishnagaraju/astramind/internal/ai"
-import "github.com/harishnagaraju/astramind/internal/chat"
 import "github.com/harishnagaraju/astramind/internal/renderer"
-import "github.com/harishnagaraju/astramind/internal/kb"
 
 import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/joho/godotenv"
 	"os"
 	"strings"
 )
@@ -27,67 +24,15 @@ func (a *App) Run() error {
 
 	activeSession := "default"
 
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println("Could not load .env file", err)
+	if err := a.initialize(); err != nil {
+		fmt.Println(err)
 		return nil
 	}
-
-	providerName := strings.TrimSpace(
-		os.Getenv("AI_PROVIDER"),
-	)
-
-	apiKey := os.Getenv("OPENAI_API_KEY")
-	model := os.Getenv("OPENAI_MODEL")
-	baseURL := os.Getenv("OPENAI_BASE_URL")
-
-	if providerName != "ollama" && apiKey == "" {
-		fmt.Println("No OpenAI API key configured.")
-		fmt.Println("Using Mock AI Provider.")
-		return nil
-	}
-
-	if model == "" {
-		model = "gpt-4o-mini"
-	}
-
-	if baseURL == "" {
-		baseURL = "https://api.openai.com/v1"
-	}
-
-	if providerName == "" {
-		providerName = "openai"
-	}
-
-	providerConfig := ai.ProviderConfig{
-		Provider: providerName,
-		APIKey:   apiKey,
-		Model:    model,
-		BaseURL:  baseURL,
-	}
-
-	provider := ai.NewProvider(
-		providerConfig,
-	)
-
-	manager := ai.NewProviderManager(
-		provider,
-	)
-
-	kbStorage := kb.NewJSONStorage("data")
-	kbManager := kb.NewManager(kbStorage)
-
-	service := chat.NewService(
-		chat.Dependencies{
-			ProviderManager: manager,
-			KnowledgeBase:   kbManager,
-		},
-	)
 
 	// Script execution mode.
 	if len(os.Args) == 3 && os.Args[1] == "--script" {
 
-		if err := service.ExecuteScript(os.Args[2]); err != nil {
+		if err := a.service.ExecuteScript(os.Args[2]); err != nil {
 			fmt.Println("Error:", err)
 			os.Exit(1)
 		}
@@ -127,7 +72,7 @@ func (a *App) Run() error {
 
 		userInput = strings.TrimSpace(userInput)
 
-		handled, err := service.HandleKnowledgeCommand(userInput)
+		handled, err := a.service.HandleKnowledgeCommand(userInput)
 		if err != nil {
 			fmt.Println("Error:", err)
 			continue
@@ -415,12 +360,12 @@ func (a *App) Run() error {
 
 			fmt.Printf(
 				"Model: %s\n",
-				model,
+				a.model,
 			)
 
 			fmt.Printf(
 				"Base URL: %s\n",
-				baseURL,
+				a.baseURL,
 			)
 
 			fmt.Printf(
@@ -459,7 +404,7 @@ func (a *App) Run() error {
 
 			fmt.Printf(
 				"\nModel: %s\n",
-				model,
+				a.model,
 			)
 			fmt.Println("Author: Harish Nagaraju")
 			fmt.Println("Company: RK Consulting")
@@ -479,12 +424,12 @@ func (a *App) Run() error {
 
 			fmt.Printf(
 				"Provider : %s\n",
-				manager.ProviderName(),
+				a.manager.ProviderName(),
 			)
 
 			fmt.Printf(
 				"Model    : %s\n",
-				model,
+				a.model,
 			)
 
 			fmt.Println()
@@ -627,7 +572,7 @@ func (a *App) Run() error {
 
 			fmt.Printf(
 				"Current Model: %s\n",
-				model,
+				a.model,
 			)
 
 			continue
@@ -640,12 +585,12 @@ func (a *App) Run() error {
 			Content: userInput,
 		})
 
-		reply, streamed, err := service.Chat(
+		reply, streamed, err := a.service.Chat(
 			context.Background(),
 			os.Stdout,
 			ai.ChatRequest{
-				Model:    model,
-				APIKey:   apiKey,
+				Model:    a.model,
+				APIKey:   a.apiKey,
 				Messages: tempConversation,
 			},
 		)
