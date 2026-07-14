@@ -299,27 +299,6 @@ func (a *App) runInteractive() error {
 			}
 			continue
 
-		case "/provider":
-
-			fmt.Println()
-
-			fmt.Println("Current AI Provider")
-			fmt.Println("-------------------")
-
-			fmt.Printf(
-				"Provider : %s\n",
-				a.deps.ProviderManager.ProviderName(),
-			)
-
-			fmt.Printf(
-				"Model    : %s\n",
-				a.model,
-			)
-
-			fmt.Println()
-
-			continue
-
 		case "/export", "/export txt", "/export md":
 
 			if len(conversation) == 0 {

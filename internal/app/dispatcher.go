@@ -26,6 +26,9 @@ func newDispatcher(app *App) *commandDispatcher {
 		&configCommand{
 			app: app,
 		},
+		&providerCommand{
+			app: app,
+		},
 	}
 
 	return d
