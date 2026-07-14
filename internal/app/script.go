@@ -10,7 +10,7 @@ func (a *App) runScript() error {
 		return nil
 	}
 
-	if err := a.service.ExecuteScript(os.Args[2]); err != nil {
+	if err := a.deps.ChatService.ExecuteScript(os.Args[2]); err != nil {
 		return err
 	}
 

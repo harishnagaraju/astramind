@@ -52,16 +52,16 @@ func (a *App) initialize() error {
 		},
 	)
 
-	a.manager = ai.NewProviderManager(provider)
+	a.deps.ProviderManager = ai.NewProviderManager(provider)
 
 	storage := kb.NewJSONStorage("data")
 
-	a.kbManager = kb.NewManager(storage)
+	a.deps.KnowledgeBase = kb.NewManager(storage)
 
-	a.service = chat.NewService(
+	a.deps.ChatService = chat.NewService(
 		chat.Dependencies{
-			ProviderManager: a.manager,
-			KnowledgeBase:   a.kbManager,
+			ProviderManager: a.deps.ProviderManager,
+			KnowledgeBase:   a.deps.KnowledgeBase,
 		},
 	)
 

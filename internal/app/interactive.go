@@ -48,7 +48,7 @@ func (a *App) runInteractive() error {
 
 		userInput = strings.TrimSpace(userInput)
 
-		handled, err := a.service.HandleKnowledgeCommand(userInput)
+		handled, err := a.deps.ChatService.HandleKnowledgeCommand(userInput)
 		if err != nil {
 			fmt.Println("Error:", err)
 			continue
@@ -400,7 +400,7 @@ func (a *App) runInteractive() error {
 
 			fmt.Printf(
 				"Provider : %s\n",
-				a.manager.ProviderName(),
+				a.deps.ProviderManager.ProviderName(),
 			)
 
 			fmt.Printf(
@@ -561,7 +561,7 @@ func (a *App) runInteractive() error {
 			Content: userInput,
 		})
 
-		reply, streamed, err := a.service.Chat(
+		reply, streamed, err := a.deps.ChatService.Chat(
 			context.Background(),
 			os.Stdout,
 			ai.ChatRequest{
