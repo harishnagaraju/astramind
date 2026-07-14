@@ -48,7 +48,8 @@ func (a *App) runInteractive() error {
 
 		userInput = strings.TrimSpace(userInput)
 
-		handled, err := a.deps.ChatService.HandleKnowledgeCommand(userInput)
+		handled, err := a.dispatcher.Execute(userInput)
+
 		if err != nil {
 			fmt.Println("Error:", err)
 			continue
@@ -286,37 +287,6 @@ func (a *App) runInteractive() error {
 			fmt.Println("Goodbye!")
 			return nil
 
-		case "/help":
-			fmt.Println("\nAvailable Commands:")
-			fmt.Println("/about     - About AstraMind")
-			fmt.Println("/help      - Show help")
-			fmt.Println("/history   - Show conversation history")
-			fmt.Println("/clear     - Clear conversation memory")
-			fmt.Println("/stats     - Show session statistics")
-			fmt.Println("/config    - Show configuration")
-			fmt.Println("/export    - Export session (TXT)")
-			fmt.Println("/export md - Export session (Markdown)")
-			fmt.Println("/sessions  - List sessions")
-			fmt.Println("/search <text> - Search current conversation")
-			fmt.Println("/searchall <text> - Search all conversation")
-			fmt.Println()
-			fmt.Println("Knowledge Base")
-			fmt.Println("/kb import <file> - Import a text or markdown document")
-			fmt.Println("/kb list          - List imported documents")
-			fmt.Println("/kb search <text> - Search the knowledge base")
-			fmt.Println("/kb remove <id>   - Remove a document")
-			fmt.Println("/kb clear         - Remove all documents")
-			fmt.Println("/kb stats         - Show knowledge base statistics")
-			fmt.Println()
-			fmt.Println("/new <name> - Create session")
-			fmt.Println("/load <name> - Load session")
-			fmt.Println("/delete <name> - Delete session")
-			fmt.Println("/export    - Export session")
-			fmt.Println("/provider  - Show active AI provider")
-			fmt.Println("exit       - Exit AstraMind")
-			fmt.Println("quit       - Exit AstraMind")
-			continue
-
 		case "/clear":
 			conversation = []models.Message{}
 
@@ -327,68 +297,6 @@ func (a *App) runInteractive() error {
 			} else {
 				fmt.Println("Conversation memory cleared.")
 			}
-			continue
-
-		case "/config":
-
-			fmt.Println("\nCurrent Configuration")
-			fmt.Println("---------------------")
-
-			fmt.Printf(
-				"Model: %s\n",
-				a.model,
-			)
-
-			fmt.Printf(
-				"Base URL: %s\n",
-				a.baseURL,
-			)
-
-			fmt.Printf(
-				"Max Messages: %d\n",
-				config.MaxMessages,
-			)
-
-			fmt.Printf(
-				"History Enabled: %t\n",
-				true,
-			)
-
-			fmt.Printf(
-				"History File: %s\n",
-				config.HistoryFile,
-			)
-
-			continue
-
-		case "/about":
-
-			fmt.Println("\nAstraMind")
-			fmt.Println("---------")
-
-			fmt.Printf(
-				"Version: %s\n",
-				config.Version,
-			)
-
-			fmt.Println("\nFeatures:")
-
-			fmt.Println("✓ Conversation Memory")
-			fmt.Println("✓ Persistent History")
-			fmt.Println("✓ Session Statistics")
-			fmt.Println("✓ Configuration Display")
-
-			fmt.Printf(
-				"\nModel: %s\n",
-				a.model,
-			)
-			fmt.Println("Author: Harish Nagaraju")
-			fmt.Println("Company: RK Consulting")
-
-			fmt.Println(
-				"Repository: github.com/harishnagaraju/astramind",
-			)
-
 			continue
 
 		case "/provider":

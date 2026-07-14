@@ -65,5 +65,7 @@ func (a *App) initialize() error {
 		},
 	)
 
+	a.dispatcher = newDispatcher(a)
+
 	return nil
 }
