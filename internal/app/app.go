@@ -15,8 +15,12 @@ type App struct {
 	model        string
 	baseURL      string
 	providerName string
+
+	activeSession string
 }
 
 func New() *App {
-	return &App{}
+	return &App{
+		activeSession: "default",
+	}
 }
