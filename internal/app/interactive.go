@@ -4,7 +4,6 @@ import "github.com/harishnagaraju/astramind/internal/config"
 import "github.com/harishnagaraju/astramind/internal/storage"
 import "github.com/harishnagaraju/astramind/internal/models"
 import "github.com/harishnagaraju/astramind/internal/ai"
-import "github.com/harishnagaraju/astramind/internal/renderer"
 
 import (
 	"bufio"
@@ -65,223 +64,6 @@ func (a *App) runInteractive() error {
 		if userInput == "" {
 			continue
 		}
-		if strings.HasPrefix(
-			userInput,
-			"/load ",
-		) {
-
-			sessionName := strings.TrimSpace(
-				strings.TrimPrefix(
-					userInput,
-					"/load ",
-				),
-			)
-
-			if sessionName == "" {
-
-				fmt.Println(
-					"Usage: /load <session-name>",
-				)
-
-				continue
-			}
-
-			if !storage.SessionExists(
-				sessionName,
-			) {
-
-				fmt.Printf(
-					"Session '%s' does not exist.\n",
-					sessionName,
-				)
-
-				continue
-			}
-
-			messages, err :=
-				storage.LoadHistory(
-					sessionName,
-				)
-
-			if err != nil {
-
-				fmt.Println(
-					"Error:",
-					err,
-				)
-
-				continue
-			}
-
-			a.activeSession = sessionName
-
-			a.runtime.Conversation = messages
-
-			fmt.Printf(
-				"Loaded session: %s\n",
-				sessionName,
-			)
-
-			continue
-		}
-
-		if strings.HasPrefix(
-			userInput,
-			"/new ",
-		) {
-
-			sessionName := strings.TrimSpace(
-				strings.TrimPrefix(
-					userInput,
-					"/new ",
-				),
-			)
-
-			if sessionName == "" {
-
-				fmt.Println(
-					"Usage: /new <session-name>",
-				)
-
-				continue
-			}
-
-			err := storage.CreateSession(
-				sessionName,
-			)
-
-			if err != nil {
-
-				fmt.Println(
-					"Error:",
-					err,
-				)
-
-				continue
-			}
-
-			a.activeSession = sessionName
-
-			a.runtime.Conversation = []models.Message{}
-
-			fmt.Printf(
-				"Created and switched to session: %s\n",
-				sessionName,
-			)
-
-			continue
-		}
-
-		if strings.HasPrefix(
-			userInput,
-			"/delete ",
-		) {
-
-			sessionName := strings.TrimSpace(
-				strings.TrimPrefix(
-					userInput,
-					"/delete ",
-				),
-			)
-
-			if sessionName == "" {
-
-				fmt.Println(
-					"Usage: /delete <session-name>",
-				)
-
-				continue
-			}
-
-			if sessionName == "default" {
-
-				fmt.Println(
-					"Default session cannot be deleted.",
-				)
-
-				continue
-			}
-
-			if sessionName == a.activeSession {
-
-				fmt.Println(
-					"Cannot delete active session.",
-				)
-
-				continue
-			}
-
-			err := storage.DeleteSession(
-				sessionName,
-			)
-
-			if err != nil {
-
-				fmt.Println(
-					"Error:",
-					err,
-				)
-
-				continue
-			}
-
-			fmt.Printf(
-				"Deleted session: %s\n",
-				sessionName,
-			)
-
-			continue
-		}
-
-		if strings.HasPrefix(userInput, "/search ") || userInput == "/search" {
-
-			query := strings.TrimSpace(
-				strings.TrimPrefix(userInput, "/search"),
-			)
-
-			if query == "" {
-				fmt.Println("Usage: /search <text>")
-				continue
-			}
-
-			results := storage.SearchMessages(a.runtime.Conversation, query)
-
-			if len(results) == 0 {
-				fmt.Println("No matches found.")
-				continue
-			}
-
-			renderer.RenderSearchResults(results)
-
-			continue
-		}
-
-		if strings.HasPrefix(userInput, "/searchall ") || userInput == "/searchall" {
-
-			query := strings.TrimSpace(
-				strings.TrimPrefix(userInput, "/searchall"),
-			)
-
-			if query == "" {
-				fmt.Println("Usage: /searchall <text>")
-				continue
-			}
-
-			results, err := storage.SearchAllSessions(query)
-			if err != nil {
-				fmt.Println("Search failed:", err)
-				continue
-			}
-
-			if len(results) == 0 {
-				fmt.Println("No matches found.")
-				continue
-			}
-
-			renderer.RenderSessionSearchResults(results)
-
-			continue
-		}
 
 		switch userInput {
 
@@ -334,49 +116,49 @@ func (a *App) runInteractive() error {
 				)
 			}
 
-			// Create temporary conversation
-			// Do NOT save until API succeeds.
-			updatedConversation := append(a.runtime.Conversation, models.Message{
-				Role:    "user",
-				Content: userInput,
-			})
+		}
+		// Create temporary conversation
+		// Do NOT save until API succeeds.
+		updatedConversation := append(a.runtime.Conversation, models.Message{
+			Role:    "user",
+			Content: userInput,
+		})
 
-			reply, streamed, err := a.deps.ChatService.Chat(
-				context.Background(),
-				os.Stdout,
-				ai.ChatRequest{
-					Model:    a.model,
-					APIKey:   a.apiKey,
-					Messages: updatedConversation,
-				},
-			)
+		reply, streamed, err := a.deps.ChatService.Chat(
+			context.Background(),
+			os.Stdout,
+			ai.ChatRequest{
+				Model:    a.model,
+				APIKey:   a.apiKey,
+				Messages: updatedConversation,
+			},
+		)
 
-			if err != nil {
-				fmt.Println("Error:", err)
-				continue
-			}
+		if err != nil {
+			fmt.Println("Error:", err)
+			continue
+		}
 
-			// Save user message only after successful API response
-			a.runtime.Conversation = updatedConversation
+		// Save user message only after successful API response
+		a.runtime.Conversation = updatedConversation
 
-			// Save assistant response
-			a.runtime.Conversation = append(a.runtime.Conversation, models.Message{
-				Role:    "assistant",
-				Content: reply,
-			})
+		// Save assistant response
+		a.runtime.Conversation = append(a.runtime.Conversation, models.Message{
+			Role:    "assistant",
+			Content: reply,
+		})
 
-			if err := storage.SaveHistory(a.activeSession, a.runtime.Conversation); err != nil {
-				fmt.Println("Warning: failed to save conversation:", err)
-			}
+		if err := storage.SaveHistory(a.activeSession, a.runtime.Conversation); err != nil {
+			fmt.Println("Warning: failed to save conversation:", err)
+		}
 
-			// Keep memory bounded
-			if len(a.runtime.Conversation) > config.MaxMessages {
-				a.runtime.Conversation = a.runtime.Conversation[len(a.runtime.Conversation)-config.MaxMessages:]
-			}
+		// Keep memory bounded
+		if len(a.runtime.Conversation) > config.MaxMessages {
+			a.runtime.Conversation = a.runtime.Conversation[len(a.runtime.Conversation)-config.MaxMessages:]
+		}
 
-			if !streamed {
-				fmt.Println("\nAI:", reply)
-			}
+		if !streamed {
+			fmt.Println("\nAI:", reply)
 		}
 	}
 }

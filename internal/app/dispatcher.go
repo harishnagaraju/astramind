@@ -20,6 +20,7 @@ func newDispatcher(app *App) *commandDispatcher {
 		&builtinCommand{},
 		&sessionCommand{},
 		&conversationCommand{},
+		&searchCommand{},
 	}
 
 	return d
