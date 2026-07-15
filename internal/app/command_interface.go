@@ -1,7 +1,6 @@
 package app
 
-// Command represents a CLI command.
+// Command represents a CLI command handler.
 type Command interface {
-	Name() string
-	Execute(input string) (bool, error)
+	Execute(app *App, input string) (bool, error)
 }

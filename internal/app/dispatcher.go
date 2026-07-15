@@ -17,9 +17,8 @@ func newDispatcher(app *App) *commandDispatcher {
 
 	// Register commands here.
 	d.commands = []Command{
-		&builtinCommand{
-			app: app,
-		},
+		&builtinCommand{},
+		&sessionCommand{},
 	}
 
 	return d
@@ -31,7 +30,7 @@ func (d *commandDispatcher) Execute(input string) (bool, error) {
 
 	for _, cmd := range d.commands {
 
-		handled, err := cmd.Execute(input)
+		handled, err := cmd.Execute(d.app, input)
 
 		if handled || err != nil {
 			return handled, err

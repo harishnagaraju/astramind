@@ -7,14 +7,9 @@ import (
 )
 
 type builtinCommand struct {
-	app *App
 }
 
-func (c *builtinCommand) Name() string {
-	return "builtin"
-}
-
-func (c *builtinCommand) Execute(input string) (bool, error) {
+func (c *builtinCommand) Execute(app *App, input string) (bool, error) {
 
 	switch input {
 
@@ -74,7 +69,7 @@ func (c *builtinCommand) Execute(input string) (bool, error) {
 
 		fmt.Printf(
 			"\nModel: %s\n",
-			c.app.model,
+			app.model,
 		)
 
 		fmt.Println("Author: Harish Nagaraju")
@@ -90,12 +85,12 @@ func (c *builtinCommand) Execute(input string) (bool, error) {
 
 		fmt.Printf(
 			"Model: %s\n",
-			c.app.model,
+			app.model,
 		)
 
 		fmt.Printf(
 			"Base URL: %s\n",
-			c.app.baseURL,
+			app.baseURL,
 		)
 
 		fmt.Printf(
@@ -124,12 +119,12 @@ func (c *builtinCommand) Execute(input string) (bool, error) {
 
 		fmt.Printf(
 			"Provider : %s\n",
-			c.app.deps.ProviderManager.ProviderName(),
+			app.deps.ProviderManager.ProviderName(),
 		)
 
 		fmt.Printf(
 			"Model    : %s\n",
-			c.app.model,
+			app.model,
 		)
 
 		fmt.Println()
