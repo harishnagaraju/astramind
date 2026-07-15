@@ -19,6 +19,7 @@ func newDispatcher(app *App) *commandDispatcher {
 	d.commands = []Command{
 		&builtinCommand{},
 		&sessionCommand{},
+		&conversationCommand{},
 	}
 
 	return d

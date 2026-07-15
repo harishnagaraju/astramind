@@ -290,18 +290,6 @@ func (a *App) runInteractive() error {
 			fmt.Println("Goodbye!")
 			return nil
 
-		case "/clear":
-			a.runtime.Conversation = []models.Message{}
-
-			err := storage.SaveHistory(a.activeSession, a.runtime.Conversation)
-
-			if err != nil {
-				fmt.Println("Error clearing history:", err)
-			} else {
-				fmt.Println("Conversation memory cleared.")
-			}
-			continue
-
 		case "/export", "/export txt", "/export md":
 
 			if len(a.runtime.Conversation) == 0 {
@@ -346,146 +334,49 @@ func (a *App) runInteractive() error {
 				)
 			}
 
-			continue
+			// Create temporary conversation
+			// Do NOT save until API succeeds.
+			updatedConversation := append(a.runtime.Conversation, models.Message{
+				Role:    "user",
+				Content: userInput,
+			})
 
-		case "/sessions":
-
-			sessions, err := storage.ListSessions()
+			reply, streamed, err := a.deps.ChatService.Chat(
+				context.Background(),
+				os.Stdout,
+				ai.ChatRequest{
+					Model:    a.model,
+					APIKey:   a.apiKey,
+					Messages: updatedConversation,
+				},
+			)
 
 			if err != nil {
-
-				fmt.Println(
-					"Error loading sessions:",
-					err,
-				)
-
+				fmt.Println("Error:", err)
 				continue
 			}
 
-			fmt.Println("\nAvailable Sessions")
-			fmt.Println("------------------")
+			// Save user message only after successful API response
+			a.runtime.Conversation = updatedConversation
 
-			if len(sessions) == 0 {
+			// Save assistant response
+			a.runtime.Conversation = append(a.runtime.Conversation, models.Message{
+				Role:    "assistant",
+				Content: reply,
+			})
 
-				fmt.Println(
-					"No sessions found.",
-				)
-
-				continue
+			if err := storage.SaveHistory(a.activeSession, a.runtime.Conversation); err != nil {
+				fmt.Println("Warning: failed to save conversation:", err)
 			}
 
-			for _, session := range sessions {
-
-				fmt.Println(session)
+			// Keep memory bounded
+			if len(a.runtime.Conversation) > config.MaxMessages {
+				a.runtime.Conversation = a.runtime.Conversation[len(a.runtime.Conversation)-config.MaxMessages:]
 			}
 
-			continue
-
-		case "/history":
-
-			if len(a.runtime.Conversation) == 0 {
-				fmt.Println("No conversation history.")
-				continue
+			if !streamed {
+				fmt.Println("\nAI:", reply)
 			}
-
-			fmt.Println("\nConversation History:")
-
-			for i, msg := range a.runtime.Conversation {
-				fmt.Printf(
-					"%d. [%s] %s\n",
-					i+1,
-					msg.Role,
-					msg.Content,
-				)
-			}
-
-			continue
-
-		case "/stats":
-
-			userCount := 0
-			assistantCount := 0
-
-			for _, msg := range a.runtime.Conversation {
-
-				switch msg.Role {
-
-				case "user":
-					userCount++
-
-				case "assistant":
-					assistantCount++
-				}
-			}
-
-			fmt.Println("\nSession Statistics")
-			fmt.Println("------------------")
-
-			fmt.Printf(
-				"User Messages: %d\n",
-				userCount,
-			)
-
-			fmt.Printf(
-				"Assistant Messages: %d\n",
-				assistantCount,
-			)
-
-			fmt.Printf(
-				"Memory Entries: %d\n",
-				len(a.runtime.Conversation),
-			)
-
-			fmt.Printf(
-				"Current Model: %s\n",
-				a.model,
-			)
-
-			continue
-		}
-
-		// Create temporary conversation
-		// Do NOT save until API succeeds.
-		updatedConversation := append(a.runtime.Conversation, models.Message{
-			Role:    "user",
-			Content: userInput,
-		})
-
-		reply, streamed, err := a.deps.ChatService.Chat(
-			context.Background(),
-			os.Stdout,
-			ai.ChatRequest{
-				Model:    a.model,
-				APIKey:   a.apiKey,
-				Messages: updatedConversation,
-			},
-		)
-
-		if err != nil {
-			fmt.Println("Error:", err)
-			continue
-		}
-
-		// Save user message only after successful API response
-		a.runtime.Conversation = updatedConversation
-
-		// Save assistant response
-		a.runtime.Conversation = append(a.runtime.Conversation, models.Message{
-			Role:    "assistant",
-			Content: reply,
-		})
-
-		if err := storage.SaveHistory(a.activeSession, a.runtime.Conversation); err != nil {
-			fmt.Println("Warning: failed to save conversation:", err)
-		}
-
-		// Keep memory bounded
-		if len(a.runtime.Conversation) > config.MaxMessages {
-			a.runtime.Conversation = a.runtime.Conversation[len(a.runtime.Conversation)-config.MaxMessages:]
-		}
-
-		if !streamed {
-			fmt.Println("\nAI:", reply)
 		}
 	}
 }
