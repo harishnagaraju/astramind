@@ -3,7 +3,7 @@ package engine
 import (
 	"fmt"
 
-	"github.com/harishnagaraju/astramind/internal/config"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/config"
 )
 
 type builtinCommand struct {

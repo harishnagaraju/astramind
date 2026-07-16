@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	/*"github.com/harishnagaraju/astramind/internal/config"*/
+	/* "github.com/harishnagaraju/astramind/internal/infrastructure/config" */
 	"github.com/harishnagaraju/astramind/internal/models"
 )
 

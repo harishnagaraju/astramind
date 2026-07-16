@@ -3,7 +3,7 @@ package engine
 import (
 	"fmt"
 
-	"github.com/harishnagaraju/astramind/internal/config"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/config"
 	"github.com/harishnagaraju/astramind/internal/models"
 	"github.com/harishnagaraju/astramind/internal/storage"
 )
