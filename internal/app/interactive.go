@@ -72,50 +72,6 @@ func (a *App) runInteractive() error {
 			fmt.Println("Goodbye!")
 			return nil
 
-		case "/export", "/export txt", "/export md":
-
-			if len(a.runtime.Conversation) == 0 {
-				fmt.Println("Nothing to export.")
-				continue
-			}
-
-			switch userInput {
-
-			case "/export", "/export txt":
-
-				err := storage.ExportSession(
-					a.activeSession,
-					a.runtime.Conversation,
-				)
-
-				if err != nil {
-					fmt.Println("Export failed:", err)
-					continue
-				}
-
-				fmt.Printf(
-					"Session exported to exports/%s.txt\n",
-					a.activeSession,
-				)
-
-			case "/export md":
-
-				err := storage.ExportMarkdown(
-					a.activeSession,
-					a.runtime.Conversation,
-				)
-
-				if err != nil {
-					fmt.Println("Export failed:", err)
-					continue
-				}
-
-				fmt.Printf(
-					"Session exported to exports/%s.md\n",
-					a.activeSession,
-				)
-			}
-
 		}
 		// Create temporary conversation
 		// Do NOT save until API succeeds.

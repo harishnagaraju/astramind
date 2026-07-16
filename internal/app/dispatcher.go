@@ -21,6 +21,7 @@ func newDispatcher(app *App) *commandDispatcher {
 		&sessionCommand{},
 		&conversationCommand{},
 		&searchCommand{},
+		&exportCommand{},
 	}
 
 	return d
