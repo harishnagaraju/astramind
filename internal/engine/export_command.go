@@ -3,7 +3,7 @@ package engine
 import (
 	"fmt"
 
-	"github.com/harishnagaraju/astramind/internal/storage"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/storage"
 )
 
 type exportCommand struct{}

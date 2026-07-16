@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
-	"github.com/harishnagaraju/astramind/internal/storage"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/storage"
 )
 
 type sessionCommand struct{}

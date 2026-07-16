@@ -1,7 +1,7 @@
 package engine
 
 import "github.com/harishnagaraju/astramind/internal/infrastructure/config"
-import "github.com/harishnagaraju/astramind/internal/storage"
+import "github.com/harishnagaraju/astramind/internal/infrastructure/storage"
 import "github.com/harishnagaraju/astramind/internal/infrastructure/models"
 import "github.com/harishnagaraju/astramind/internal/infrastructure/ai"
 

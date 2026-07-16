@@ -5,7 +5,7 @@ import (
 
 	"github.com/harishnagaraju/astramind/internal/infrastructure/config"
 	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
-	"github.com/harishnagaraju/astramind/internal/storage"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/storage"
 )
 
 type conversationCommand struct{}

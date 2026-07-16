@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
@@ -16,13 +17,17 @@ func LoadConversation(
 
 	t.Helper()
 
-	root, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("Unable to determine working directory: %v", err)
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("failed to determine testutil source location")
 	}
 
-	// Go back to project root
-	root = filepath.Join(root, "..", "..")
+	// testdata.go -> internal/testutil -> project root
+	root := filepath.Join(
+		filepath.Dir(filename),
+		"..",
+		"..",
+	)
 
 	file := filepath.Join(
 		root,

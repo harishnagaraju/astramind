@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/harishnagaraju/astramind/internal/infrastructure/renderer"
-	"github.com/harishnagaraju/astramind/internal/storage"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/storage"
 )
 
 type searchCommand struct{}
