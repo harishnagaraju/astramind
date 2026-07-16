@@ -3,7 +3,7 @@ package engine
 import (
 	"fmt"
 
-	"github.com/harishnagaraju/astramind/internal/infrastructure/storage"
+	"github.com/harishnagaraju/astramind/internal/features/export"
 )
 
 type exportCommand struct{}
@@ -12,6 +12,8 @@ func (c *exportCommand) Execute(
 	app *App,
 	input string,
 ) (bool, error) {
+
+	exportService := export.NewService()
 
 	switch input {
 
@@ -22,7 +24,7 @@ func (c *exportCommand) Execute(
 			return true, nil
 		}
 
-		err := storage.ExportSession(
+		err := exportService.ExportTXT(
 			app.activeSession,
 			app.runtime.Conversation,
 		)
@@ -45,7 +47,7 @@ func (c *exportCommand) Execute(
 			return true, nil
 		}
 
-		err := storage.ExportMarkdown(
+		err := exportService.ExportMarkdown(
 			app.activeSession,
 			app.runtime.Conversation,
 		)
