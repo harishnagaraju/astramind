@@ -4,9 +4,9 @@ import (
 	"context"
 	"io"
 
+	"github.com/harishnagaraju/astramind/internal/features/kb"
 	"github.com/harishnagaraju/astramind/internal/infrastructure/ai"
 	"github.com/harishnagaraju/astramind/internal/infrastructure/renderer"
-	"github.com/harishnagaraju/astramind/internal/kb"
 )
 
 // Dependencies contains all services used by the chat package.

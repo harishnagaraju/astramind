@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/harishnagaraju/astramind/internal/features/session"
 	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
-	"github.com/harishnagaraju/astramind/internal/infrastructure/storage"
 )
 
 type sessionCommand struct{}
 
 func (c *sessionCommand) Execute(app *App, input string) (bool, error) {
+
+	// Create once for this command execution.
+	svc := session.NewService()
 
 	// /load
 	if strings.HasPrefix(input, "/load ") {
@@ -24,12 +27,12 @@ func (c *sessionCommand) Execute(app *App, input string) (bool, error) {
 			return true, nil
 		}
 
-		if !storage.SessionExists(sessionName) {
+		if !svc.Exists(sessionName) {
 			fmt.Printf("Session '%s' does not exist.\n", sessionName)
 			return true, nil
 		}
 
-		messages, err := storage.LoadHistory(sessionName)
+		messages, err := svc.Load(sessionName)
 		if err != nil {
 			return true, err
 		}
@@ -54,7 +57,7 @@ func (c *sessionCommand) Execute(app *App, input string) (bool, error) {
 			return true, nil
 		}
 
-		if err := storage.CreateSession(sessionName); err != nil {
+		if err := svc.Create(sessionName); err != nil {
 			return true, err
 		}
 
@@ -88,7 +91,7 @@ func (c *sessionCommand) Execute(app *App, input string) (bool, error) {
 			return true, nil
 		}
 
-		if err := storage.DeleteSession(sessionName); err != nil {
+		if err := svc.Delete(sessionName); err != nil {
 			return true, err
 		}
 
@@ -100,7 +103,7 @@ func (c *sessionCommand) Execute(app *App, input string) (bool, error) {
 	// /sessions
 	if input == "/sessions" {
 
-		sessions, err := storage.ListSessions()
+		sessions, err := svc.List()
 		if err != nil {
 			return true, err
 		}

@@ -3,8 +3,8 @@ package chat
 import (
 	"testing"
 
+	"github.com/harishnagaraju/astramind/internal/features/kb"
 	"github.com/harishnagaraju/astramind/internal/infrastructure/ai"
-	"github.com/harishnagaraju/astramind/internal/kb"
 )
 
 func newTestService(t *testing.T) *Service {
