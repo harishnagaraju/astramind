@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/harishnagaraju/astramind/internal/models"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
 	"github.com/harishnagaraju/astramind/internal/storage"
 )
 

@@ -3,7 +3,7 @@ package storage
 import (
 	"strings"
 
-	"github.com/harishnagaraju/astramind/internal/models"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
 )
 
 // SearchMessages performs a case-insensitive search over a conversation.

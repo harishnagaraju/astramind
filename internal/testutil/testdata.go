@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/harishnagaraju/astramind/internal/models"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
 )
 
 func LoadConversation(

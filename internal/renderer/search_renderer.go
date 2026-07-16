@@ -3,7 +3,7 @@ package renderer
 import (
 	"fmt"
 
-	"github.com/harishnagaraju/astramind/internal/models"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
 )
 
 // RenderSearchResults displays search results for the current session.

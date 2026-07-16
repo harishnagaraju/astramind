@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	/* "github.com/harishnagaraju/astramind/internal/infrastructure/config" */
-	"github.com/harishnagaraju/astramind/internal/models"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
 )
 
 func SessionExists(

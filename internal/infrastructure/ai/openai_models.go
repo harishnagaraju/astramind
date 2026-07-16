@@ -1,6 +1,6 @@
 package ai
 
-import "github.com/harishnagaraju/astramind/internal/models"
+import "github.com/harishnagaraju/astramind/internal/infrastructure/models"
 
 const (
 	openAIChatCompletionsEndpoint = "https://api.openai.com/v1/chat/completions"

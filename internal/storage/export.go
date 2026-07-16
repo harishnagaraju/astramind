@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/harishnagaraju/astramind/internal/models"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
 )
 
 func ExportSession(

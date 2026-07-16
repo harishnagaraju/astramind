@@ -3,7 +3,7 @@ package ai
 import (
 	"testing"
 
-	"github.com/harishnagaraju/astramind/internal/models"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
 )
 
 func TestMockProvider(t *testing.T) {

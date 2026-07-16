@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/harishnagaraju/astramind/internal/models"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
 )
 
 func TestProviderManager(t *testing.T) {

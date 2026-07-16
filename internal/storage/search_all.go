@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"github.com/harishnagaraju/astramind/internal/models"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
 )
 
 // SearchAllSessions searches every saved session for the specified query.

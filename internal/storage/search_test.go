@@ -3,7 +3,7 @@ package storage
 import (
 	"testing"
 
-	"github.com/harishnagaraju/astramind/internal/models"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
 )
 
 func TestSearchMessages_EmptyQuery(t *testing.T) {

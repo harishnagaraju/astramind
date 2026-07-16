@@ -3,7 +3,7 @@ package ai
 import (
 	"context"
 	"encoding/json"
-	"github.com/harishnagaraju/astramind/internal/models"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
 	"net/http"
 	"net/http/httptest"
 	"testing"
