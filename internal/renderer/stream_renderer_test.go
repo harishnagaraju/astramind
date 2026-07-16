@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/harishnagaraju/astramind/internal/ai"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/ai"
 )
 
 type mockStream struct {

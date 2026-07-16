@@ -5,7 +5,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/harishnagaraju/astramind/internal/ai"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/ai"
 )
 
 func TestServiceStreaming(t *testing.T) {

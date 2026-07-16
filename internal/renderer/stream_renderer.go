@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/harishnagaraju/astramind/internal/ai"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/ai"
 )
 
 // StreamRenderer renders streaming AI responses.

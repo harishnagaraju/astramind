@@ -1,4 +1,4 @@
-package app
+package engine
 
 // commandDispatcher routes CLI commands to registered handlers.
 type commandDispatcher struct {

@@ -1,4 +1,4 @@
-package app
+package engine
 
 import "github.com/harishnagaraju/astramind/internal/models"
 

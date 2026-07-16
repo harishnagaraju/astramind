@@ -1,8 +1,8 @@
-package app
+package engine
 
 import (
-	"github.com/harishnagaraju/astramind/internal/ai"
 	"github.com/harishnagaraju/astramind/internal/chat"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/ai"
 	"github.com/harishnagaraju/astramind/internal/kb"
 )
 

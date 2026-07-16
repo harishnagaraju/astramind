@@ -3,7 +3,7 @@ package chat
 import (
 	"testing"
 
-	"github.com/harishnagaraju/astramind/internal/ai"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/ai"
 	"github.com/harishnagaraju/astramind/internal/kb"
 )
 

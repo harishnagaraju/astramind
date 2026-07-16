@@ -4,7 +4,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/harishnagaraju/astramind/internal/ai"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/ai"
 	"github.com/harishnagaraju/astramind/internal/kb"
 	"github.com/harishnagaraju/astramind/internal/renderer"
 )

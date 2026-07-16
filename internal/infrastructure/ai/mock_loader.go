@@ -4,16 +4,22 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 )
 
 func LoadMockData() ([]MockPair, error) {
 
-	root, err := os.Getwd()
-	if err != nil {
-		return nil, err
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		return nil, os.ErrNotExist
 	}
 
-	root = filepath.Join(root, "..", "..")
+	root := filepath.Join(
+		filepath.Dir(filename),
+		"..",
+		"..",
+		"..",
+	)
 
 	file := filepath.Join(
 		root,
