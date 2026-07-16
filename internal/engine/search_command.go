@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/harishnagaraju/astramind/internal/features/search"
 	"github.com/harishnagaraju/astramind/internal/infrastructure/renderer"
-	"github.com/harishnagaraju/astramind/internal/infrastructure/storage"
 )
 
 type searchCommand struct{}
@@ -14,6 +14,8 @@ func (c *searchCommand) Execute(
 	app *App,
 	input string,
 ) (bool, error) {
+
+	searchService := search.NewService()
 
 	if strings.HasPrefix(input, "/search ") || input == "/search" {
 
@@ -26,7 +28,7 @@ func (c *searchCommand) Execute(
 			return true, nil
 		}
 
-		results := storage.SearchMessages(
+		results := searchService.SearchCurrent(
 			app.runtime.Conversation,
 			query,
 		)
@@ -52,7 +54,7 @@ func (c *searchCommand) Execute(
 			return true, nil
 		}
 
-		results, err := storage.SearchAllSessions(query)
+		results, err := searchService.SearchAll(query)
 		if err != nil {
 			return true, err
 		}
