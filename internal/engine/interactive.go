@@ -1,7 +1,7 @@
 package engine
 
 import "github.com/harishnagaraju/astramind/internal/infrastructure/config"
-import "github.com/harishnagaraju/astramind/internal/infrastructure/storage"
+import "github.com/harishnagaraju/astramind/internal/features/history"
 import "github.com/harishnagaraju/astramind/internal/infrastructure/models"
 import "github.com/harishnagaraju/astramind/internal/infrastructure/ai"
 
@@ -17,8 +17,9 @@ func (a *App) runInteractive() error {
 
 	var err error
 	reader := bufio.NewReader(os.Stdin)
+	historyService := history.NewService()
 
-	a.runtime.Conversation, err = storage.LoadHistory(
+	a.runtime.Conversation, err = historyService.Load(
 		a.activeSession,
 	)
 
@@ -68,7 +69,10 @@ func (a *App) runInteractive() error {
 		switch userInput {
 
 		case "exit", "quit":
-			storage.SaveHistory(a.activeSession, a.runtime.Conversation)
+			historyService.Save(a.activeSession, a.runtime.Conversation)
+			if err != nil {
+				return err
+			}
 			fmt.Println("Goodbye!")
 			return nil
 
@@ -104,7 +108,7 @@ func (a *App) runInteractive() error {
 			Content: reply,
 		})
 
-		if err := storage.SaveHistory(a.activeSession, a.runtime.Conversation); err != nil {
+		if err := historyService.Save(a.activeSession, a.runtime.Conversation); err != nil {
 			fmt.Println("Warning: failed to save conversation:", err)
 		}
 

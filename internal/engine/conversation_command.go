@@ -3,9 +3,9 @@ package engine
 import (
 	"fmt"
 
+	"github.com/harishnagaraju/astramind/internal/features/history"
 	"github.com/harishnagaraju/astramind/internal/infrastructure/config"
 	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
-	"github.com/harishnagaraju/astramind/internal/infrastructure/storage"
 )
 
 type conversationCommand struct{}
@@ -15,13 +15,15 @@ func (c *conversationCommand) Execute(
 	input string,
 ) (bool, error) {
 
+	historyService := history.NewService()
+
 	switch input {
 
 	case "/clear":
 
 		app.runtime.Conversation = []models.Message{}
 
-		err := storage.SaveHistory(
+		err := historyService.Save(
 			app.activeSession,
 			app.runtime.Conversation,
 		)
