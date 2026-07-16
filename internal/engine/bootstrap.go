@@ -7,7 +7,7 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"github.com/harishnagaraju/astramind/internal/chat"
+	"github.com/harishnagaraju/astramind/internal/features/chat"
 	"github.com/harishnagaraju/astramind/internal/infrastructure/ai"
 	"github.com/harishnagaraju/astramind/internal/kb"
 )
