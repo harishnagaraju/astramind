@@ -6,9 +6,10 @@ import (
 	"github.com/harishnagaraju/astramind/internal/infrastructure/ai"
 )
 
-// Dependencies contains all long-lived application services.
 type Dependencies struct {
 	ProviderManager *ai.ProviderManager
-	KnowledgeBase   *kb.Manager
-	ChatService     *chat.Service
+
+	KnowledgeBase *kb.Manager
+
+	ChatService *chat.Service
 }

@@ -29,3 +29,14 @@ func (s *Service) Load(
 
 	return storage.LoadHistory(session)
 }
+
+// ListSessions returns the names of all saved sessions.
+func (s *Service) ListSessions() ([]string, error) {
+
+	return storage.ListSessions()
+}
+
+// Delete removes a saved session.
+func (s *Service) Delete(session string) error {
+	return storage.DeleteSession(session)
+}
