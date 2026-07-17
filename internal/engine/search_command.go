@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/harishnagaraju/astramind/internal/features/history"
-	"github.com/harishnagaraju/astramind/internal/features/search"
 	"github.com/harishnagaraju/astramind/internal/infrastructure/renderer"
 )
 
@@ -16,7 +14,7 @@ func (c *searchCommand) Execute(
 	input string,
 ) (bool, error) {
 
-	searchService := search.NewService(history.NewService())
+	searchService := app.deps.SearchService
 
 	if strings.HasPrefix(input, "/search ") || input == "/search" {
 

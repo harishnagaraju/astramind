@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/harishnagaraju/astramind/internal/features/session"
 	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
 )
 
@@ -13,7 +12,7 @@ type sessionCommand struct{}
 func (c *sessionCommand) Execute(app *App, input string) (bool, error) {
 
 	// Create once for this command execution.
-	svc := session.NewService()
+	svc := app.deps.SessionService
 
 	// /load
 	if strings.HasPrefix(input, "/load ") {

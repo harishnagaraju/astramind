@@ -3,7 +3,6 @@ package engine
 import (
 	"fmt"
 
-	"github.com/harishnagaraju/astramind/internal/features/history"
 	"github.com/harishnagaraju/astramind/internal/infrastructure/config"
 	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
 )
@@ -15,7 +14,7 @@ func (c *conversationCommand) Execute(
 	input string,
 ) (bool, error) {
 
-	historyService := history.NewService()
+	historyService := app.deps.HistoryService
 
 	switch input {
 

@@ -2,8 +2,6 @@ package engine
 
 import (
 	"fmt"
-
-	"github.com/harishnagaraju/astramind/internal/features/export"
 )
 
 type exportCommand struct{}
@@ -13,7 +11,7 @@ func (c *exportCommand) Execute(
 	input string,
 ) (bool, error) {
 
-	exportService := export.NewService()
+	exportService := app.deps.ExportService
 
 	switch input {
 

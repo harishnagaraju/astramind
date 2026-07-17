@@ -8,7 +8,11 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/harishnagaraju/astramind/internal/features/chat"
+	"github.com/harishnagaraju/astramind/internal/features/export"
+	"github.com/harishnagaraju/astramind/internal/features/history"
 	"github.com/harishnagaraju/astramind/internal/features/kb"
+	"github.com/harishnagaraju/astramind/internal/features/search"
+	"github.com/harishnagaraju/astramind/internal/features/session"
 	"github.com/harishnagaraju/astramind/internal/infrastructure/ai"
 )
 
@@ -64,6 +68,14 @@ func (a *App) initialize() error {
 			KnowledgeBase:   a.deps.KnowledgeBase,
 		},
 	)
+
+	a.deps.HistoryService = history.NewService()
+
+	a.deps.SessionService = session.NewService()
+
+	a.deps.ExportService = export.NewService()
+
+	a.deps.SearchService = search.NewService(a.deps.HistoryService)
 
 	a.dispatcher = newDispatcher(a)
 
