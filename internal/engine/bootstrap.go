@@ -71,7 +71,7 @@ func (a *App) initialize() error {
 
 	a.deps.HistoryService = history.NewService()
 
-	a.deps.SessionService = session.NewService()
+	a.deps.SessionService = session.NewService(a.deps.HistoryService)
 
 	a.deps.ExportService = export.NewService()
 
