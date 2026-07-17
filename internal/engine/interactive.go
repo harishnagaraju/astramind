@@ -1,7 +1,6 @@
 package engine
 
 import "github.com/harishnagaraju/astramind/internal/infrastructure/config"
-import "github.com/harishnagaraju/astramind/internal/features/history"
 import "github.com/harishnagaraju/astramind/internal/infrastructure/models"
 import "github.com/harishnagaraju/astramind/internal/infrastructure/ai"
 
@@ -17,7 +16,7 @@ func (a *App) runInteractive() error {
 
 	var err error
 	reader := bufio.NewReader(os.Stdin)
-	historyService := history.NewService()
+	historyService := a.deps.HistoryService
 
 	a.runtime.Conversation, err = historyService.Load(
 		a.activeSession,

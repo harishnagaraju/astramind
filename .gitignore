@@ -50,4 +50,6 @@ data/
 
 # Optional: keep directories in Git
 !exports/.gitkeep
-!data/.gitkeeptesting*.md
+
+!data/.gitkeep
+testing*.md
