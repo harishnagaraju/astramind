@@ -2,6 +2,7 @@ package ai
 
 import (
 	"context"
+	"hash/fnv"
 	"strings"
 )
 
@@ -26,6 +27,43 @@ func (m *MockProvider) Chat(
 	)
 
 	return reply, nil
+}
+
+// Embed returns a deterministic pseudo-embedding derived from the
+// input text. It performs no network calls, which makes it safe for
+// unit tests that exercise embedding-based logic (e.g. cosine
+// similarity ranking) without depending on a real provider.
+func (m *MockProvider) Embed(
+	request EmbeddingRequest,
+) ([]float32, error) {
+
+	const dimensions = 16
+
+	vector := make([]float32, dimensions)
+
+	words := strings.Fields(
+		strings.ToLower(request.Text),
+	)
+
+	if len(words) == 0 {
+		return vector, nil
+	}
+
+	for _, word := range words {
+
+		h := fnv.New32a()
+		h.Write([]byte(word))
+		hash := h.Sum32()
+
+		index := int(hash) % dimensions
+		if index < 0 {
+			index += dimensions
+		}
+
+		vector[index] += 1
+	}
+
+	return vector, nil
 }
 
 func (m *MockProvider) Stream(

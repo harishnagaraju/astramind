@@ -15,8 +15,9 @@ type Document struct {
 
 // Chunk represents a portion of a document.
 type Chunk struct {
-	ID         string `json:"id"`
-	DocumentID string `json:"document_id"`
-	Index      int    `json:"index"`
-	Content    string `json:"content"`
+	ID         string    `json:"id"`
+	DocumentID string    `json:"document_id"`
+	Index      int       `json:"index"`
+	Content    string    `json:"content"`
+	Embedding  []float32 `json:"embedding,omitempty"`
 }

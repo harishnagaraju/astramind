@@ -85,3 +85,18 @@ func (pm *ProviderManager) Stream(
 		request,
 	)
 }
+
+func (pm *ProviderManager) Embed(
+	request EmbeddingRequest,
+) ([]float32, error) {
+
+	embeddingProvider, ok := pm.provider.(EmbeddingProvider)
+	if !ok {
+		return nil, fmt.Errorf(
+			"provider %s does not support embeddings",
+			pm.provider.Name(),
+		)
+	}
+
+	return embeddingProvider.Embed(request)
+}
