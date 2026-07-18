@@ -31,6 +31,9 @@ func (s *Service) HandleKnowledgeCommand(input string) (bool, error) {
 	case "search":
 		return true, s.handleKBSearch(fields)
 
+	case "ssearch":
+		return true, s.handleKBSemanticSearch(fields)
+
 	case "remove":
 		return true, s.handleKBRemove(fields)
 
@@ -113,6 +116,39 @@ func (s *Service) handleKBSearch(args []string) error {
 		fmt.Printf(
 			"[%s]\n%s\n\n",
 			chunk.DocumentID,
+			chunk.Content,
+		)
+	}
+
+	return nil
+}
+
+func (s *Service) handleKBSemanticSearch(args []string) error {
+
+	if len(args) < 3 {
+		return ErrInvalidCommand
+	}
+
+	query := strings.Join(args[2:], " ")
+
+	results, err := s.deps.KnowledgeBase.SemanticSearch(query)
+	if err != nil {
+		return err
+	}
+
+	if len(results) == 0 {
+		fmt.Println("No matching knowledge found.")
+		return nil
+	}
+
+	fmt.Println("Semantic Search Results")
+	fmt.Println("------------------------")
+
+	for _, chunk := range results {
+		fmt.Printf(
+			"[%s] (similarity: %.3f)\n%s\n\n",
+			chunk.DocumentID,
+			chunk.Score,
 			chunk.Content,
 		)
 	}

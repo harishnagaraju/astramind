@@ -34,6 +34,7 @@ func (c *builtinCommand) Execute(app *App, input string) (bool, error) {
 		fmt.Println("/kb import <file> - Import a text or markdown document")
 		fmt.Println("/kb list          - List imported documents")
 		fmt.Println("/kb search <text> - Search the knowledge base")
+		fmt.Println("/kb ssearch <text> - Semantic search (embedding-based)")
 		fmt.Println("/kb remove <id>   - Remove a document")
 		fmt.Println("/kb clear         - Remove all documents")
 		fmt.Println("/kb stats         - Show knowledge base statistics")

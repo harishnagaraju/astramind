@@ -189,6 +189,31 @@ func (m *Manager) Search(query string) ([]SearchResult, error) {
 	return repository.Search(query)
 }
 
+// SemanticSearch performs an embedding-based search of the knowledge
+// base. Unlike ImportDocument's graceful degradation, this fails
+// loudly if no embedder is configured - a silent empty result here
+// would be indistinguishable from "no matches found".
+func (m *Manager) SemanticSearch(query string) ([]SemanticSearchResult, error) {
+
+	if m.embedder == nil {
+		return nil, fmt.Errorf(
+			"semantic search requires an embedder to be configured",
+		)
+	}
+
+	queryEmbedding, err := m.embedder.Embed(query)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to embed query: %w",
+			err,
+		)
+	}
+
+	repository := NewRepository(m)
+
+	return repository.SemanticSearch(queryEmbedding)
+}
+
 // Stats returns knowledge base statistics.
 func (m *Manager) Stats() (*Stats, error) {
 

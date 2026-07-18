@@ -44,8 +44,19 @@ TMP_SESSION="manualtest_tmp_$$"
 KB_FILE_1="manualtest_kb1.md"
 KB_FILE_2="manualtest_kb2.md"
 
-echo "This is testing /kb import <filename> (file 1)" > "$KB_FILE_1"
-echo "This is testing /kb import <filename> (file 2)" > "$KB_FILE_2"
+# Topically distinct content (not near-duplicates) so semantic search
+# has something meaningful to distinguish, and so a paraphrase query
+# has zero substring overlap with either file - proving the gap
+# between keyword and semantic search rather than just smoke-testing
+# that both commands run without error.
+echo "The Eiffel Tower is a wrought-iron lattice tower located in Paris, France." > "$KB_FILE_1"
+echo "Photosynthesis allows plants to convert sunlight into chemical energy." > "$KB_FILE_2"
+
+# A paraphrase of file 2's content, sharing no contiguous substring
+# with either file. /kb search does a plain substring match on the
+# full phrase, so this should find nothing. /kb ssearch should still
+# surface manualtest_kb2.md by meaning.
+SEMANTIC_QUERY="how do plants get energy from the sun"
 
 echo "=========================================="
 echo "AstraMind Manual Command Walkthrough"
@@ -67,10 +78,12 @@ echo
 /searchall golang
 /kb import $KB_FILE_1
 /kb list
-/kb search import
+/kb search Paris
 /kb import $KB_FILE_2
 /kb list
 /kb stats
+/kb search $SEMANTIC_QUERY
+/kb ssearch $SEMANTIC_QUERY
 /kb clear
 /kb list
 /kb stats
@@ -109,6 +122,8 @@ check "Current Configuration"               "/config output"
 check "Session exported to exports"         "/export (txt + md)"
 check "Available Sessions"                  "/sessions output"
 check "Knowledge Search Results"            "/kb search hit"
+check "chunks embedded"                     "/kb import generates embeddings"
+check "Semantic Search Results"             "/kb ssearch hit"
 check "Knowledge base cleared"              "/kb clear"
 check "Knowledge base is empty"             "/kb list after clear"
 check "Created and switched to session: ${TMP_SESSION}" "/new session"
@@ -116,3 +131,9 @@ check "Loaded session: default"             "/load default"
 check "Deleted session: ${TMP_SESSION}"     "/delete session"
 check "Current AI Provider"                 "/provider output"
 check "Goodbye!"                            "clean exit"
+
+echo
+echo "Manual comparison (not auto-checked - eyeball the log above):"
+echo "  /kb search \"$SEMANTIC_QUERY\"  -> should say 'No matching knowledge found.'"
+echo "  /kb ssearch \"$SEMANTIC_QUERY\" -> should surface manualtest_kb2.md by meaning"
+echo "  If both found it, or neither did, the semantic path isn't adding real value yet."

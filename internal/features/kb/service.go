@@ -27,6 +27,11 @@ func (s *Service) Search(query string) ([]SearchResult, error) {
 	return s.manager.Search(query)
 }
 
+// SemanticSearch performs an embedding-based search of the knowledge base.
+func (s *Service) SemanticSearch(query string) ([]SemanticSearchResult, error) {
+	return s.manager.SemanticSearch(query)
+}
+
 // Remove removes a document.
 func (s *Service) Remove(id string) error {
 	return s.manager.RemoveKnowledge(id)
