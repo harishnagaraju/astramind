@@ -1,6 +1,7 @@
 package kb
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,7 +10,8 @@ import (
 
 // Manager coordinates knowledge base operations.
 type Manager struct {
-	storage Storage
+	storage  Storage
+	embedder Embedder
 }
 
 // NewManager creates a new knowledge base manager.
@@ -17,6 +19,14 @@ func NewManager(storage Storage) *Manager {
 	return &Manager{
 		storage: storage,
 	}
+}
+
+// SetEmbedder configures the embedder used to generate vector
+// embeddings for chunks during import. It is optional - if never
+// set, ImportDocument behaves exactly as before (keyword search
+// only, no embeddings generated).
+func (m *Manager) SetEmbedder(embedder Embedder) {
+	m.embedder = embedder
 }
 
 func (m *Manager) SaveDocument(doc *Document) error {
@@ -125,6 +135,39 @@ func (m *Manager) ImportDocument(path string) (*Document, error) {
 
 	// Record the number of generated chunks.
 	doc.ChunkCount = len(chunks)
+
+	// Generate embeddings for each chunk, if an embedder is
+	// configured. A failure here does not fail the import - the
+	// chunk simply falls back to keyword search, since Embedding
+	// stays nil.
+	if m.embedder == nil {
+		fmt.Println("(no embedder configured - skipping embeddings)")
+	} else {
+
+		embedded := 0
+
+		for i := range chunks {
+
+			embedding, err := m.embedder.Embed(chunks[i].Content)
+			if err != nil {
+				fmt.Printf(
+					"(embedding failed for chunk %d: %v)\n",
+					i,
+					err,
+				)
+				continue
+			}
+
+			chunks[i].Embedding = embedding
+			embedded++
+		}
+
+		fmt.Printf(
+			"(%d/%d chunks embedded)\n",
+			embedded,
+			len(chunks),
+		)
+	}
 
 	// Persist the chunks.
 	if err := m.SaveChunks(chunks); err != nil {

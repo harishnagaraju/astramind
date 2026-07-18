@@ -62,6 +62,13 @@ func (a *App) initialize() error {
 
 	a.deps.KnowledgeBase = kb.NewManager(storage)
 
+	if _, ok := provider.(ai.EmbeddingProvider); ok {
+		a.deps.KnowledgeBase.SetEmbedder(&providerEmbedder{
+			providerManager: a.deps.ProviderManager,
+			apiKey:          a.apiKey,
+		})
+	}
+
 	a.deps.ChatService = chat.NewService(
 		chat.Dependencies{
 			ProviderManager: a.deps.ProviderManager,
