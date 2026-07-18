@@ -77,7 +77,8 @@ AstraMind aims to become a flexible AI platform that combines conversational int
 ## Knowledge Base Commands
 - `/kb import <file>`   Import a text or markdown document
 - `/kb list`            List imported documents
-- `/kb search <text>`   Search the knowledge base
+- `/kb search <text>`   Search the knowledge base (keyword)
+- `/kb ssearch <text>`  Search the knowledge base (semantic, embedding-based)
 - `/kb remove <id>`     Remove a document
 - `/kb clear`           Remove all documents
 - `/kb stats`           Show knowledge base statistics
@@ -344,6 +345,13 @@ Chunks : 1
 
 Found 3 matching chunks
 
+/kb ssearch how does the system handle errors
+
+Semantic Search Results
+------------------------
+[8f3a2d...] (similarity: 0.812)
+...matching chunk content by meaning, not exact wording...
+
 /kb stats
 
 Documents : 1
@@ -559,4 +567,3 @@ AstraMind is designed and maintained by Harish Nagaraju.
 ## Project Planning
 
 See [Roadmap](docs/roadmap.md) for upcoming releases and features.
-
