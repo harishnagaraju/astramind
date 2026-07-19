@@ -12,12 +12,29 @@ import (
 // lifecycle operations (Create/Exists) that don't belong in History.
 type Service struct {
 	history *history.Service
+	store   Store
 }
 
 // NewService creates a new session service backed by the given
-// History service.
+// History service. Create/Exists default to the real, on-disk
+// data/sessions folder - the same location and behavior as before
+// this store was made injectable. Every existing caller of
+// NewService() is unaffected.
 func NewService(historySvc *history.Service) *Service {
-	return &Service{history: historySvc}
+	return &Service{
+		history: historySvc,
+		store:   storage.NewFileHistoryStore("data"),
+	}
+}
+
+// NewServiceWithStore creates a session service backed by the given
+// History service and Store. Primarily for tests that want isolation
+// from the real data/sessions folder.
+func NewServiceWithStore(historySvc *history.Service, store Store) *Service {
+	return &Service{
+		history: historySvc,
+		store:   store,
+	}
 }
 
 // Save stores a conversation as a session.
@@ -56,7 +73,7 @@ func (s *Service) Create(
 	name string,
 ) error {
 
-	return storage.CreateSession(name)
+	return s.store.CreateSession(name)
 }
 
 // Exists checks whether a session exists.
@@ -64,5 +81,5 @@ func (s *Service) Exists(
 	name string,
 ) bool {
 
-	return storage.SessionExists(name)
+	return s.store.SessionExists(name)
 }
