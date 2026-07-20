@@ -214,6 +214,19 @@ kill "$WEB_PID" 2>/dev/null || true
 trap - EXIT
 rm -f "$WEB_FILE_1" "$WEB_FILE_2"
 
+# The web smoke test imports real documents into the actual
+# data/ knowledge base (the same one used interactively and via
+# the browser) - clean them up now, or they silently pollute every
+# real /kb ask afterward, the same class of bug fixed earlier for
+# the search tests writing into the real data/sessions folder.
+echo
+echo "Cleaning up test documents from the knowledge base..."
+CLEANUP_SCRIPT=$(mktemp)
+echo "/kb clear" > "$CLEANUP_SCRIPT"
+echo "exit" >> "$CLEANUP_SCRIPT"
+"$BIN" --script "$CLEANUP_SCRIPT" > /dev/null 2>&1 || true
+rm -f "$CLEANUP_SCRIPT"
+
 echo
 echo "=========================================="
 echo "All done. Logs:"

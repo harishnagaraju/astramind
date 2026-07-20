@@ -5,6 +5,79 @@ All notable changes to AstraMind are documented in this file.
 The project follows [Semantic Versioning](https://semver.org/).
 ---
 ---
+## [v0.9.0] - 2026-07-21
+
+### Highlights
+
+This release turns AstraMind from a keyword-search Knowledge Base into a working Retrieval-Augmented Generation assistant, and closes out a substantial architectural cleanup identified in a full review of the v0.8.0 codebase. It also adds a local, browser-based interface for non-technical users, alongside the existing CLI. A known model-capability limitation was found and documented through controlled testing - see Known Limitations below before treating this as demo-ready for high-stakes use.
+
+### Added
+
+#### Semantic Search & RAG
+
+- `ai.EmbeddingProvider` interface (Ollama, OpenAI, and a deterministic mock for tests), matching the existing `StreamingProvider` pattern
+- Embedding generation wired into `/kb import`
+- `kb.CosineSimilarity` and `Repository.SemanticSearch`, ranking chunks by embedding similarity rather than keyword count
+- `/kb ssearch <text>` - semantic search, kept as a separate command alongside keyword `/kb search`
+- `kb.BuildSemanticPrompt` and `/kb ask <question>` - completes the RAG loop (import -> chunk -> embed -> retrieve -> **answer**), citing sources with every response
+- Local web UI (`--web` flag): embedded HTTP server and single-file browser interface, exposing import/list/ask over a JSON API, reusing the same backend and provider configuration as the CLI (online or offline)
+
+#### Architecture
+
+- `Dependencies` struct extended with `HistoryService`, `SessionService`, `ExportService`, `SearchService` - every feature service now constructed once at startup and shared, instead of built ad-hoc per command
+- `storage.FileHistoryStore` - configurable-directory session storage, mirroring the existing `kb.JSONStorage` pattern
+- `history.Store` and `session.Store` interfaces, enabling isolated, test-injectable storage
+- `--script` mode routes through the full command dispatcher, matching interactive mode
+
+#### Testing
+
+- First unit tests for `history` and `session` packages (previously untested)
+- Semantic search, RAG prompt, and context-window regression test suites
+- `tests/integration/manual_testing.sh` - full manual walkthrough including a live keyword-vs-semantic comparison and a `--web` API smoke test
+
+### Improved
+
+- `search` decoupled from `storage`, now depends on `history` (`search -> history -> storage`)
+- `session` decoupled from duplicated storage logic, now delegates to `history` for Save/Load/Delete/List
+- `README.md` and `docs/roadmap.md` updated to reflect delivered semantic search and RAG
+
+### Fixed
+
+- Silent embedding failure during `/kb import`, caused by two missing provider files - now surfaced with visible import feedback instead of failing invisibly
+- Test pollution of the real `data/sessions` folder - storage location is now injectable, and tests use isolated temp directories
+- Ollama RAG answers truncating mid-generation: no context window was ever specified, so Ollama fell back to its own small default; requests now set `num_ctx: 8192`
+- `SemanticSearch` had no result limit - every embedded chunk in the entire knowledge base was returned on every question with no cap, which is harmless with a few test documents but would stuff the whole knowledge base into every prompt at real scale; capped to the top 5 most relevant chunks
+- Broken `.gitignore` line from a prior append with no trailing newline
+- Compiled binary (`astramind`) no longer tracked in git
+
+### Removed
+
+- `chat/dispatcher.go` and `chat/script.go` - dead code superseded by dispatcher-based `--script` routing
+- `kb.Service` - unused wrapper with zero callers anywhere in the codebase
+
+### Known Limitations
+
+- **`gemma3:1b` (the smallest practical local Ollama model) can fabricate facts and omit valid entries on exhaustive multi-item extraction, even with correct source text directly in its context.** Proven via a controlled experiment: an identical prompt, identical document, and identical question given to `gemma3:1b` versus a ~25B-parameter model (`google/gemma-4-26b-a4b-it` via OpenRouter) - the larger model correctly listed all 5 matching entries with zero errors; the smaller model returned only 2 of 5, and in an earlier run fabricated a duplicate entry with an invented date. This is a model-capability ceiling, not a defect in AstraMind's retrieval, prompt construction, or context handling - all of which were independently verified as correct during this investigation.
+- Practical consequence: `/kb ask` and the web UI's answer generation should not be treated as reliable for high-stakes use (e.g. legal research) on `gemma3:1b` or comparably small local models. A real minimum local-model size/hardware floor has not yet been established - testing a mid-size local model (e.g. `gemma2:9b`) against realistic hardware is a recommended next step before any customer-facing demo of the RAG feature.
+- `/about` and `/config` still report `v0.8.0` - the version constant has not yet been bumped for this release.
+
+### Tested
+
+- go fmt
+- go vet
+- go build
+- go test -v ./...
+- tests/integration/run_all.sh
+- tests/integration/manual_testing.sh (including the `--web` API smoke test)
+
+### Verified
+
+- Semantic search and RAG proven end-to-end on real Ollama + `nomic-embed-text`, including a real, previously-unseen document (not a synthetic test fixture)
+- No test-created sessions or documents polluting the real `data/` folder after the storage isolation and test-cleanup fixes
+- Model-capability limitation isolated via a controlled comparison (see Known Limitations), confirming the issue is not in AstraMind's code
+
+---
+
 ## [v0.8.0] - 2026-07-13
 
 ### Highlights
