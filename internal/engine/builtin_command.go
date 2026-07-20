@@ -38,6 +38,7 @@ func (c *builtinCommand) Execute(app *App, input string) (bool, error) {
 		fmt.Println("/kb remove <id>   - Remove a document")
 		fmt.Println("/kb clear         - Remove all documents")
 		fmt.Println("/kb stats         - Show knowledge base statistics")
+		fmt.Println("/kb ask <question> - Ask a question, answered from your knowledge base (RAG)")
 
 		fmt.Println()
 

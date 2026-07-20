@@ -1,7 +1,13 @@
 package chat
 
-import "strings"
-import "fmt"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/harishnagaraju/astramind/internal/features/kb"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/ai"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
+)
 
 // HandleKnowledgeCommand processes /kb commands.
 func (s *Service) HandleKnowledgeCommand(input string) (bool, error) {
@@ -33,6 +39,9 @@ func (s *Service) HandleKnowledgeCommand(input string) (bool, error) {
 
 	case "ssearch":
 		return true, s.handleKBSemanticSearch(fields)
+
+	case "ask":
+		return true, s.handleKBAsk(fields)
 
 	case "remove":
 		return true, s.handleKBRemove(fields)
@@ -151,6 +160,52 @@ func (s *Service) handleKBSemanticSearch(args []string) error {
 			chunk.Score,
 			chunk.Content,
 		)
+	}
+
+	return nil
+}
+
+func (s *Service) handleKBAsk(args []string) error {
+
+	if len(args) < 3 {
+		return ErrInvalidCommand
+	}
+
+	question := strings.Join(args[2:], " ")
+
+	results, err := s.deps.KnowledgeBase.SemanticSearch(question)
+	if err != nil {
+		return err
+	}
+
+	if len(results) == 0 {
+		fmt.Println("No relevant knowledge found to answer this question.")
+		return nil
+	}
+
+	prompt := kb.BuildSemanticPrompt(question, results)
+
+	reply, err := s.deps.ProviderManager.Chat(ai.ChatRequest{
+		Messages: []models.Message{
+			{Role: "user", Content: prompt},
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(reply)
+	fmt.Println()
+	fmt.Println("Sources:")
+
+	seen := make(map[string]bool)
+
+	for _, result := range results {
+		if seen[result.DocumentID] {
+			continue
+		}
+		seen[result.DocumentID] = true
+		fmt.Printf("  [%s]\n", result.DocumentID)
 	}
 
 	return nil

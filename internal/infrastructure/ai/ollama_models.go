@@ -5,6 +5,18 @@ type OllamaChatRequest struct {
 	Model    string              `json:"model"`
 	Messages []OllamaChatMessage `json:"messages"`
 	Stream   bool                `json:"stream"`
+	Options  *OllamaOptions      `json:"options,omitempty"`
+}
+
+// OllamaOptions configures generation parameters for the Ollama API.
+type OllamaOptions struct {
+	// NumCtx sets the context window size, in tokens. Ollama's own
+	// default (commonly 2048) is too small for RAG prompts, which
+	// combine system instructions, several retrieved chunks, the
+	// question, and the answer all within the same window - once
+	// that combined total exceeds the window, Ollama truncates the
+	// response mid-generation rather than erroring.
+	NumCtx int `json:"num_ctx,omitempty"`
 }
 
 // OllamaChatMessage represents a single chat message.

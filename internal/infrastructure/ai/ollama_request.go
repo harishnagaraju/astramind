@@ -22,6 +22,15 @@ func buildOllamaRequest(
 	ollamaReq := OllamaChatRequest{
 		Model:  model,
 		Stream: stream,
+		Options: &OllamaOptions{
+			// 8192 gives RAG prompts (instructions + retrieved
+			// chunks + question + answer) real room to complete,
+			// while staying modest enough for older/CPU-only
+			// hardware. Ollama's own default (commonly 2048) was
+			// causing answers to truncate mid-generation once the
+			// combined prompt+response exceeded it.
+			NumCtx: 8192,
+		},
 	}
 
 	for _, msg := range request.Messages {

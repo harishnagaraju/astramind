@@ -84,6 +84,7 @@ echo
 /kb stats
 /kb search $SEMANTIC_QUERY
 /kb ssearch $SEMANTIC_QUERY
+/kb ask $SEMANTIC_QUERY
 /kb clear
 /kb list
 /kb stats
@@ -124,6 +125,7 @@ check "Available Sessions"                  "/sessions output"
 check "Knowledge Search Results"            "/kb search hit"
 check "chunks embedded"                     "/kb import generates embeddings"
 check "Semantic Search Results"             "/kb ssearch hit"
+check "Sources:"                            "/kb ask completed the RAG loop"
 check "Knowledge base cleared"              "/kb clear"
 check "Knowledge base is empty"             "/kb list after clear"
 check "Created and switched to session: ${TMP_SESSION}" "/new session"
@@ -136,4 +138,85 @@ echo
 echo "Manual comparison (not auto-checked - eyeball the log above):"
 echo "  /kb search \"$SEMANTIC_QUERY\"  -> should say 'No matching knowledge found.'"
 echo "  /kb ssearch \"$SEMANTIC_QUERY\" -> should surface manualtest_kb2.md by meaning"
-echo "  If both found it, or neither did, the semantic path isn't adding real value yet."
+echo "  /kb ask \"$SEMANTIC_QUERY\"     -> should give an actual answer, citing manualtest_kb2.md as the source"
+echo "  If both search modes found it, or neither did, the semantic path isn't adding real value yet."
+
+# ==========================================
+# PART 2: Web UI API smoke test (--web mode)
+# ==========================================
+#
+# This drives the same backend through the local web server's JSON
+# API instead of stdin - the same code path the browser UI uses.
+# Also confirms --web launches correctly and stays up.
+echo
+echo "=========================================="
+echo "Web UI API Smoke Test (--web mode)"
+echo "=========================================="
+echo
+
+WEB_ADDR="localhost:8420"
+WEB_FILE_1="manualtest_web1.md"
+WEB_FILE_2="manualtest_web2.md"
+WEB_LOG="manual_test_web_${TIMESTAMP}.log"
+
+echo "The Eiffel Tower is a wrought-iron lattice tower located in Paris, France." > "$WEB_FILE_1"
+echo "Photosynthesis allows plants to convert sunlight into chemical energy." > "$WEB_FILE_2"
+
+"$BIN" --web > "$WEB_LOG" 2>&1 &
+WEB_PID=$!
+
+# Always clean up the background server and fixture files, even if a
+# later step in this section fails.
+trap 'kill "$WEB_PID" 2>/dev/null || true; rm -f "$WEB_FILE_1" "$WEB_FILE_2"' EXIT
+
+echo "Waiting for server to start (pid $WEB_PID)..."
+sleep 2
+
+STATUS_RESPONSE=$(curl -s "http://${WEB_ADDR}/api/status" || echo "CURL_FAILED")
+echo "GET /api/status -> $STATUS_RESPONSE"
+
+curl -s -o /dev/null -w "" -F "file=@${WEB_FILE_1}" "http://${WEB_ADDR}/api/documents" || true
+curl -s -o /dev/null -w "" -F "file=@${WEB_FILE_2}" "http://${WEB_ADDR}/api/documents" || true
+
+DOCS_RESPONSE=$(curl -s "http://${WEB_ADDR}/api/documents" || echo "CURL_FAILED")
+echo "GET /api/documents -> $DOCS_RESPONSE"
+
+# Extract manualtest_web2.md's document ID from the /api/documents
+# response, so the /api/ask citation check compares against the
+# actual ID the API returns - not the filename, which never appears
+# in /api/ask's response at all.
+PHOTOSYNTHESIS_DOC_ID=$(echo "$DOCS_RESPONSE" | grep -o '"id":"[^"]*","name":"manualtest_web2.md"' | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
+
+ASK_RESPONSE=$(curl -s -X POST \
+    -H "Content-Type: application/json" \
+    -d "{\"question\":\"$SEMANTIC_QUERY\"}" \
+    "http://${WEB_ADDR}/api/ask" || echo "CURL_FAILED")
+echo "POST /api/ask -> $ASK_RESPONSE"
+
+echo
+echo "Web API sanity scan:"
+
+web_check() {
+    if echo "$2" | grep -q "$1"; then
+        echo "  [OK]      $3"
+    else
+        echo "  [MISSING] $3"
+    fi
+}
+
+web_check "provider"                "$STATUS_RESPONSE" "/api/status returned provider info"
+web_check "manualtest_web1.md"      "$DOCS_RESPONSE"    "/api/documents lists imported file 1"
+web_check "manualtest_web2.md"      "$DOCS_RESPONSE"    "/api/documents lists imported file 2"
+web_check "\"sources\""             "$ASK_RESPONSE"     "/api/ask returned cited sources"
+web_check "$PHOTOSYNTHESIS_DOC_ID"  "$ASK_RESPONSE"     "/api/ask correctly cited the photosynthesis doc"
+
+kill "$WEB_PID" 2>/dev/null || true
+trap - EXIT
+rm -f "$WEB_FILE_1" "$WEB_FILE_2"
+
+echo
+echo "=========================================="
+echo "All done. Logs:"
+echo "  Interactive walkthrough : $LOGFILE"
+echo "  Web server stdout       : $WEB_LOG"
+echo "=========================================="

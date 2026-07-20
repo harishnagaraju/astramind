@@ -27,3 +27,32 @@ func BuildPrompt(question string, results []SearchResult) string {
 
 	return builder.String()
 }
+
+// BuildSemanticPrompt builds a RAG prompt from a user question and
+// semantic (embedding-based) search results. Mirrors BuildPrompt's
+// format exactly, so downstream rendering doesn't need to know which
+// search mode produced the results.
+func BuildSemanticPrompt(question string, results []SemanticSearchResult) string {
+	var builder strings.Builder
+
+	builder.WriteString("You are answering questions using the provided knowledge base.\n\n")
+
+	builder.WriteString("Knowledge Base:\n\n")
+
+	for _, result := range results {
+		builder.WriteString("[Document: ")
+		builder.WriteString(result.DocumentID)
+		builder.WriteString("]\n")
+
+		builder.WriteString(result.Content)
+		builder.WriteString("\n\n")
+	}
+
+	builder.WriteString("Question:\n")
+	builder.WriteString(question)
+	builder.WriteString("\n\n")
+
+	builder.WriteString("Answer using only the supplied knowledge. If the knowledge base does not contain enough information to answer, say so explicitly rather than guessing.")
+
+	return builder.String()
+}
