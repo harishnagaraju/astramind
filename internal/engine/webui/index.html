@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AstraMind</title>
+<style>
+  :root {
+    --paper: #F5F3EE;
+    --paper-raised: #FBFAF7;
+    --ink: #1C2333;
+    --ink-soft: #4A5268;
+    --oxblood: #6B1F2A;
+    --oxblood-dark: #4E1620;
+    --brass: #8B7355;
+    --forest: #2D5F3E;
+    --border: #D8D3C7;
+    --serif: Georgia, "Times New Roman", Cambria, serif;
+    --mono: Consolas, "SF Mono", Menlo, "Courier New", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: var(--serif);
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 28px;
+    border-bottom: 2px solid var(--ink);
+    background: var(--paper-raised);
+  }
+
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .brand h1 {
+    font-size: 22px;
+    margin: 0;
+    letter-spacing: 0.02em;
+  }
+
+  .brand span.tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .status-stamp {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 6px 14px;
+    border: 2px solid var(--forest);
+    color: var(--forest);
+    border-radius: 3px;
+    transform: rotate(-1.5deg);
+    white-space: nowrap;
+  }
+
+  .status-stamp.offline { border-color: var(--brass); color: var(--brass); }
+  .status-stamp.unknown { border-color: var(--ink-soft); color: var(--ink-soft); }
+
+  main {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    min-height: calc(100vh - 68px);
+  }
+
+  @media (max-width: 780px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  aside {
+    border-right: 1px solid var(--border);
+    padding: 24px;
+    background: var(--paper-raised);
+  }
+
+  aside h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    margin: 0 0 14px 0;
+    font-family: var(--mono);
+    font-weight: 600;
+  }
+
+  .upload-box {
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+
+  .upload-box input[type="file"] {
+    display: block;
+    width: 100%;
+    font-family: var(--serif);
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  button {
+    font-family: var(--mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 3px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background 120ms ease;
+  }
+
+  button:hover { background: var(--oxblood-dark); }
+  button:focus-visible { outline: 3px solid var(--brass); outline-offset: 2px; }
+  button:disabled { background: var(--border); cursor: not-allowed; }
+
+  .doc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .doc-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .doc-list li .doc-name {
+    font-weight: 600;
+    display: block;
+  }
+
+  .doc-list li .doc-id {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-soft);
+    display: block;
+    margin-top: 2px;
+  }
+
+  .doc-list .empty {
+    color: var(--ink-soft);
+    font-style: italic;
+    font-size: 13px;
+  }
+
+  section.qa {
+    padding: 32px 40px;
+    max-width: 760px;
+  }
+
+  .qa-intro {
+    color: var(--ink-soft);
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+
+  .ask-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+
+  .ask-form textarea {
+    flex: 1;
+    font-family: var(--serif);
+    font-size: 15px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    resize: vertical;
+    min-height: 48px;
+    background: var(--paper-raised);
+    color: var(--ink);
+  }
+
+  .ask-form textarea:focus-visible {
+    outline: 3px solid var(--brass);
+    outline-offset: 1px;
+  }
+
+  .answer-block {
+    border-left: 3px solid var(--oxblood);
+    padding: 4px 0 4px 20px;
+    margin-bottom: 20px;
+  }
+
+  .answer-block .question {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
+  .answer-block .answer-text {
+    font-size: 16px;
+    white-space: pre-wrap;
+    margin-bottom: 12px;
+  }
+
+  .sources {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+
+  .sources .sources-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .sources ol {
+    margin: 0;
+    padding-left: 18px;
+  }
+
+  .empty-state {
+    color: var(--ink-soft);
+    font-style: italic;
+    padding: 12px 0;
+  }
+
+  .loading {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--brass);
+  }
+
+  .error-text {
+    color: var(--oxblood);
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>AstraMind</h1>
+    <span class="tag">Private research assistant</span>
+  </div>
+  <div id="statusStamp" class="status-stamp unknown">Checking&hellip;</div>
+</header>
+
+<main>
+  <aside>
+    <h2>Your Documents</h2>
+    <div class="upload-box">
+      <input type="file" id="fileInput" accept=".txt,.md">
+      <button id="uploadBtn">Import Document</button>
+    </div>
+    <ul class="doc-list" id="docList">
+      <li class="empty">No documents imported yet.</li>
+    </ul>
+  </aside>
+
+  <section class="qa">
+    <p class="qa-intro">
+      Ask a question. AstraMind answers using only the documents you've imported,
+      and cites its source with every answer.
+    </p>
+
+    <div class="ask-form">
+      <textarea id="questionInput" placeholder="Ask a question about your documents&hellip;"></textarea>
+      <button id="askBtn">Ask</button>
+    </div>
+
+    <div id="answers"></div>
+  </section>
+</main>
+
+<script>
+(function () {
+  const statusStamp = document.getElementById('statusStamp');
+  const docList = document.getElementById('docList');
+  const fileInput = document.getElementById('fileInput');
+  const uploadBtn = document.getElementById('uploadBtn');
+  const questionInput = document.getElementById('questionInput');
+  const askBtn = document.getElementById('askBtn');
+  const answers = document.getElementById('answers');
+
+  function escapeHtml(s) {
+    const d = document.createElement('div');
+    d.innerText = s;
+    return d.innerHTML;
+  }
+
+  async function refreshStatus() {
+    try {
+      const res = await fetch('/api/status');
+      const data = await res.json();
+      statusStamp.textContent = data.provider === 'ollama' ? 'Local / Offline' : 'Online (' + data.provider + ')';
+      statusStamp.className = 'status-stamp ' + (data.provider === 'ollama' ? 'offline' : '');
+    } catch (e) {
+      statusStamp.textContent = 'Unavailable';
+      statusStamp.className = 'status-stamp unknown';
+    }
+  }
+
+  async function refreshDocuments() {
+    try {
+      const res = await fetch('/api/documents');
+      const docs = await res.json();
+
+      if (!docs || docs.length === 0) {
+        docList.innerHTML = '<li class="empty">No documents imported yet.</li>';
+        return;
+      }
+
+      docList.innerHTML = docs.map(function (d) {
+        return '<li><span class="doc-name">' + escapeHtml(d.name) +
+               '</span><span class="doc-id">' + escapeHtml(d.id) +
+               ' &middot; ' + d.chunk_count + ' chunk(s)</span></li>';
+      }).join('');
+    } catch (e) {
+      docList.innerHTML = '<li class="empty">Could not load documents.</li>';
+    }
+  }
+
+  uploadBtn.addEventListener('click', async function () {
+    if (!fileInput.files || fileInput.files.length === 0) return;
+
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = 'Importing\u2026';
+
+    try {
+      const res = await fetch('/api/documents', { method: 'POST', body: formData });
+      if (!res.ok) {
+        const err = await res.text();
+        alert('Import failed: ' + err);
+      } else {
+        fileInput.value = '';
+        await refreshDocuments();
+      }
+    } catch (e) {
+      alert('Import failed: ' + e.message);
+    } finally {
+      uploadBtn.disabled = false;
+      uploadBtn.textContent = 'Import Document';
+    }
+  });
+
+  askBtn.addEventListener('click', async function () {
+    const question = questionInput.value.trim();
+    if (!question) return;
+
+    askBtn.disabled = true;
+    askBtn.textContent = 'Asking\u2026';
+
+    const block = document.createElement('div');
+    block.className = 'answer-block';
+    block.innerHTML = '<div class="question">' + escapeHtml(question) +
+                       '</div><div class="loading">Thinking\u2026</div>';
+    answers.prepend(block);
+
+    try {
+      const res = await fetch('/api/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: question })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        block.innerHTML = '<div class="question">' + escapeHtml(question) +
+                           '</div><div class="error-text">' + escapeHtml(data.error || 'Something went wrong.') + '</div>';
+        return;
+      }
+
+      let sourcesHtml = '';
+      if (data.sources && data.sources.length > 0) {
+        sourcesHtml = '<div class="sources"><div class="sources-label">Sources</div><ol>' +
+          data.sources.map(function (s) { return '<li>' + escapeHtml(s) + '</li>'; }).join('') +
+          '</ol></div>';
+      }
+
+      block.innerHTML = '<div class="question">' + escapeHtml(question) + '</div>' +
+                         '<div class="answer-text">' + escapeHtml(data.answer) + '</div>' +
+                         sourcesHtml;
+
+      questionInput.value = '';
+    } catch (e) {
+      block.innerHTML = '<div class="question">' + escapeHtml(question) +
+                         '</div><div class="error-text">' + escapeHtml(e.message) + '</div>';
+    } finally {
+      askBtn.disabled = false;
+      askBtn.textContent = 'Ask';
+    }
+  });
+
+  questionInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      askBtn.click();
+    }
+  });
+
+  refreshStatus();
+  refreshDocuments();
+})();
+</script>
+
+</body>
+</html>

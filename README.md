@@ -1,5 +1,3 @@
-</>
-
 # AstraMind
 Intelligent Conversations. Infinite Possibilities.
 
@@ -7,13 +5,13 @@ Created and maintained by Harish Nagaraju.
 
 [![Go Build](https://github.com/harishnagaraju/astramind/actions/workflows/go.yml/badge.svg)](https://github.com/harishnagaraju/astramind/actions)
 ![Go](https://img.shields.io/badge/Go-1.24+-blue)
-![License](https://img.shields.io/badge/License-AGPL%203.0-green)
+![License](https://img.shields.io/badge/License-AGPL--3.0-green)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
-Current Stable Release: **v0.8.0**
+Current Release: **v0.9.0**
 
-AstraMind is a modular, AI-powered command-line assistant built in Go that provides a clean, scalable foundation for developing intelligent applications using Large Language Models (LLMs). Designed with a production-ready architecture, it supports multiple AI providers, conversation and session management, persistent chat history, export capabilities, automated testing, and a modern CI/CD pipeline.
+AstraMind is a modular, AI-powered command-line assistant built in Go that provides a clean, scalable foundation for developing intelligent applications using Large Language Models (LLMs). Designed with a production-ready architecture, it supports multiple AI providers, conversation and session management, persistent chat history, a local Knowledge Base with semantic search and Retrieval-Augmented Generation (RAG), a local web interface, export capabilities, automated testing, and a modern CI/CD pipeline.
 
-Built with simplicity, maintainability, and extensibility in mind, AstraMind demonstrates best practices for integrating AI into real-world applications through clean Go code, modular components, and industry-standard APIs. While it begins as a lightweight CLI assistant, its architecture is designed to evolve into a comprehensive AI platform capable of supporting web applications, local and cloud-based LLMs, Retrieval-Augmented Generation (RAG), streaming responses, AI agents, enterprise copilots, knowledge systems, and domain-specific AI solutions.
+Built with simplicity, maintainability, and extensibility in mind, AstraMind demonstrates best practices for integrating AI into real-world applications through clean Go code, modular components, and industry-standard APIs. It runs fully offline via Ollama, or against any OpenAI-compatible cloud endpoint, using the same code path either way.
 
 # Vision
 
@@ -21,33 +19,38 @@ AstraMind aims to become a flexible AI platform that combines conversational int
 
 # Current Features
 
-## Knowledge Base
+## Knowledge Base & RAG
 
 - Import text and Markdown documents
 - Automatic document chunking
-- Persistent JSON document storage
-- Persistent chunk storage
+- Persistent JSON document and chunk storage
 - Keyword search
-- Knowledge Base statistics
-- Knowledge Base management
+- **Semantic search** - embedding-based, ranks results by meaning rather than exact wording
+- **Retrieval-Augmented Generation (`/kb ask`)** - retrieves relevant content and generates a cited answer using the active AI provider
+- Knowledge Base statistics and management
+
+## Local Web Interface
+
+- `--web` flag launches a local, browser-based UI as an alternative to the CLI
+- Import documents and ask questions from a browser, no terminal required
+- Single embedded binary - no separate install, works fully offline when using Ollama
+- Uses the exact same backend and provider configuration as the CLI
 
 ## Multiple AI Providers
-- OpenAI
-- OpenRouter
-- Ollama
-- Mock AI
+- OpenAI (and any OpenAI-compatible endpoint, including OpenRouter - see below)
+- Ollama (local)
+- Mock AI (for testing/offline development)
 
 ## AI Providers
 - Multi-provider AI architecture
 - OpenAI-compatible API integration
-- OpenRouter integration
 - Native Ollama integration
 - Local LLM support
+- Embedding support (Ollama, OpenAI-compatible, and Mock)
 - Configurable API base URL
 - Configurable AI model selection
 - Runtime provider selection
-- Mock AI provider
-- Automatic provider failov
+- Automatic provider failover
 
 ## Streaming Responses
 - Real-time token streaming
@@ -56,7 +59,6 @@ AstraMind aims to become a flexible AI platform that combines conversational int
 - Ollama streaming
 - Automatic fallback to non-streaming providers
 - Mock streaming provider
-- End-to-end streaming support
 
 ## Conversation Management
 - Conversation memory
@@ -77,7 +79,9 @@ AstraMind aims to become a flexible AI platform that combines conversational int
 ## Knowledge Base Commands
 - `/kb import <file>`   Import a text or markdown document
 - `/kb list`            List imported documents
-- `/kb search <text>`   Search the knowledge base
+- `/kb search <text>`   Search the knowledge base (keyword)
+- `/kb ssearch <text>`  Search the knowledge base (semantic, embedding-based)
+- `/kb ask <question>`  Ask a question, answered from your knowledge base (RAG)
 - `/kb remove <id>`     Remove a document
 - `/kb clear`           Remove all documents
 - `/kb stats`           Show knowledge base statistics
@@ -106,19 +110,13 @@ AstraMind aims to become a flexible AI platform that combines conversational int
 - Markdown export
 
 ## Developer Features
-- Modular Go architecture
-- Provider abstraction layer
-- Streaming provider interface
+- Modular Go architecture (`engine` / `features` / `infrastructure` layers)
+- Dependency injection - every feature service constructed once at startup and shared
+- Provider abstraction layer (chat, streaming, and embeddings)
 - Configurable request builder
 - Structured error handling
 - GitHub Actions CI/CD
-- Automated testing
-- Unit tests
-- Integration tests
-- Streaming integration tests
-- HTTP error integration tests
-- Mock provider testing
-- Regression test suite
+- Automated testing (unit, integration, and a full manual walkthrough script)
 - GitHub Issues & Milestones
 - Release management
 - Semantic versioning
@@ -139,7 +137,16 @@ go build ./cmd/astramind
 
 ./astramind
 ```
-AstraMind supports any OpenAI-compatible API endpoint through the OPENAI_BASE_URL configuration.
+
+To use the local web interface instead of the CLI:
+
+```bash
+./astramind --web
+```
+
+This starts a local server and opens your default browser automatically.
+
+AstraMind supports any OpenAI-compatible API endpoint through the `OPENAI_BASE_URL` configuration.
 
 ## Environment Variables
 
@@ -154,12 +161,16 @@ OPENAI_BASE_URL=https://api.openai.com/v1
 
 ### OpenRouter
 
+OpenRouter is OpenAI-compatible, so it's configured the same way as OpenAI - point `OPENAI_BASE_URL` at OpenRouter and use an OpenRouter API key and model ID:
+
 ```env
-AI_PROVIDER=openrouter
-OPENAI_API_KEY=your_api_key
-OPENAI_MODEL=openrouter/auto
+AI_PROVIDER=openai
+OPENAI_API_KEY=your_openrouter_api_key
+OPENAI_MODEL=openai/gpt-4o-mini
 OPENAI_BASE_URL=https://openrouter.ai/api/v1
 ```
+
+Browse available models (including free-tier options) at https://openrouter.ai/models.
 
 ### Ollama
 
@@ -168,6 +179,13 @@ AI_PROVIDER=ollama
 OPENAI_MODEL=gemma3:1b
 OPENAI_BASE_URL=http://localhost:11434
 ```
+
+For semantic search and `/kb ask` to work with Ollama, an embedding model is also required:
+
+```bash
+ollama pull nomic-embed-text
+```
+
 ## Using Ollama
 
 Install Ollama
@@ -180,6 +198,7 @@ Download a model
 
 ```bash
 ollama pull gemma3:1b
+ollama pull nomic-embed-text
 ```
 
 Run the model
@@ -190,7 +209,7 @@ ollama run gemma3:1b
 
 # Testing
 
-AstraMind includes a comprehensive automated testing framework covering unit, integration, and regression testing.
+AstraMind includes a comprehensive automated testing framework covering unit, integration, and manual end-to-end testing.
 
 ## Unit Tests
 
@@ -202,9 +221,8 @@ go test -v ./...
 
 The unit test suite includes:
 
-* Unit tests
-* Provider integration tests
-* Streaming integration tests
+* Unit tests across every package
+* Provider integration tests (chat, streaming, and embeddings)
 * HTTP error handling tests
 * Invalid JSON handling tests
 * Connection failure tests
@@ -251,18 +269,17 @@ tests\integration\run_kb.bat
 ./tests/integration/run_kb.sh
 ```
 
-The Knowledge Base integration test validates the complete workflow:
+## Manual Testing
 
-* Import documents
-* List documents
-* Display Knowledge Base statistics
-* Search the Knowledge Base
-* Remove documents
-* Clear the Knowledge Base
+A full interactive walkthrough script covers every command, including a live comparison of keyword vs. semantic search, the RAG loop, and a `--web` API smoke test:
+
+```bash
+bash tests/integration/manual_testing.sh
+```
 
 ## Script Execution
 
-AstraMind supports automated command execution using script files.
+AstraMind supports automated command execution using script files, routed through the same command dispatcher as interactive mode.
 
 Example:
 
@@ -278,16 +295,14 @@ astramind.exe --script tests\integration\commands\kb.txt
 ./astramind --script tests/integration/commands/kb.txt
 ```
 
-This capability provides a reusable foundation for automated integration testing, continuous integration (CI), and future regression test suites.
-
 ## Supported AI Providers
 
-| Provider   | Local | Streaming | Status |
-|------------|:-----:|:---------:|:------:|
-| Mock AI    | N/A   | ✅        | ✅     |
-| OpenAI     | ❌    | ✅        | ✅     |
-| OpenRouter | ❌    | ✅        | ✅     |
-| Ollama     | ✅    | ✅        | ✅     |
+| Provider   | Local | Streaming | Embeddings | Status |
+|------------|:-----:|:---------:|:----------:|:------:|
+| Mock AI    | N/A   | ✅        | ✅         | ✅     |
+| OpenAI     | ❌    | ✅        | ✅         | ✅     |
+| OpenRouter | ❌    | ✅        | Varies by model | ✅ |
+| Ollama     | ✅    | ✅        | ✅         | ✅     |
 
 
 ## Available Commands
@@ -307,7 +322,7 @@ This capability provides a reusable foundation for automated integration testing
 | /export        	| Export current session as TXT     |
 | /export md     	| Export current session as Markdown|
 | /provider      	| Show AI provider                  |
-| /search <text> 	| Search current converstation      |
+| /search <text> 	| Search current conversation       |
 | /searchall <text>	| Search across all sessions        |
 
 ## Knowledge Base
@@ -319,17 +334,17 @@ Imported documents are automatically:
 
 - assigned a unique identifier
 - split into chunks
+- embedded (if an embedding-capable provider is configured)
 - stored on disk
-- indexed for keyword search
-
-The Knowledge Base is designed as the foundation for Retrieval-Augmented
-Generation (RAG) in future releases.
+- indexed for both keyword and semantic search
 
 ### Example
 
+```
 /kb import notes.txt
 
 Imported: notes.txt
+(1/1 chunks embedded)
 
 /kb list
 
@@ -344,6 +359,19 @@ Chunks : 1
 
 Found 3 matching chunks
 
+/kb ssearch how does the system handle errors
+
+Semantic Search Results
+------------------------
+[8f3a2d...] (similarity: 0.812)
+...matching chunk content by meaning, not exact wording...
+
+/kb ask how does the system handle errors
+
+The system handles errors by...
+Sources:
+  [8f3a2d...]
+
 /kb stats
 
 Documents : 1
@@ -356,7 +384,11 @@ Removed
 /kb clear
 
 Knowledge base cleared.
+```
 
+### A note on RAG answer quality
+
+`/kb ask` and the web UI's answer generation depend on the capability of the active AI provider. Small local models (e.g. `gemma3:1b`, ~1B parameters) can omit or, in some cases, fabricate details even when the correct source text is present in context - this is a model capability limitation, not a defect in AstraMind's retrieval or prompt construction. For accuracy-critical use, a larger local model or a cloud provider is recommended. See [CHANGELOG.md](CHANGELOG.md) for details on how this was identified and verified.
 
 ## Streaming Responses
 AstraMind supports real-time streaming responses from compatible AI providers.
@@ -373,12 +405,21 @@ Benefits include:
 cmd/
     astramind/
 internal/
-    ai/
-    chat/
-    config/
-    models/
-    renderer/
-    storage/
+    engine/            - command dispatch, app lifecycle, web server
+        webui/         - embedded local web interface
+    features/
+        chat/          - conversation + knowledge base command handling
+        kb/            - knowledge base, chunking, search, RAG
+        history/       - conversation history persistence
+        session/       - session lifecycle
+        search/        - conversation search
+        export/        - session export
+    infrastructure/
+        ai/            - provider abstraction (chat, streaming, embeddings)
+        storage/       - file-based persistence
+        models/        - shared data types
+        renderer/      - terminal output
+        config/        - runtime configuration
     testutil/
 
 exports/
@@ -386,6 +427,19 @@ data/
 ```
 
 # Release Management
+
+## v0.9.0
+**Semantic Search, RAG & Local Web Interface**
+
+- Embedding-based semantic search (`/kb ssearch`), alongside keyword search.
+- Retrieval-Augmented Generation (`/kb ask`) - completes the pipeline from import through answer generation, with citations.
+- Local web interface (`--web`) - browser-based UI for non-technical users, same backend as the CLI.
+- Embedding provider support for Ollama, OpenAI-compatible endpoints, and Mock.
+- Architectural cleanup: consistent dependency injection across all feature services, decoupled search/history/session packages, `--script` mode routed through the full command dispatcher.
+- Injectable, test-isolated storage for history and sessions.
+- Fixed: Ollama RAG answers truncating mid-generation (context window was unset); unbounded semantic search result count; silent embedding failures on import.
+- First unit tests for the `history` and `session` packages.
+- See [CHANGELOG.md](CHANGELOG.md) for the complete list, including a documented model-capability limitation found through controlled testing.
 
 ## v0.8.0
 **Knowledge Base**
@@ -503,8 +557,7 @@ data/
 
 ## Technology Stack
 - Go 1.24+
-- OpenAI APIs
-- OpenRouter
+- OpenAI-compatible APIs (OpenAI, OpenRouter)
 - Ollama
 - JSON
 - REST APIs
@@ -513,23 +566,17 @@ data/
 - Markdown
 
 ## Architecture
-AstraMind follows a modular architecture consisting of:
+AstraMind follows a modular, layered architecture:
 
-- AI Provider Framework
-- Provider Factory
-- Provider Manager
-- Streaming Framework
-- Storage Layer
-- Chat Engine
-- Renderer
-- Configuration
-- Export System
-- Test Utilities
+- `engine` - command dispatch, dependency injection, application lifecycle, local web server
+- `features` - chat, knowledge base (search/RAG), history, session, search, export
+- `infrastructure` - AI provider framework (chat/streaming/embeddings), storage, models, renderer, configuration
+- Test utilities
 
 ## License
-AGPL 3.0
+GNU Affero General Public License v3.0 (AGPL-3.0)
 
-This project is licensed under the AGPL 3.0 - see the LICENSE file for details.
+This project is licensed under AGPL-3.0. *Note: the licensing terms are under review with legal counsel before any commercial release - the `LICENSE` file in this repository should be reconciled with this statement before v1.0.*
 
 # About
 ## Why AstraMind?
@@ -559,4 +606,3 @@ AstraMind is designed and maintained by Harish Nagaraju.
 ## Project Planning
 
 See [Roadmap](docs/roadmap.md) for upcoming releases and features.
-

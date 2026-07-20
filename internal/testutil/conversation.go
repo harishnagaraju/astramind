@@ -1,6 +1,6 @@
 package testutil
 
-import "github.com/harishnagaraju/astramind/internal/models"
+import "github.com/harishnagaraju/astramind/internal/infrastructure/models"
 
 func SampleConversation() []models.Message {
 

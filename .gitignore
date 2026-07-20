@@ -50,4 +50,7 @@ data/
 
 # Optional: keep directories in Git
 !exports/.gitkeep
+
 !data/.gitkeep
+testing*.md
+astramind
