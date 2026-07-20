@@ -396,7 +396,7 @@ Local Models
 
 ---
 
-## v0.8.0
+## v0.8.0 (Latest Stable Release)
 
 Knowledge Base
 
@@ -407,28 +407,43 @@ Knowledge Base
 - Prompt builder
 - Knowledge Base management
 
-Future
+---
+
+## v0.9.0 (In Progress)
+
+Semantic Search
 
 - Embeddings
-- Semantic search
-- Vector database
-- Retrieval-Augmented Generation
+- `/kb ssearch` — embedding-based semantic search over the KB
+- Vector database work has **not** started (still JSON + linear search under the hood)
+- Note: semantic search returning ranked chunks is not the same as RAG. Retrieval still stops before a prompt is built or sent to an LLM.
+
+---
+
+## v0.9.1 (Current — validation branch, not a feature branch)
+
+Scoped narrowly to closing two open loops before any further architecture is committed:
+
+- Validate gemma2:9b on real hardware (answer completeness + system usability during generation)
+- Run the offline demo with real users (niece/lawyer) and capture actual behavior, not just stated reactions
+
+No new features land in this branch. It exists to inform what v1.0 should actually be, rather than deciding that in advance.
 
 ---
 
 # Version 1.0 Vision
 
-AstraMind evolves into a complete AI platform featuring:
+Scope below is a *backlog*, not a commitment — it is intentionally re-ordered from earlier drafts of this document to prioritize finishing what's already started (RAG, KB, retrieval) over adding new surface area (notes/tasks/plugins). Order and inclusion are subject to change based on v0.9.1 validation results. See the "v1.0 roadmap" GitHub issue for the working priority list.
 
-- Local and cloud AI providers
-- Retrieval-Augmented Generation (RAG)
-- Knowledge Base
-- Long-term memory
-- AI Agents
-- Tool calling
-- Plugin architecture
-- Multi-modal support
-- Personal productivity assistant
+1. **RAG completion** — wire semantic search into a prompt builder → LLM → answer flow (`/kb ask`), blocked on v0.9.1 hardware validation
+2. **Knowledge Base completion** — `/kb info`, `/kb update`, `/kb rebuild`, `/kb export`; PDF/Word/HTML import
+3. **Vector store migration** — JSON/linear search → SQLite + vector index (FAISS not required yet)
+4. **Provider abstraction expansion** — Gemini, Claude, OpenRouter, LM Studio
+5. **Search improvements** — fuzzy matching, ranking, highlighting, filters, regex
+6. **Plugin architecture** — weather, filesystem, calculator, web — sequenced after RAG, not before
+7. **Notes / Tasks / Calendar** — lowest priority; ships as a plugin/feature, not core architecture
+
+Identity check for v1.0: someone downloading it should think "this is my private AI assistant," not "this is a chat program with notes." The differentiator is local LLMs, multiple providers, streaming, Knowledge Base, semantic search, RAG, search, sessions, and script mode — everything else is post-v1.0.
 
 ---
 

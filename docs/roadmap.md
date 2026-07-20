@@ -61,9 +61,9 @@ PostgreSQL-backed memory
 Persistent chat history
 User profiles
 Phase 4
-RAG (Retrieval-Augmented Generation)
+Semantic search (✅ shipped in v0.9.0 — embedding-based `/kb ssearch`)
+RAG (Retrieval-Augmented Generation) — retrieval → prompt builder → LLM → answer; not yet built, top priority for v1.0
 PDF and document ingestion
-Semantic search (✅ basic version shipped in v0.9.0 - embedding-based /kb ssearch)
 Vector database integration
 Phase 5
 Multi-agent architecture
@@ -196,29 +196,36 @@ Enterprise integrations
 
 ---
 
-## v0.9.0 (Planned) - Personal Assistant
+## v0.9.0 (In Progress) - Semantic Search
 
-- Notes management
-- Task management
-- Daily planner
-- Calendar integration
-- Reminder system
+- Embeddings
+- `/kb ssearch` — embedding-based semantic search
+- Vector database work not yet started (still JSON + linear search)
+
+## v0.9.1 (Current) - Validation Branch
+
+Not a feature release. Scoped to two open loops before v1.0 gets named and scoped for real:
+
+- Validate gemma2:9b on real hardware (answer completeness + usability during generation)
+- Niece/lawyer offline demo — capture actual behavior, not just stated feedback
+
+Notes/Tasks/Calendar (previously slated for v0.9.0) has been deprioritized — see v1.0 backlog below. It now ships as a plugin/feature after RAG, not as a v0.9 milestone.
 
 ---
 
-## v1.0.0 - Enterprise AI Platform
+## v1.0.0 - Personal AI Assistant Platform
 
-- Web Interface
-- Authentication
-- PostgreSQL memory
-- User profiles
-- RAG
-- PDF ingestion
-- Semantic search (✅ basic version shipped in v0.9.0 - embedding-based /kb ssearch)
-- Vector databases
-- Multi-agent workflows
-- Tool calling
-- Enterprise integrations
+Priority order (backlog, not committed — see "v1.0 roadmap" GitHub issue):
+
+1. RAG completion (`/kb ask`) — blocked on v0.9.1 validation
+2. Knowledge Base completion (`/kb info`, `/kb update`, `/kb rebuild`, `/kb export`; PDF/Word/HTML import)
+3. Vector store migration (SQLite + vector index)
+4. Provider abstraction expansion (Gemini, Claude, OpenRouter, LM Studio)
+5. Search improvements (fuzzy matching, ranking, highlighting, filters, regex)
+6. Plugin architecture (weather, filesystem, calculator, web)
+7. Notes / Tasks / Calendar (as a plugin, not core)
+
+Enterprise items (Web Interface, Authentication, PostgreSQL memory, user profiles, multi-agent workflows, enterprise integrations) are pushed out of v1.0 scope — see Phase 2/3/5 below, now explicitly post-v1.0.
 
 ---
 
@@ -404,16 +411,17 @@ AstraMind follows the following engineering principles:
 
 # Current Release Status
 
-| Version  |     Status            |
-|----------|-----------------------|
-| v0.4.1 | old Stable Release      |
-| v0.5.0 | old Stable Release      |
-| v0.6.0 | old Stable Release      |
-| v0.7.0 | old Stable Release      |
-| v0.8.0 | ✅ Latest Stable Release|
-| v0.9.0 | 🚧 Current Development  |
-| v1.0.0 | 📋 Planned              |
-| v1.1.0 | 🎯 Long-Term Vision     |
+| Version  |     Status            							|
+|----------|----------------------------------------------------------------------------|
+| v0.4.1 | old Stable Release      							|
+| v0.5.0 | old Stable Release      							|
+| v0.6.0 | old Stable Release      							|
+| v0.7.0 | old Stable Release      							|
+| v0.8.0 | ✅ Latest Stable Release							|
+| v0.9.0 | 🚧 In Progress (semantic search shipped, RAG not yet) 			|
+| v0.9.1 | 🚧 Current — validation branch (hardware test + user demo, no new features) 	|
+| v1.0.0 | 📋 Planned (scope pending v0.9.1 results) 					|
+| v1.1.0 | 🎯 Long-Term Vision     							|
 
 ---
 
