@@ -62,7 +62,7 @@ Persistent chat history
 User profiles
 Phase 4
 Semantic search (✅ shipped in v0.9.0 — embedding-based `/kb ssearch`)
-RAG (Retrieval-Augmented Generation) — retrieval → prompt builder → LLM → answer; not yet built, top priority for v1.0
+RAG (Retrieval-Augmented Generation) (✅ substantially shipped in v0.9.1 — see Release Roadmap below; deterministic dual-path design, not the free-form-LLM design originally envisioned here)
 PDF and document ingestion
 Vector database integration
 Phase 5
@@ -196,20 +196,22 @@ Enterprise integrations
 
 ---
 
-## v0.9.0 (In Progress) - Semantic Search
+## v0.9.0 - Semantic Search
 
 - Embeddings
 - `/kb ssearch` — embedding-based semantic search
 - Vector database work not yet started (still JSON + linear search)
 
-## v0.9.1 (Current) - Validation Branch
+## v0.9.1 (Current) - Validation Branch, Deterministic RAG
 
-Not a feature release. Scoped to two open loops before v1.0 gets named and scoped for real:
+Originally scoped as a pure validation branch (no new features) to close two open loops before v1.0 gets named and scoped for real:
 
-- Validate gemma2:9b on real hardware (answer completeness + usability during generation)
-- Niece/lawyer offline demo — capture actual behavior, not just stated feedback
+- Validate gemma2:9b on real hardware (answer completeness + usability during generation) — **closed.** Model produces correct output on the target hardware (i5-4210U, 16GB RAM, no GPU); brief stutter only under simultaneous heavy multitasking.
+- Niece/lawyer offline demo — capture actual behavior, not just stated feedback — **still open.**
 
-Notes/Tasks/Calendar (previously slated for v0.9.0) has been deprioritized — see v1.0 backlog below. It now ships as a plugin/feature after RAG, not as a v0.9 milestone.
+**Scope note:** validating the hardware question required testing `/kb ask` answer quality, which surfaced a real document-chunking bug and a hard reliability limit in free-form LLM enumeration - neither fixable by configuration alone. Fixing the second required an architectural change: `/kb ask` now routes enumeration and single-fact questions to deterministic, zero-LLM-call extraction, with the original free-form LLM path kept only as a fallback (no embedder configured). This is a real feature addition on a branch that was scoped to have none - flagged here explicitly rather than left implicit, since it changes what "RAG completion" (previously the #1 v1.0 backlog item) means going forward.
+
+Notes/Tasks/Calendar (previously slated for v0.9.0) remains deprioritized — ships as a plugin/feature after Knowledge Base completion, not as a near-term milestone.
 
 ---
 
@@ -217,15 +219,15 @@ Notes/Tasks/Calendar (previously slated for v0.9.0) has been deprioritized — s
 
 Priority order (backlog, not committed — see "v1.0 roadmap" GitHub issue):
 
-1. RAG completion (`/kb ask`) — blocked on v0.9.1 validation
-2. Knowledge Base completion (`/kb info`, `/kb update`, `/kb rebuild`, `/kb export`; PDF/Word/HTML import)
+1. ~~RAG completion (`/kb ask`)~~ — substantially delivered in v0.9.1 as a deterministic dual-path design. Free-form LLM synthesis remains available only as a fallback path, not the primary mechanism.
+2. **Knowledge Base completion** (`/kb info`, `/kb update`, `/kb rebuild`, `/kb export`; PDF/Word/HTML import) — now the top active priority
 3. Vector store migration (SQLite + vector index)
 4. Provider abstraction expansion (Gemini, Claude, OpenRouter, LM Studio)
 5. Search improvements (fuzzy matching, ranking, highlighting, filters, regex)
 6. Plugin architecture (weather, filesystem, calculator, web)
 7. Notes / Tasks / Calendar (as a plugin, not core)
 
-Enterprise items (Web Interface, Authentication, PostgreSQL memory, user profiles, multi-agent workflows, enterprise integrations) are pushed out of v1.0 scope — see Phase 2/3/5 below, now explicitly post-v1.0.
+Enterprise items (Web Interface, Authentication, PostgreSQL memory, user profiles, multi-agent workflows, enterprise integrations) are pushed out of v1.0 scope — see Phase 2/3/5 above, now explicitly post-v1.0.
 
 ---
 
@@ -264,10 +266,10 @@ Enterprise items (Web Interface, Authentication, PostgreSQL memory, user profile
 ## Phase 4
 ### Knowledge Platform
 
-- RAG
+- RAG (✅ substantially shipped in v0.9.1 - deterministic dual-path design)
 - PDF ingestion
 - Document indexing
-- Semantic search (✅ basic version shipped in v0.9.0 - embedding-based /kb ssearch)
+- Semantic search (✅ shipped in v0.9.0 - embedding-based /kb ssearch)
 - Vector database integration
 
 ---
@@ -288,9 +290,11 @@ Enterprise items (Web Interface, Authentication, PostgreSQL memory, user profile
 
 - ✅ OpenAI Provider
 - ✅ Mock Provider
+- ✅ Ollama Provider (including embeddings)
 - ✅ Provider Factory
 - ✅ Provider Manager
 - ✅ Automatic Provider Failover
+- ✅ Configurable per-request generation temperature
 
 ---
 
@@ -335,9 +339,11 @@ Enterprise items (Web Interface, Authentication, PostgreSQL memory, user profile
 ---
 ## Knowledge Base Commands
 
-- ✅ /kb import
+- ✅ /kb import (paragraph-aware, CRLF-safe chunking)
 - ✅ /kb list
 - ✅ /kb search
+- ✅ /kb ssearch
+- ✅ /kb ask (deterministic enumeration + single-fact extraction, LLM fallback)
 - ✅ /kb remove
 - ✅ /kb clear
 - ✅ /kb stats
@@ -351,6 +357,7 @@ Enterprise items (Web Interface, Authentication, PostgreSQL memory, user profile
 - ✅ GitHub Actions CI
 - ✅ Automated testing
 - ✅ Regression suite
+- ✅ Content-fidelity and determinism test scans
 - ✅ Coverage reporting
 - ✅ Semantic Versioning
 - ✅ GitHub Issues
@@ -364,6 +371,7 @@ Enterprise items (Web Interface, Authentication, PostgreSQL memory, user profile
 ## AI Assistant
 
 - OpenAI-compatible API integration
+- Native Ollama integration (chat, streaming, embeddings)
 - Mock AI for offline development
 - Interactive command-line chat
 - Cross-platform support
@@ -385,6 +393,7 @@ Enterprise items (Web Interface, Authentication, PostgreSQL memory, user profile
 - Unit testing
 - Integration testing
 - Regression testing
+- Content-fidelity and determinism testing (RAG-specific)
 - Automated CI
 - Code formatting
 - Static analysis
@@ -406,6 +415,7 @@ AstraMind follows the following engineering principles:
 - Semantic Versioning
 - GitHub Issue-Driven Development
 - Small, Reviewable Commits
+- Prefer deterministic, verifiable code paths over LLM generation wherever the correct answer is already knowable from retrieved data
 
 ---
 
@@ -417,10 +427,10 @@ AstraMind follows the following engineering principles:
 | v0.5.0 | old Stable Release      							|
 | v0.6.0 | old Stable Release      							|
 | v0.7.0 | old Stable Release      							|
-| v0.8.0 | ✅ Latest Stable Release							|
-| v0.9.0 | 🚧 In Progress (semantic search shipped, RAG not yet) 			|
-| v0.9.1 | 🚧 Current — validation branch (hardware test + user demo, no new features) 	|
-| v1.0.0 | 📋 Planned (scope pending v0.9.1 results) 					|
+| v0.8.0 | old Stable Release      							|
+| v0.9.0 | ✅ Latest Merged Release (semantic search; RAG completed on v0.9.1 branch, not yet merged) |
+| v0.9.1 | 🚧 Current — validation branch; #55 closed, RAG dual-path shipped, #56 (user demo) still open |
+| v1.0.0 | 📋 Planned (scope pending #56) 					|
 | v1.1.0 | 🎯 Long-Term Vision     							|
 
 ---

@@ -26,7 +26,7 @@ AstraMind aims to become a flexible AI platform that combines conversational int
 - Persistent JSON document and chunk storage
 - Keyword search
 - **Semantic search** - embedding-based, ranks results by meaning rather than exact wording
-- **Retrieval-Augmented Generation (`/kb ask`)** - retrieves relevant content and generates a cited answer using the active AI provider
+- **Retrieval-Augmented Generation (`/kb ask`)** - retrieves relevant content and answers, citing sources with every response. List and single-fact questions are answered deterministically (chunk content returned directly, no LLM call, no risk of a fact being dropped or misstated); free-form LLM synthesis is used only as a fallback when no embedder is configured. See "How `/kb ask` answers a question" below.
 - Knowledge Base statistics and management
 
 ## Local Web Interface
@@ -368,7 +368,11 @@ Semantic Search Results
 
 /kb ask how does the system handle errors
 
-The system handles errors by...
+Here is everything found in your knowledge base across 1 relevant section(s):
+
+* ...matching chunk content, returned verbatim - no LLM paraphrase for
+  list/single-fact questions like this one...
+
 Sources:
   [8f3a2d...]
 
@@ -386,9 +390,19 @@ Removed
 Knowledge base cleared.
 ```
 
-### A note on RAG answer quality
+### How `/kb ask` answers a question
 
-`/kb ask` and the web UI's answer generation depend on the capability of the active AI provider. Small local models (e.g. `gemma3:1b`, ~1B parameters) can omit or, in some cases, fabricate details even when the correct source text is present in context - this is a model capability limitation, not a defect in AstraMind's retrieval or prompt construction. For accuracy-critical use, a larger local model or a cloud provider is recommended. See [CHANGELOG.md](CHANGELOG.md) for details on how this was identified and verified.
+As of the v0.9.1 branch, `/kb ask` no longer sends every question to the LLM. It routes based on question shape:
+
+- **"List everything matching X" questions** ("what are all the...", "what are the... timings") are answered deterministically: every relevant chunk found is returned in full, formatted as a list, with no LLM call and no possibility of an item being silently dropped during generation.
+- **Single-fact questions** ("is there...", "what time is...", "how much...", "what is the...") are also answered deterministically when an embedding provider is configured: the single most relevant chunk is returned verbatim, so a date, fee, or ID can't be misstated by a model paraphrasing it.
+- **The free-form LLM path is retained only as a fallback** - used when no embedding provider is configured. It carries the caveat below.
+
+This replaced an earlier single-path design after validation testing found that free-form LLM enumeration was unreliable in a way prompt wording alone couldn't fix - see [CHANGELOG.md](CHANGELOG.md) (v0.9.1) for the full investigation, including a real measured case where similarity-based sentence windowing was tried and abandoned.
+
+### A note on the LLM fallback path
+
+When the LLM fallback path is used (no embedder configured), answer quality still depends on the capability of the active AI provider. Small local models (e.g. `gemma3:1b`, ~1B parameters) can omit or, in some cases, fabricate details even when the correct source text is present in context - this is a model capability limitation, not a defect in AstraMind's retrieval or prompt construction. For accuracy-critical use on this fallback path, a larger local model or a cloud provider is recommended. See [CHANGELOG.md](CHANGELOG.md) for details on how this was identified and verified.
 
 ## Streaming Responses
 AstraMind supports real-time streaming responses from compatible AI providers.
@@ -427,6 +441,19 @@ data/
 ```
 
 # Release Management
+
+## v0.9.1 (validation branch, not yet merged to main)
+**Deterministic RAG & Real-Hardware Validation**
+
+Originally scoped as validation-only (no new features); real findings during validation required an architectural fix. Documented here rather than silently expanded.
+
+- Closed: `gemma2:9b` validated on real hardware (Intel i5-4210U, 16GB RAM, no GPU) - produces correct output; usable for sequential use, brief stutter only under heavy simultaneous multitasking.
+- `/kb ask` now routes enumeration and single-fact questions to deterministic, zero-LLM-call extraction from retrieved chunks, rather than trusting free-form LLM generation to enumerate correctly or restate a fact exactly. The original free-form LLM path is retained as a fallback for single-fact questions only, when no embedder is configured.
+- Fixed a real document-chunking bug: byte-offset splitting could corrupt content mid-word, and a CRLF-encoded real-world file bypassed an earlier paragraph-aware fix entirely (a `\r\n\r\n` blank line never matches a `\n\n` split point). Both fixed; both verified against real file bytes, not synthetic test fixtures.
+- Added content-fidelity and determinism checks to the manual test walkthrough.
+- Two sentence-level windowing approaches for single-fact answers (fixed-size, then embedding-similarity-based) were tried and abandoned after live testing against real embeddings showed no reliable topic-boundary signal at sentence granularity - see [CHANGELOG.md](CHANGELOG.md) for the measured data.
+- Still open: real-user (niece/lawyer) offline demo feedback.
+- See [CHANGELOG.md](CHANGELOG.md) for the complete list and full investigation detail.
 
 ## v0.9.0
 **Semantic Search, RAG & Local Web Interface**
