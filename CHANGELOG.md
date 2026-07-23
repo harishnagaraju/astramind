@@ -5,6 +5,62 @@ All notable changes to AstraMind are documented in this file.
 The project follows [Semantic Versioning](https://semver.org/).
 ---
 ---
+## [v0.9.1] - 2026-07-24
+
+### Highlights
+
+This release closes out the v0.9.1 validation branch: a hardware check on `gemma2:9b` (issue #55) that, in the course of validating it, surfaced a real chunking bug, a real prompt-construction gap, and a hard limit on how far prompt engineering alone can make free-form LLM enumeration reliable. Rather than continuing to tune prompt wording and generation temperature, `/kb ask` was split into two paths: a deterministic, zero-LLM-call extraction path for questions with a discrete, verifiable answer, and the existing free-form RAG path, now used only as a fallback. Every fix below was verified against a real, previously-used document (`Sanskrit1.txt`, CRLF line endings included) through the actual CLI and real Ollama embeddings - not synthetic test fixtures alone.
+
+### Added
+
+#### Deterministic Query Answering
+
+- `kb.IsEnumerationQuery` - classifies a question as enumeration-style ("what are all the X", "what are the X timings") versus a single specific fact, used to route `/kb ask`
+- `kb.ExtractItems` / `kb.BuildListAnswer` - deterministic enumeration path: retrieves chunks as usual, returns each retrieved chunk's content as one item, formats as a list. No LLM call, so no possibility of a matching entry being silently dropped during generation
+- `kb.ExtractiveAnswer` - deterministic single-fact path: ranks chunks by embedding similarity to the question, returns the single best-matching chunk's content verbatim. No LLM paraphrase step, so no possibility of a generative model misstating a date, fee, or other fact while rewording it
+- `ai.ChatRequest.Temperature` (optional, `*float64`) - configurable generation temperature, used at 0.4 for the RAG fallback path
+
+#### Testing
+
+- Content-fidelity and determinism checks in `tests/integration/manual_testing.sh`: imports a fixture with known facts, asks the same question multiple times, and greps the transcript for every expected fact rather than eyeballing the output
+- `TestChunkHandlesCRLFLineEndings`, `TestChunkRespectsParagraphBoundaries` - regression tests for the chunking fixes below, using real CRLF content
+- `TestExtractItems_RealSanskritDocument`, `TestExtractiveAnswer_SelectsCorrectChunk` - run against the real `Sanskrit1.txt` bytes, not a synthetic fixture
+
+### Fixed
+
+- **Chunker corrupted real documents mid-word.** Byte-offset chunking had no word or paragraph awareness and could split a chunk boundary through the middle of a word (e.g. "Youth group" -> "uth group"). Fixed with paragraph-aware splitting on blank-line boundaries, falling back to the old sliding-window split only for a single paragraph too large to fit in one chunk.
+- **The paragraph-aware fix above silently did not apply to real-world CRLF files.** The real test document uses `\r\n` line endings; a CRLF blank line (`\r\n\r\n`) never contains the substring `\n\n`, so the paragraph splitter found zero boundaries in it and fell straight back to the byte-offset splitter - reproducing the exact bug it was meant to fix, invisibly, because every test fixture at the time used LF-only content. Fixed by normalizing `\r\n`/`\r` to `\n` before splitting.
+- **`/kb ask` silently omitted valid entries on enumeration questions, even with a complete and correct prompt.** Root-caused through a full pipeline audit (disk read -> chunk -> embed -> prompt -> generation): retrieval, chunking, and prompt content were all confirmed correct and complete in isolation. The remaining variance was in the LLM's free-form generation step - a model reliably following the question's literal keywords over weaker instruction wording, especially at low temperature. Not fixable through prompt wording, question rewording, or temperature tuning alone (several approaches were tried and measured; see Known Limitations). Resolved architecturally: see "Deterministic Query Answering" above.
+- `BuildSemanticPrompt` had regressed to its pre-fix form (a single generic trailing instruction instead of explicit per-source enumeration) due to an unrelated file being committed under its name in a prior commit. Restored.
+
+### Known Limitations
+
+- **Single-fact and enumeration answers return whole chunks verbatim, which can be verbose when a chunk bundles multiple unrelated entries.** Two windowing approaches were tried and abandoned before landing on whole-chunk return:
+  - A fixed-size window (N sentences before/after the matched sentence) sometimes bled into a genuinely unrelated neighboring entry.
+  - A dynamic, embedding-similarity-threshold window (expand while neighboring sentences stay semantically similar to the match) was tried next, on the theory that a real topic boundary would show up as a similarity drop. Live testing against real Ollama embeddings disproved this for short-sentence prose: an unrelated sentence ("Not meeting on 16 February", about a different class) scored *higher* similarity to the anchor ("Meeting ID 795 777 3585") than genuinely related sentences did (the actual Zoom URL and password), apparently because both happened to share the literal word "meeting" despite unrelated meaning. No threshold could separate on-topic from off-topic content using this signal - this was a real, measured finding, not a miscalibration. Whole-chunk return was kept as the safer default: chunking already guarantees no entry is corrupted or split mid-content, so the worst failure mode is extra (correct) text, never wrong or missing text.
+- `ExtractiveAnswer` re-embeds every sentence in every retrieved chunk on every single-fact question, with no caching. Fine at the scale tested (single-digit chunk counts); will need embedding caching at import time before this scales to a larger knowledge base.
+- The free-form LLM RAG path (`BuildSemanticPrompt` + `Chat`) is now only used as a fallback when no embedder is configured. It is not covered by the completeness/precision guarantees of the deterministic paths above.
+- `internal/features/kb/query_expansion.go`'s `ExpandQuery` function (question-rewording via appended instructions) is superseded by the deterministic extraction path and is no longer called anywhere in the codebase. `IsEnumerationQuery` from the same file is still in active use as the query router. Cleanup (removing the now-dead `ExpandQuery` code) is planned but not yet done.
+
+### Tested
+
+- go fmt
+- go vet
+- go build
+- go test -v ./...
+- tests/integration/run_all.sh
+- tests/integration/manual_testing.sh (extended with content-fidelity and determinism scans)
+- Full build and test suite re-verified against a fresh pull of the actual pushed branch from GitHub, independent of local working-directory state
+
+### Verified
+
+- Chunking fix confirmed against the real `Sanskrit1.txt` file's actual bytes (CRLF line endings, real diacritics) - zero corruption, all 9 real entries intact
+- Enumeration path (`/kb ask what are the Sanskrit class timings`) confirmed live via the CLI against real Ollama embeddings: all 9 entries present, correctly cited across 3 sources
+- Single-fact path (`/kb ask what is the meeting id`) confirmed live via the CLI against real Ollama embeddings: correct chunk selected, single source cited, correct answer present, no fabrication
+- Hardware validation (issue #55) closed: `gemma2:9b` produces correct output on the target hardware (Intel i5-4210U, 16GB RAM, no GPU); brief UI stutter observed only under simultaneous heavy multitasking, not disqualifying for sequential use
+
+---
+
 ## [v0.9.0] - 2026-07-21
 
 ### Highlights
