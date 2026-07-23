@@ -1,65 +1,112 @@
 package kb
 
 import (
-	"strconv"
 	"strings"
+	"testing"
 )
 
-// BuildPrompt builds a RAG prompt from a user question and search results.
-func BuildPrompt(question string, results []SearchResult) string {
-	var builder strings.Builder
-
-	builder.WriteString("You are answering questions using the provided knowledge base.\n\n")
-
-	builder.WriteString("Knowledge Base:\n\n")
-
-	for _, result := range results {
-		builder.WriteString("[Document: ")
-		builder.WriteString(result.DocumentID)
-		builder.WriteString("]\n")
-
-		builder.WriteString(result.Content)
-		builder.WriteString("\n\n")
+func TestBuildPromptSingleResult(t *testing.T) {
+	results := []SearchResult{
+		{
+			DocumentID: "go-guide",
+			Content:    "Go is a programming language.",
+		},
 	}
 
-	builder.WriteString("Question:\n")
-	builder.WriteString(question)
-	builder.WriteString("\n\n")
+	prompt := BuildPrompt(
+		"What is Go?",
+		results,
+	)
 
-	builder.WriteString("Answer using only the supplied knowledge.")
+	if !strings.Contains(prompt, "Go is a programming language.") {
+		t.Fatal("expected document content in prompt")
+	}
 
-	return builder.String()
+	if !strings.Contains(prompt, "What is Go?") {
+		t.Fatal("expected question in prompt")
+	}
 }
 
-// BuildSemanticPrompt builds a RAG prompt from a user question and
-// semantic (embedding-based) search results. Mirrors BuildPrompt's
-// format exactly, so downstream rendering doesn't need to know which
-// search mode produced the results.
-func BuildSemanticPrompt(question string, results []SemanticSearchResult) string {
-	var builder strings.Builder
-
-	builder.WriteString("You are answering questions using the provided knowledge base.\n\n")
-
-	builder.WriteString("Knowledge Base:\n\n")
-
-	for i, result := range results {
-		builder.WriteString("[Source ")
-		builder.WriteString(strconv.Itoa(i + 1))
-		builder.WriteString(" of ")
-		builder.WriteString(strconv.Itoa(len(results)))
-		builder.WriteString(", Document: ")
-		builder.WriteString(result.DocumentID)
-		builder.WriteString("]\n")
-
-		builder.WriteString(result.Content)
-		builder.WriteString("\n\n")
+func TestBuildPromptMultipleResults(t *testing.T) {
+	results := []SearchResult{
+		{
+			DocumentID: "doc1",
+			Content:    "First document.",
+		},
+		{
+			DocumentID: "doc2",
+			Content:    "Second document.",
+		},
 	}
 
-	builder.WriteString("Question:\n")
-	builder.WriteString(question)
-	builder.WriteString("\n\n")
+	prompt := BuildPrompt(
+		"Example question",
+		results,
+	)
 
-	builder.WriteString("Answer using only the supplied knowledge. If the question asks for multiple items (a list of timings, dates, entries, or similar), you must include every single matching item found across every source above - do not summarize, shorten, or omit any matching entry, even if the list is long. If the knowledge base does not contain enough information to answer, say so explicitly rather than guessing.")
+	if !strings.Contains(prompt, "First document.") {
+		t.Fatal("missing first document")
+	}
 
-	return builder.String()
+	if !strings.Contains(prompt, "Second document.") {
+		t.Fatal("missing second document")
+	}
+}
+
+func TestBuildPromptEmptyResults(t *testing.T) {
+	prompt := BuildPrompt(
+		"What is Go?",
+		nil,
+	)
+
+	if !strings.Contains(prompt, "Question:") {
+		t.Fatal("expected question section")
+	}
+}
+
+func TestBuildPromptEmptyQuestion(t *testing.T) {
+	results := []SearchResult{
+		{
+			DocumentID: "doc",
+			Content:    "Knowledge",
+		},
+	}
+
+	prompt := BuildPrompt(
+		"",
+		results,
+	)
+
+	if !strings.Contains(prompt, "Knowledge") {
+		t.Fatal("expected knowledge content")
+	}
+}
+
+// TestBuildSemanticPromptForcesPerSourceEnumeration guards against a
+// regression to the previous single-trailing-instruction approach.
+// v0.9.1 validation testing showed a trailing "include everything"
+// instruction alone was not sufficient to prevent the model from
+// narrowly matching only the question's literal keywords - the
+// prompt must explicitly number the sources and instruct the model
+// to work through each one individually.
+func TestBuildSemanticPromptForcesPerSourceEnumeration(t *testing.T) {
+	results := []SemanticSearchResult{
+		{DocumentID: "doc1", Content: "First entry."},
+		{DocumentID: "doc2", Content: "Second entry."},
+		{DocumentID: "doc3", Content: "Third entry."},
+	}
+
+	prompt := BuildSemanticPrompt("What are all the entries?", results)
+
+	if !strings.Contains(prompt, "There are 3 sources above, numbered 1 through 3") {
+		t.Fatal("expected prompt to explicitly state the source count for per-source enumeration")
+	}
+
+	if !strings.Contains(prompt, "Work through each source in order") {
+		t.Fatal("expected prompt to instruct working through sources individually")
+	}
+
+	if !strings.Contains(prompt, "even if that source doesn't use the same words as the question") {
+		t.Fatal("expected prompt to explicitly address the narrow-keyword-matching failure mode")
+	}
 }
