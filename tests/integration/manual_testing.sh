@@ -58,6 +58,63 @@ echo "Photosynthesis allows plants to convert sunlight into chemical energy." > 
 # surface manualtest_kb2.md by meaning.
 SEMANTIC_QUERY="how do plants get energy from the sun"
 
+# ------------------------------------------------------------------
+# Content-fidelity fixture.
+#
+# KB_FILE_1 and KB_FILE_2 above are single-sentence files - never
+# long enough to force the chunker to split, so they can't catch a
+# chunk-boundary bug. This fixture is deliberately built to exercise
+# that path: multiple blank-line-separated paragraphs, each holding
+# one independently checkable fact (a day, an activity, and a time),
+# with total length pushed past DefaultChunkSize (1000 bytes) so a
+# real split is guaranteed to happen somewhere between paragraphs.
+#
+# Because every fact here is known in advance, the /kb ask response
+# can be verified mechanically against this file - no eyeballing
+# required. This is what originally caught the chunker splitting
+# mid-word (e.g. "Youth group" -> "uth group") and the resulting
+# non-deterministic omissions in list-style answers.
+# ------------------------------------------------------------------
+KB_FILE_3="manualtest_kb3_fidelity.md"
+
+cat > "$KB_FILE_3" <<'FIXTURE'
+SCHEDULE NOTICEBOARD
+
+Monday Chess Club 15:00 - 16:00.
+Held in Room 4. Open to all students grade 6 and up.
+Coach: Mr. Fernandes. No fee required.
+
+Tuesday Robotics Workshop 14:00 - 15:30.
+Held in the Science Lab. Registration required in advance.
+Coach: Ms. Alvares. Materials fee: 10 dollars.
+
+Wednesday Debate Team 16:00 - 17:00.
+Held in the Auditorium. Open to grade 8 and up only.
+Coach: Mr. Pinto. No fee required.
+
+Thursday Art Class 13:00 - 14:00.
+Held in Room 9. Open to all students.
+Coach: Ms. Rodrigues. Materials fee: 5 dollars.
+
+Friday Music Rehearsal 15:30 - 16:30.
+Held in the Music Room. Open to band members only.
+Coach: Mr. Souza. No fee required.
+
+Saturday Yoga Session 09:00 - 10:00.
+Held in the Gym. Open to all staff and students.
+Coach: Ms. Costa. No fee required.
+
+Sunday Study Hall 10:00 - 12:00.
+Held in the Library. Open to all students preparing for exams.
+Coach: Mr. Dias. No fee required.
+
+Monday Evening Coding Club 17:30 - 18:30.
+Held in Room 12, the computer lab. Open to grade 7 and up.
+Coach: Mr. Lobo. No fee required.
+FIXTURE
+
+FIDELITY_QUERY="list out all the club and class timings"
+
 echo "=========================================="
 echo "AstraMind Manual Command Walkthrough"
 echo "Binary : $BIN"
@@ -86,6 +143,12 @@ echo
 /kb ssearch $SEMANTIC_QUERY
 /kb ask $SEMANTIC_QUERY
 /kb clear
+/kb import $KB_FILE_3
+/kb list
+/kb ask $FIDELITY_QUERY
+/kb ask $FIDELITY_QUERY
+/kb ask $FIDELITY_QUERY
+/kb clear
 /kb list
 /kb stats
 /sessions
@@ -98,7 +161,7 @@ echo
 exit
 EOF
 
-rm -f "$KB_FILE_1" "$KB_FILE_2"
+rm -f "$KB_FILE_1" "$KB_FILE_2" "$KB_FILE_3"
 
 echo
 echo "=========================================="
@@ -140,6 +203,82 @@ echo "  /kb search \"$SEMANTIC_QUERY\"  -> should say 'No matching knowledge fou
 echo "  /kb ssearch \"$SEMANTIC_QUERY\" -> should surface manualtest_kb2.md by meaning"
 echo "  /kb ask \"$SEMANTIC_QUERY\"     -> should give an actual answer, citing manualtest_kb2.md as the source"
 echo "  If both search modes found it, or neither did, the semantic path isn't adding real value yet."
+
+# ------------------------------------------------------------------
+# Content-fidelity check on the /kb ask fixture (KB_FILE_3).
+#
+# Every fact in KB_FILE_3 is known in advance, so instead of eyeballing
+# whether the RAG answer "looks right," grep the transcript for each
+# fact independently. A MISSING line here means the pipeline silently
+# dropped a real fact - the exact failure mode that slipped through
+# every check above (they only confirm the RAG loop produced *an*
+# answer, not that the answer was complete or correct).
+# ------------------------------------------------------------------
+echo
+echo "Content-fidelity scan (checks /kb ask answers against known fixture facts):"
+
+FIDELITY_FACTS=(
+    "Chess Club"
+    "Robotics Workshop"
+    "Debate Team"
+    "Art Class"
+    "Music Rehearsal"
+    "Yoga Session"
+    "Study Hall"
+    "Coding Club"
+)
+
+fidelity_missing=0
+for fact in "${FIDELITY_FACTS[@]}"; do
+    count=$(grep -c "$fact" "$LOGFILE" || true)
+    if [ "$count" -ge 1 ]; then
+        echo "  [OK]      fact present at least once: $fact"
+    else
+        echo "  [MISSING] fact never appeared in any /kb ask answer: $fact"
+        fidelity_missing=$((fidelity_missing + 1))
+    fi
+done
+
+if [ "$fidelity_missing" -gt 0 ]; then
+    echo
+    echo "  -> $fidelity_missing fact(s) never appeared in ANY of the 3 /kb ask runs."
+    echo "     This points at a chunking or retrieval bug, not a one-off LLM slip."
+fi
+
+# ------------------------------------------------------------------
+# Determinism check.
+#
+# The fixture query above was run 3 times back-to-back in the same
+# transcript. If the model is grounded correctly, the same question
+# against unchanged content should return the same set of facts
+# every time - wording may vary slightly, but the list of facts
+# present should not. This is what would have caught the original
+# bug immediately: a chunk-boundary corruption produced a different
+# (and wrong) set of omissions on every single run.
+# ------------------------------------------------------------------
+echo
+echo "Determinism scan (checks the same /kb ask query answered 3x for consistent facts):"
+
+RUN_MISMATCH=0
+for fact in "${FIDELITY_FACTS[@]}"; do
+    hits=$(grep -c "$fact" "$LOGFILE" || true)
+    # Each fact should appear in all 3 runs (>=3 hits) or none - a
+    # count of 1 or 2 means it showed up in some runs but not others,
+    # i.e. the answer is not deterministic for this fact.
+    if [ "$hits" -eq 1 ] || [ "$hits" -eq 2 ]; then
+        echo "  [INCONSISTENT] \"$fact\" appeared in only $hits of 3 runs"
+        RUN_MISMATCH=$((RUN_MISMATCH + 1))
+    fi
+done
+
+if [ "$RUN_MISMATCH" -eq 0 ]; then
+    echo "  [OK]      all facts were consistent across the 3 repeated runs"
+else
+    echo "  -> $RUN_MISMATCH fact(s) appeared inconsistently across repeated runs."
+    echo "     Same input, same question, different answers = non-deterministic"
+    echo "     retrieval or generation. Investigate before trusting this pipeline"
+    echo "     with real users."
+fi
 
 # ==========================================
 # PART 2: Web UI API smoke test (--web mode)
