@@ -17,6 +17,13 @@ type OllamaOptions struct {
 	// that combined total exceeds the window, Ollama truncates the
 	// response mid-generation rather than erroring.
 	NumCtx int `json:"num_ctx,omitempty"`
+
+	// Temperature controls generation randomness (0 = deterministic,
+	// higher = more varied). omitempty means a zero value here is
+	// indistinguishable from "not set" at the JSON level, so callers
+	// use ChatRequest.Temperature's pointer to decide whether to set
+	// this field at all - see buildOllamaRequest.
+	Temperature float64 `json:"temperature,omitempty"`
 }
 
 // OllamaChatMessage represents a single chat message.

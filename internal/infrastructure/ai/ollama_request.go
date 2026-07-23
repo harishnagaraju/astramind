@@ -33,6 +33,10 @@ func buildOllamaRequest(
 		},
 	}
 
+	if request.Temperature != nil {
+		ollamaReq.Options.Temperature = *request.Temperature
+	}
+
 	for _, msg := range request.Messages {
 		ollamaReq.Messages = append(
 			ollamaReq.Messages,
