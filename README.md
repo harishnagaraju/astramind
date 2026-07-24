@@ -5,7 +5,7 @@ Created and maintained by Harish Nagaraju.
 
 [![Go Build](https://github.com/harishnagaraju/astramind/actions/workflows/go.yml/badge.svg)](https://github.com/harishnagaraju/astramind/actions)
 ![Go](https://img.shields.io/badge/Go-1.24+-blue)
-![License](https://img.shields.io/badge/License-AGPL--3.0-green)
+![License](https://img.shields.io/badge/License-Apache--2.0-green)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
 Current Release: **v0.9.0**
 
@@ -601,9 +601,9 @@ AstraMind follows a modular, layered architecture:
 - Test utilities
 
 ## License
-GNU Affero General Public License v3.0 (AGPL-3.0)
+Apache License 2.0
 
-This project is licensed under AGPL-3.0. *Note: the licensing terms are under review with legal counsel before any commercial release - the `LICENSE` file in this repository should be reconciled with this statement before v1.0.*
+This project is licensed under the Apache License, Version 2.0. See the [LICENSE](LICENSE) file for the full text. Permissive by design: AstraMind is intended as an open platform others can build on, adopt, and extend without restriction - commercial products and plugins built on top of it (including AstraMind's own school and legal-industry plugins) are separate, independently licensed works.
 
 # About
 ## Why AstraMind?
