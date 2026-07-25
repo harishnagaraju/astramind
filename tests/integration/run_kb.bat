@@ -3,7 +3,14 @@
 echo Running Knowledge Base Integration Tests...
 echo.
 
-.\astramind.exe --script tests\integration\commands\kb.txt
+cd /d "%~dp0..\.."
+
+if not exist astramind.exe (
+    echo Could not find astramind.exe in %CD%.
+    echo Build first: go build -o astramind.exe ./cmd/astramind
+    exit /b 1
+)
+
+astramind.exe --script tests\integration\commands\kb.txt
 
 exit /b %ERRORLEVEL%
-
