@@ -215,12 +215,17 @@ func (s *Service) Ask(question string) (answer string, sources []string, err err
 // every item within them, format as a list. No LLM call, no
 // possibility of an item being silently omitted by generation.
 //
-// Deliberately does NOT filter extracted items by keyword overlap
-// with the question - retrieval already decided which chunks are
-// relevant. Filtering items again afterward is exactly the mechanism
-// that caused the original bug (narrow keyword matching silently
-// dropping related-but-differently-worded entries). Once a chunk is
-// judged relevant, every item in it is included.
+// Whole chunks are filtered for relevance (see FilterRelevantChunks)
+// before extraction, but individual items within an included chunk
+// are never filtered against the question's wording - retrieval
+// (and now chunk-level filtering) already decided which chunks are
+// relevant. Filtering individual items within a relevant chunk was
+// tried and rejected: narrow keyword matching silently dropped
+// related-but-differently-worded entries (e.g. "Tuesday Chanting"
+// being dropped from a Sanskrit-timings answer because it doesn't
+// contain the word "Sanskrit", despite genuinely being part of the
+// same schedule). Once a chunk is judged relevant, every item in it
+// is included.
 func (s *Service) askEnumeration(question string) (string, []string, error) {
 	results, err := s.deps.KnowledgeBase.SemanticSearch(question)
 	if err != nil {
@@ -242,6 +247,23 @@ func (s *Service) askEnumeration(question string) (string, []string, error) {
 	if !kb.HasAnyContentWordOverlap(question, results) {
 		return "No relevant knowledge found to answer this question.", nil, nil
 	}
+
+	// Chunk-level relevance filter: HasAnyContentWordOverlap above
+	// only answers "is anything at all relevant" (all-or-nothing for
+	// the whole batch) - it does not remove individual irrelevant
+	// chunks from an otherwise-valid batch. Confirmed in real testing
+	// (real Ollama embeddings): a small knowledge base containing
+	// both Sanskrit1.txt and an unrelated service contract answered
+	// a Sanskrit-specific question with both documents bundled
+	// together, because SemanticSearch returns every chunk whenever
+	// the KB's total chunk count is at or below its retrieval limit.
+	// FilterRelevantChunks removes only whole chunks with zero
+	// content-word overlap - it does NOT filter individual items
+	// within a chunk (see the removed comment below for why that was
+	// tried and rejected: it silently dropped real entries, like
+	// "Tuesday Chanting", from an otherwise-relevant chunk just
+	// because the entry itself didn't repeat the word "Sanskrit").
+	results = kb.FilterRelevantChunks(question, results)
 
 	items := kb.ExtractItems(results)
 	answer := kb.BuildListAnswer(items)

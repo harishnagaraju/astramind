@@ -165,3 +165,65 @@ func findPreciseLine(question, chunkContent string) (line string, found bool) {
 
 	return paragraphs[bestIndex], true
 }
+
+// FilterRelevantChunks removes chunks that share zero content words
+// with the question, operating at whole-chunk granularity only.
+//
+// This is deliberately NOT the same thing as filtering individual
+// items within a chunk (see askEnumeration's doc comment in
+// knowledge_handler.go for why that was tried and rejected: it
+// silently dropped real, related entries - e.g. "Tuesday Chanting" -
+// from a chunk about Sanskrit classes, just because the entry itself
+// didn't contain the word "Sanskrit"). A chunk is included or
+// excluded as a whole, so every item inside an included chunk is
+// still returned together, exactly as before - this only decides
+// whether an entire chunk belongs in the answer at all.
+//
+// Why this is needed: SemanticSearch always returns every chunk it
+// has whenever the knowledge base's total chunk count is at or below
+// the retrieval limit (5) - true for any KB with only 2-3 documents,
+// regardless of embedding quality. HasAnyContentWordOverlap already
+// gates the case where NOTHING in the results is relevant (a
+// genuinely out-of-scope question), but it was never designed to
+// remove individual irrelevant chunks from an otherwise-valid batch -
+// confirmed in real testing on real Ollama embeddings: a question
+// about a Sanskrit class schedule returned an entirely unrelated
+// service contract alongside the correct answer, because both
+// happened to be in the same small knowledge base.
+//
+// If filtering would remove every chunk, the original unfiltered
+// list is returned instead - this should not happen in practice
+// (HasAnyContentWordOverlap already confirms at least one chunk has
+// overlap before this is ever called), but returning something
+// verbose is always safer than returning nothing.
+func FilterRelevantChunks(question string, results []SemanticSearchResult) []SemanticSearchResult {
+	words := contentWords(question)
+
+	var significantWords []string
+	for _, w := range words {
+		if len(w) > 2 {
+			significantWords = append(significantWords, w)
+		}
+	}
+
+	if len(significantWords) == 0 {
+		return results
+	}
+
+	var filtered []SemanticSearchResult
+	for _, result := range results {
+		lower := strings.ToLower(result.Content)
+		for _, w := range significantWords {
+			if strings.Contains(lower, w) {
+				filtered = append(filtered, result)
+				break
+			}
+		}
+	}
+
+	if len(filtered) == 0 {
+		return results
+	}
+
+	return filtered
+}
