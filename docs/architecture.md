@@ -377,7 +377,7 @@ Using `httptest.Server`:
 
 ## Manual / Content-Fidelity Testing
 
-`tests/integration/manual_testing.sh` extends the interactive walkthrough with:
+`scripts/manual_walkthrough.sh` extends the interactive walkthrough with:
 
 - A content-fidelity scan - imports a fixture with known facts, asks `/kb ask` questions, and greps the transcript for every expected fact, rather than eyeballing output
 - A determinism scan - runs the same question multiple times and flags any fact that appears inconsistently across runs

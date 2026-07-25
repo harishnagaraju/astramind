@@ -74,7 +74,7 @@ func TestHandleKBAskSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	handled, err := service.HandleKnowledgeCommand("/kb ask what does the document say")
+	handled, err := service.HandleKnowledgeCommand("/kb ask what does hello world say")
 	if err != nil {
 		t.Fatal(err)
 	}

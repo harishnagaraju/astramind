@@ -2,9 +2,9 @@
 
 /kb clear
 
-/kb import tests/integration/data/notes1.txt
+/kb import tests/fixtures/kb_documents/notes1.txt
 
-/kb import tests/integration/data/notes2.txt
+/kb import tests/fixtures/kb_documents/notes2.txt
 
 /kb list
 
@@ -17,12 +17,11 @@
 # Everything above only exercised /kb import and /kb search (keyword)
 # on plain .txt files. It never touched /kb ask, .docx import, or any
 # of the deterministic enumeration/extraction/precise-match behavior
-# built this release - meaning this automated suite (the one run_all.sh
-# actually gates on) had zero coverage of the release's real changes.
-# manual_testing.sh has RAG coverage, but it's run by hand, not as
-# part of the automated 5-step suite.
+# built this release - meaning this check alone had zero coverage of
+# the release's real changes. scripts/check_rag_behavior.sh covers
+# that; scripts/regression.sh runs both together.
 
-/kb import tests/integration/data/sample_contract.docx
+/kb import tests/fixtures/kb_documents/sample_contract.docx
 
 /kb list
 

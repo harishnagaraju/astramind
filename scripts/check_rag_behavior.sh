@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# v092_regression_check.sh
+# check_rag_behavior.sh
 #
 # Runs the manual verification checklist for the three fixes made
 # just before the v0.9.2 release (plural "what is the" routing,
@@ -10,10 +10,10 @@
 # single-fact precision behavior still works correctly.
 #
 # Usage:
-#   bash v092_regression_check.sh                # from repo root, CLI checks only
-#   bash v092_regression_check.sh --web           # also run the web UI smoke test
-#   bash v092_regression_check.sh ./astramind.exe # explicit binary path
-#   bash v092_regression_check.sh --web ./astramind.exe   # both, any order
+#   bash scripts/check_rag_behavior.sh                # from repo root, CLI checks only
+#   bash scripts/check_rag_behavior.sh --web           # also run the web UI smoke test
+#   bash scripts/check_rag_behavior.sh ./astramind.exe # explicit binary path
+#   bash scripts/check_rag_behavior.sh --web ./astramind.exe   # both, any order
 #
 set -e
 
@@ -21,7 +21,7 @@ set -e
 # the pattern already used by manual_testing.sh - works whether
 # invoked directly, or from scripts/regression.sh via a relative path.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$REPO_ROOT"
 
 RUN_WEB=0
@@ -56,7 +56,7 @@ cat > "$CMDFILE" << 'EOF'
 # enumeration, not single-fact extraction. Previously this exact
 # phrasing returned only 4 of 9 real entries from a single chunk.
 /kb clear
-/kb import Sanskrit1.txt
+/kb import tests/fixtures/kb_documents/Sanskrit1.txt
 /kb ask what is the timings of sanskrit classes?
 
 # Test 2 - confirm the already-working enumeration phrasing still
@@ -78,7 +78,7 @@ cat > "$CMDFILE" << 'EOF'
 # Zoom-related question. Import a document with zero Zoom content and
 # confirm this specific false positive is gone.
 /kb clear
-/kb import internal/features/kb/testdata/sample_contract.docx
+/kb import tests/fixtures/kb_documents/sample_contract.docx
 /kb ask what is the zoom meeting id
 
 # Test 6 - confirm docx single-fact precision is still correct: exact
@@ -88,7 +88,7 @@ cat > "$CMDFILE" << 'EOF'
 # Test 7 - mixed KB: both documents loaded together, confirm each
 # question still routes to the correct document, and the out-of-scope
 # question is still correctly rejected even with more content present.
-/kb import Sanskrit1.txt
+/kb import tests/fixtures/kb_documents/Sanskrit1.txt
 /kb ask what is the timings of sanskrit classes?
 /kb ask how much should client pay consultant
 /kb ask what is the capital of delhi
@@ -131,7 +131,7 @@ echo "  Test 7: each question correctly answered from its own document; capital-
 # automated pre-release gate (confirmed firsthand - backgrounding
 # --web hung a sandboxed shell during testing of this exact script).
 # Pass --web to include it, e.g.:
-#   bash tests/integration/v092_regression_check.sh --web
+#   bash scripts/check_rag_behavior.sh --web
 #
 # scripts/regression.sh does NOT pass --web by default - the
 # automated gate stays fast and non-interactive. Add --web (see that
@@ -142,7 +142,7 @@ if [ "$RUN_WEB" != "1" ]; then
     echo "Web UI (/api/ask) Smoke Test - SKIPPED"
     echo "=========================================="
     echo "Pass --web to include this section, e.g.:"
-    echo "  bash tests/integration/v092_regression_check.sh --web"
+    echo "  bash scripts/check_rag_behavior.sh --web"
     echo
     exit 0
 fi
@@ -172,8 +172,8 @@ echo "exit" >> "$CLEAR_SCRIPT"
 rm -f "$CLEAR_SCRIPT"
 
 echo
-echo "Importing Sanskrit1.txt via /api/documents..."
-curl -s -o /dev/null -w "" -F "file=@Sanskrit1.txt" "http://${WEB_ADDR}/api/documents" || true
+echo "Importing Sanskrit1.txt (tests/fixtures/kb_documents) via /api/documents..."
+curl -s -o /dev/null -w "" -F "file=@tests/fixtures/kb_documents/Sanskrit1.txt" "http://${WEB_ADDR}/api/documents" || true
 
 echo
 echo "--- Web Test 1: plural 'what is the' routing (same as CLI Test 1) ---"

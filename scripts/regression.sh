@@ -33,8 +33,8 @@ echo "[3/4] Coverage..."
 
 echo
 echo "[4/4] Knowledge Base & RAG Regression..."
-./tests/integration/run_kb.sh
-bash ./tests/integration/v092_regression_check.sh $RUN_WEB
+./scripts/check_knowledge_base.sh
+bash ./scripts/check_rag_behavior.sh $RUN_WEB
 
 END_TIME=$(date +%s)
 ELAPSED=$((END_TIME-START_TIME))

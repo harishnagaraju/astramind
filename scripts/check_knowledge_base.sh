@@ -6,7 +6,7 @@ echo "Running Knowledge Base Integration Tests..."
 echo
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$REPO_ROOT"
 
 if [ -f "./astramind.exe" ]; then
@@ -19,4 +19,4 @@ else
     exit 1
 fi
 
-"$BIN" --script tests/integration/commands/kb.txt
+"$BIN" --script tests/fixtures/commands/kb.txt

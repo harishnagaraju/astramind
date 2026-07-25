@@ -1,4 +1,4 @@
-package testutil
+package utilityforunittest
 
 import (
 	"encoding/json"
@@ -19,10 +19,10 @@ func LoadConversation(
 
 	_, filename, _, ok := runtime.Caller(0)
 	if !ok {
-		t.Fatal("failed to determine testutil source location")
+		t.Fatal("failed to determine utilityforunittest source location")
 	}
 
-	// testdata.go -> internal/testutil -> project root
+	// testdata.go -> internal/utilityforunittest -> project root
 	root := filepath.Join(
 		filepath.Dir(filename),
 		"..",
@@ -32,7 +32,7 @@ func LoadConversation(
 	file := filepath.Join(
 		root,
 		"tests",
-		"testdata",
+		"fixtures",
 		"conversations",
 		name+".json",
 	)

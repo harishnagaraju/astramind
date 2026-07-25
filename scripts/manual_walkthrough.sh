@@ -1,27 +1,27 @@
 #!/usr/bin/env bash
 #
-# manual_test.sh
+# manual_walkthrough.sh
 #
 # Drives AstraMind's interactive CLI end-to-end by piping the same
 # command sequence you've been typing by hand into stdin, and saves
 # the full transcript for review.
 #
 # Can be run from anywhere - it resolves the repo root from its own
-# location (tests/integration/) and always executes the binary from
+# location (scripts/) and always executes the binary from
 # there, matching how run_all.sh / run_kb.sh already behave.
 #
 # Usage:
-#   bash tests/integration/manual_test.sh     # from repo root
-#   ./manual_test.sh                          # from tests/integration/
-#   ./manual_test.sh ./path/to/bin.exe        # explicit binary override
+#   bash scripts/manual_walkthrough.sh        # from repo root
+#   ./manual_walkthrough.sh                   # from scripts/
+#   ./manual_walkthrough.sh ./path/to/bin.exe # explicit binary override
 #
 set -e
 
 # Resolve repo root relative to this script's own location, so it works
-# whether invoked from the repo root (bash tests/integration/manual_test.sh)
-# or from inside tests/integration itself (./manual_test.sh).
+# whether invoked from the repo root (bash scripts/manual_walkthrough.sh)
+# or from inside scripts/ itself (./manual_walkthrough.sh).
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$REPO_ROOT"
 
 BIN="${1:-}"

@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/harishnagaraju/astramind/internal/testutil"
+	"github.com/harishnagaraju/astramind/internal/utilityforunittest"
 )
 
 func TestExportTXT(t *testing.T) {
@@ -13,7 +13,7 @@ func TestExportTXT(t *testing.T) {
 
 	err := ExportSession(
 		session,
-		testutil.LoadConversation(
+		utilityforunittest.LoadConversation(
 			t,
 			"short",
 		),
@@ -26,7 +26,7 @@ func TestExportTXT(t *testing.T) {
 		)
 	}
 
-	testutil.AssertFileExists(
+	utilityforunittest.AssertFileExists(
 		t,
 		"exports/unit-test.txt",
 	)

@@ -1,4 +1,4 @@
-package testutil
+package utilityforunittest
 
 import "github.com/harishnagaraju/astramind/internal/infrastructure/models"
 
