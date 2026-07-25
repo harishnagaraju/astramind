@@ -603,7 +603,7 @@ AstraMind follows a modular, layered architecture:
 ## License
 Apache License 2.0
 
-This project is licensed under the Apache License, Version 2.0. See the [LICENSE](LICENSE) file for the full text. Permissive by design: AstraMind is intended as an open platform others can build on, adopt, and extend without restriction - commercial products and plugins built on top of it (including AstraMind's own school and legal-industry plugins) are separate, independently licensed works.
+This project is licensed under the Apache License, Version 2.0. See the [LICENSE](LICENSE) file for the full text. Permissive by design: AstraMind is intended as an open platform others can build on, adopt, and extend without restriction.
 
 # About
 ## Why AstraMind?

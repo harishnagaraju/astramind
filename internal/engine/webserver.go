@@ -8,10 +8,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-
-	"github.com/harishnagaraju/astramind/internal/features/kb"
-	"github.com/harishnagaraju/astramind/internal/infrastructure/ai"
-	"github.com/harishnagaraju/astramind/internal/infrastructure/models"
 )
 
 //go:embed webui/index.html
@@ -181,47 +177,19 @@ func (a *App) handleAPIAsk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	results, err := a.deps.KnowledgeBase.SemanticSearch(req.Question)
+	answer, sources, err := a.deps.ChatService.Ask(req.Question)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(askResponse{Error: err.Error()})
 		return
 	}
 
-	if len(results) == 0 {
-		json.NewEncoder(w).Encode(askResponse{
-			Answer:  "No relevant knowledge found to answer this question.",
-			Sources: []string{},
-		})
-		return
-	}
-
-	prompt := kb.BuildSemanticPrompt(req.Question, results)
-
-	reply, err := a.deps.ProviderManager.Chat(ai.ChatRequest{
-		Messages: []models.Message{
-			{Role: "user", Content: prompt},
-		},
-	})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(askResponse{Error: err.Error()})
-		return
-	}
-
-	seen := make(map[string]bool)
-	sources := make([]string, 0)
-
-	for _, result := range results {
-		if seen[result.DocumentID] {
-			continue
-		}
-		seen[result.DocumentID] = true
-		sources = append(sources, result.DocumentID)
+	if sources == nil {
+		sources = []string{}
 	}
 
 	json.NewEncoder(w).Encode(askResponse{
-		Answer:  reply,
+		Answer:  answer,
 		Sources: sources,
 	})
 }

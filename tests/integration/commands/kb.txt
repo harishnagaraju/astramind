@@ -12,6 +12,29 @@
 
 /kb search Knowledge
 
+# --- Deterministic RAG coverage (added for v0.9.2) ---
+#
+# Everything above only exercised /kb import and /kb search (keyword)
+# on plain .txt files. It never touched /kb ask, .docx import, or any
+# of the deterministic enumeration/extraction/precise-match behavior
+# built this release - meaning this automated suite (the one run_all.sh
+# actually gates on) had zero coverage of the release's real changes.
+# manual_testing.sh has RAG coverage, but it's run by hand, not as
+# part of the automated 5-step suite.
+
+/kb import tests/integration/data/sample_contract.docx
+
+/kb list
+
+# Enumeration-style question - should route to the deterministic
+# ExtractItems/BuildListAnswer path, zero LLM calls.
+/kb ask what does the service agreement cover
+
+# Single-fact question - should route to ExtractiveAnswer, refined by
+# precise-match (findPreciseLine) down to the specific paragraph
+# containing the answer, not the whole chunk.
+/kb ask how much should the client pay the consultant
+
 /kb clear
 
 /kb list

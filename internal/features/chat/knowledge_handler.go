@@ -173,36 +173,44 @@ func (s *Service) handleKBAsk(args []string) error {
 
 	question := strings.Join(args[2:], " ")
 
-	// Route enumeration-style questions ("what are all the X", "list
-	// every X", "what are the X timings") to a deterministic
-	// extraction path instead of the free-form LLM path.
-	//
-	// This replaces an earlier approach that tried to fix incomplete
-	// enumeration by rewording the question and tuning prompt/
-	// temperature. That approach was fundamentally limited: once a
-	// chunk is retrieved, whether the LLM's free-form generation
-	// mentions every item in it is a property of the model's
-	// generation process, not something prompt wording can
-	// guarantee. Confirmed during testing that even a complete,
-	// correct, uncorrupted prompt (chunking bug fixed, retrieval
-	// limit not a factor) still produced inconsistent, incomplete
-	// answers - the variance was in the LLM step itself, which no
-	// amount of prompt engineering can make deterministic.
-	//
-	// The deterministic path below has no such gap: chunks are
-	// already paragraph-structured (see chunker.go), so extracting
-	// "all items in the retrieved chunks" is a matter of splitting
-	// already-retrieved text back into paragraphs and formatting
-	// them - no generation step, so no possibility of an item being
-	// silently dropped.
-	if kb.IsEnumerationQuery(question) {
-		return s.handleKBAskEnumeration(question)
+	answer, _, err := s.Ask(question)
+	if err != nil {
+		return err
 	}
 
-	return s.handleKBAskFreeform(question)
+	fmt.Println(answer)
+
+	return nil
 }
 
-// handleKBAskEnumeration answers "list everything matching X" style
+// Ask answers a knowledge-base question and returns the complete,
+// display-ready answer text (including any source citations already
+// formatted into it) along with a separate, structured list of
+// source document IDs for callers that need them independently (e.g.
+// a JSON API response field).
+//
+// This is the single implementation of /kb ask's routing logic - the
+// CLI's handleKBAsk and the web UI's /api/ask handler both call this
+// rather than each implementing their own version of it. Before this
+// refactor, webserver.go had its own separate, hand-written copy of
+// the old free-form-LLM-only ask logic, written before this package's
+// RAG reliability redesign (deterministic enumeration + extraction,
+// see IsEnumerationQuery/ExtractItems/ExtractiveAnswer) and never
+// updated when that redesign happened - meaning the web UI kept
+// serving the old, less reliable behavior silently, with no test or
+// build failure to catch the drift, since the two implementations
+// were entirely independent and neither referenced the other. A
+// single shared method makes that class of drift structurally
+// impossible: there is now only one place this logic can be wrong.
+func (s *Service) Ask(question string) (answer string, sources []string, err error) {
+	if kb.IsEnumerationQuery(question) {
+		return s.askEnumeration(question)
+	}
+
+	return s.askFreeform(question)
+}
+
+// askEnumeration answers "list everything matching X" style
 // questions deterministically: retrieve relevant chunks, extract
 // every item within them, format as a list. No LLM call, no
 // possibility of an item being silently omitted by generation.
@@ -213,30 +221,27 @@ func (s *Service) handleKBAsk(args []string) error {
 // that caused the original bug (narrow keyword matching silently
 // dropping related-but-differently-worded entries). Once a chunk is
 // judged relevant, every item in it is included.
-func (s *Service) handleKBAskEnumeration(question string) error {
+func (s *Service) askEnumeration(question string) (string, []string, error) {
 	results, err := s.deps.KnowledgeBase.SemanticSearch(question)
 	if err != nil {
-		return err
+		return "", nil, err
 	}
 
 	if len(results) == 0 {
-		fmt.Println("No relevant knowledge found to answer this question.")
-		return nil
+		return "No relevant knowledge found to answer this question.", nil, nil
 	}
 
 	items := kb.ExtractItems(results)
 	answer := kb.BuildListAnswer(items)
 
-	fmt.Println(answer)
-
-	return nil
+	return answer, uniqueDocumentIDs(results), nil
 }
 
-// handleKBAskFreeform answers single-fact questions. Tries the
-// extractive path first (Pattern B: return the matching source
-// paragraph verbatim, no LLM paraphrase, so no risk of a generative
-// model restating a date or fee incorrectly) and only falls back to
-// the LLM RAG path if extraction can't run at all (no embedder
+// askFreeform answers single-fact questions. Tries the extractive
+// path first (Pattern B: return the matching source paragraph
+// verbatim, no LLM paraphrase, so no risk of a generative model
+// restating a date or fee incorrectly) and only falls back to the
+// LLM RAG path if extraction can't run at all (no embedder
 // configured) - the same graceful-degradation pattern ImportDocument
 // already uses elsewhere in this package for missing embedders.
 //
@@ -246,24 +251,20 @@ func (s *Service) handleKBAskEnumeration(question string) error {
 // question is intentionally out of scope for /kb ask's current
 // design; it answers questions about what the knowledge base states,
 // not compound reasoning over it.
-func (s *Service) handleKBAskFreeform(question string) error {
+func (s *Service) askFreeform(question string) (string, []string, error) {
 	results, err := s.deps.KnowledgeBase.SemanticSearch(question)
 	if err != nil {
-		return err
+		return "", nil, err
 	}
 
 	if len(results) == 0 {
-		fmt.Println("No relevant knowledge found to answer this question.")
-		return nil
+		return "No relevant knowledge found to answer this question.", nil, nil
 	}
 
 	item, err := s.deps.KnowledgeBase.ExtractiveAnswer(question, results)
 	if err == nil {
-		fmt.Println(item.Text)
-		fmt.Println()
-		fmt.Println("Sources:")
-		fmt.Printf("  [%s]\n", item.SourceChunkID)
-		return nil
+		sources := []string{item.SourceChunkID}
+		return formatAnswerWithSources(item.Text, sources), sources, nil
 	}
 	// Any extractive failure (no embedder configured, no embeddable
 	// item found) falls through to the LLM path below rather than
@@ -287,24 +288,46 @@ func (s *Service) handleKBAskFreeform(question string) error {
 		Temperature: &ragTemperature,
 	})
 	if err != nil {
-		return err
+		return "", nil, err
 	}
 
-	fmt.Println(reply)
-	fmt.Println()
-	fmt.Println("Sources:")
+	sources := uniqueDocumentIDs(results)
+	return formatAnswerWithSources(reply, sources), sources, nil
+}
 
+// formatAnswerWithSources appends a "Sources:" section to answer
+// text, matching the format kb.BuildListAnswer already uses for the
+// enumeration path - so callers (CLI, web UI) can treat every Ask()
+// result uniformly, regardless of which internal path produced it.
+func formatAnswerWithSources(answer string, sources []string) string {
+	if len(sources) == 0 {
+		return answer
+	}
+
+	var b strings.Builder
+	b.WriteString(answer)
+	b.WriteString("\n\nSources:\n")
+	for _, src := range sources {
+		b.WriteString("  [")
+		b.WriteString(src)
+		b.WriteString("]\n")
+	}
+	return b.String()
+}
+
+func uniqueDocumentIDs(results []kb.SemanticSearchResult) []string {
 	seen := make(map[string]bool)
+	var out []string
 
-	for _, result := range results {
-		if seen[result.DocumentID] {
+	for _, r := range results {
+		if seen[r.DocumentID] {
 			continue
 		}
-		seen[result.DocumentID] = true
-		fmt.Printf("  [%s]\n", result.DocumentID)
+		seen[r.DocumentID] = true
+		out = append(out, r.DocumentID)
 	}
 
-	return nil
+	return out
 }
 
 func (s *Service) handleKBRemove(args []string) error {

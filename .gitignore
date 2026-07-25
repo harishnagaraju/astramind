@@ -45,8 +45,8 @@ tests/coverage/coverage.html
 tests/coverage/coverage.txt
 
 # Runtime data
-exports/
-data/
+/exports/
+/data/
 
 # Optional: keep directories in Git
 !exports/.gitkeep

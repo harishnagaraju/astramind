@@ -63,20 +63,18 @@ func TestExtractiveAnswer_SelectsCorrectChunk(t *testing.T) {
 	}
 
 	if !strings.Contains(item.Text, "Thursday Senior Sanskrit from 06:15 to 07:15 am") {
-		t.Fatalf("expected the matched fact in the returned chunk, got %q", item.Text)
+		t.Fatalf("expected the matched fact in the returned text, got %q", item.Text)
 	}
 
-	// Whole-chunk return means this should match one full chunk's
-	// content exactly, not a fragment of it.
-	found := false
-	for _, c := range chunks {
-		if item.Text == c.Content {
-			found = true
-			break
-		}
-	}
-	if !found {
-		t.Fatalf("expected returned text to exactly match one full chunk, got %q", item.Text)
+	// Precise line-matching (see precise_match.go) now correctly
+	// narrows this to just the matched entry, not the whole chunk -
+	// a real precision improvement verified against the exact real
+	// case (this same question) that motivated it. The old
+	// assertion here (checking for a full-chunk match) reflected the
+	// previous, coarser whole-chunk-only behavior and no longer
+	// describes correct behavior.
+	if item.Text != "Thursday Senior Sanskrit from 06:15 to 07:15 am." {
+		t.Fatalf("expected precise single-line match, got %q", item.Text)
 	}
 }
 

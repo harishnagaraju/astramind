@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/harishnagaraju/astramind/internal/features/chat"
 	"github.com/harishnagaraju/astramind/internal/features/kb"
 	"github.com/harishnagaraju/astramind/internal/infrastructure/ai"
 )
@@ -36,12 +37,20 @@ func newTestApp(t *testing.T) *App {
 	manager := kb.NewManager(storage)
 	manager.SetEmbedder(webTestEmbedder{})
 
+	providerManager := ai.NewProviderManager(&ai.MockProvider{})
+
+	chatService := chat.NewService(chat.Dependencies{
+		KnowledgeBase:   manager,
+		ProviderManager: providerManager,
+	})
+
 	app := &App{
 		providerName: "mock",
 	}
 
 	app.deps.KnowledgeBase = manager
-	app.deps.ProviderManager = ai.NewProviderManager(&ai.MockProvider{})
+	app.deps.ProviderManager = providerManager
+	app.deps.ChatService = chatService
 
 	return app
 }

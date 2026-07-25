@@ -1,0 +1,3 @@
+Go is a programming language.
+AstraMind is written in Go.
+Knowledge Base testing.

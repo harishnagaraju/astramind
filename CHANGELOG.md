@@ -5,6 +5,34 @@ All notable changes to AstraMind are documented in this file.
 The project follows [Semantic Versioning](https://semver.org/).
 ---
 ---
+## [v0.9.2] - 2026-07-24
+
+### Highlights
+
+Four changes, related by timing more than by theme: a project-level licensing decision, the first step of formal-document import (issue #57), a precision improvement to single-fact answers, and a real reliability gap found and closed in the web UI's answer path.
+
+### Changed
+
+- **Relicensed from AGPL-3.0 to Apache License 2.0.** AGPL's network-copyleft terms are a common, explicit reason corporate legal teams block adoption of a dependency outright. Apache 2.0 removes that friction, better matching AstraMind's goal of being a widely adoptable open platform. See `README.md`'s License section for further detail.
+
+### Added
+
+- **`.docx` (modern Word) import support**, with zero new dependencies - a `.docx` file is a ZIP archive of XML, so Go's standard library (`archive/zip` + `encoding/xml`) is sufficient to extract real paragraph text directly, with no external library and no CGO.
+- `extractDocxText`, wired into `ImportDocument` alongside the existing `.txt`/`.md` handling
+- Regression tests run against a real python-docx-generated file (`testdata/sample_contract.docx`), not a hand-built XML fixture - matching the standard set earlier in this project's history of testing against real files rather than idealized ones (see the CRLF chunking fix in v0.9.1)
+- **Precise single-line extraction for single-fact `/kb ask` questions**, refining the whole-chunk return that v0.9.1 shipped. Within the chunk already selected as most relevant, `findPreciseLine` looks for a single paragraph containing an unambiguous highest count of the question's content words (stopwords stripped) - a deterministic, explainable, literal word-overlap count, not a semantic technique. This succeeds on exactly the case that defeated an earlier embedding-similarity-based approach: asking for a Zoom meeting ID no longer risks matching "Not meeting on 16 February" (which shares only one content word with the question) over the actual "Meeting ID 795 777 3585" (which shares two) - a clear, checkable margin instead of a similarity score that measured data showed could rank the wrong sentence higher. Falls back to the existing whole-chunk return on any tie or zero-overlap case, so this can only ever narrow an already-correct answer, never produce a wrong one.
+
+### Fixed
+
+- **The web UI (`/api/ask`) was silently still using the old free-form-LLM-only answer path**, never updated when v0.9.1 redesigned `/kb ask`'s reliability model (deterministic enumeration/extraction, see v0.9.1 above). This wasn't caught by any test, because `webserver.go`'s ask handler and the CLI's ask handler were two entirely separate, hand-written implementations with no shared code and nothing to flag the drift between them - the web UI's users were getting the older, less reliable free-form LLM behavior (including internal prompt-formatting artifacts like `[Source 1 of 2, Document: ...]` leaking into visible answers) with no indication anything was different from the CLI. Fixed by extracting a single `chat.Service.Ask` method that both the CLI and the web UI now call - the same class of drift is now structurally impossible, since there is only one implementation of the routing logic to be wrong.
+
+### Known Limitations
+
+- **PDF import is not yet implemented.** Requires a genuine pure-Go PDF text-extraction library (no CGO, no external binary, to stay consistent with this project's architecture). Extraction quality will vary by how the source PDF was produced - clean text-based PDFs extract well, complex multi-column layouts may not, and scanned/image-only PDFs have no extractable text at all without OCR, which remains out of scope.
+- **Legacy `.doc` (pre-2007 binary Word format) is not planned for pure-Go support.** Mature pure-Go extractors for this format don't exist; the ecosystem's best tools (antiword, LibreOffice headless conversion) are external binaries, which conflicts with this project's pure-Go constraint. Current recommendation: convert legacy `.doc` files to `.docx` before import (a one-click "Save As" in Word) rather than accept a lower-confidence best-effort extractor for a format explicitly meant to reach "100% output" reliability.
+
+---
+
 ## [v0.9.1] - 2026-07-24
 
 ### Highlights

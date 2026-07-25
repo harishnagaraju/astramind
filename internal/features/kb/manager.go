@@ -108,7 +108,7 @@ func (m *Manager) ImportDocument(path string) (*Document, error) {
 	ext := strings.ToLower(filepath.Ext(path))
 
 	switch ext {
-	case ".txt", ".md":
+	case ".txt", ".md", ".docx":
 		// supported
 	default:
 		return nil, ErrInvalidDocument
@@ -124,13 +124,28 @@ func (m *Manager) ImportDocument(path string) (*Document, error) {
 		return nil, err
 	}
 
+	// .docx is a binary (ZIP) container, not plain text - the raw
+	// bytes can't be used as string content directly the way .txt/
+	// .md can. extractDocxText pulls the real paragraph text out of
+	// it first.
+	var content string
+	switch ext {
+	case ".docx":
+		content, err = extractDocxText(data)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read %s: %w", filepath.Base(path), err)
+		}
+	default:
+		content = string(data)
+	}
+
 	id := generateDocumentID()
 
 	doc := &Document{
 		ID:         id,
 		Name:       filepath.Base(path),
 		Path:       path,
-		Content:    string(data),
+		Content:    content,
 		CreatedAt:  time.Now(),
 		ModifiedAt: info.ModTime(),
 	}
@@ -307,6 +322,23 @@ func (m *Manager) ExtractiveAnswer(
 
 	if !found {
 		return nil, ErrNoExtractiveMatch
+	}
+
+	// Precision refinement: within the chunk already selected as
+	// most relevant, look for a single paragraph with an
+	// unambiguous best content-word overlap against the question.
+	// If found, that's a strictly more precise answer than the
+	// whole chunk - if not (a tie, or nothing matched), fall back
+	// to the existing, safe whole-chunk return. Chunk selection
+	// itself (above) is unchanged - this only narrows the answer
+	// within the chunk that embedding similarity already judged
+	// relevant, it never changes which chunk was selected.
+	if preciseLine, ok := findPreciseLine(question, bestResult.Content); ok {
+		return &ExtractedItem{
+			Text:             preciseLine,
+			SourceDocumentID: bestResult.DocumentID,
+			SourceChunkID:    bestResult.ChunkID,
+		}, nil
 	}
 
 	return &ExtractedItem{
