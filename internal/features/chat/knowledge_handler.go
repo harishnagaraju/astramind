@@ -231,6 +231,18 @@ func (s *Service) askEnumeration(question string) (string, []string, error) {
 		return "No relevant knowledge found to answer this question.", nil, nil
 	}
 
+	// Relevance gate: SemanticSearch always returns its top-ranked
+	// chunks regardless of whether any of them are actually related
+	// to the question - "most similar of what exists" isn't the same
+	// as "relevant". If the question shares literally zero words with
+	// anything retrieved, treat that as no relevant knowledge found
+	// rather than confidently presenting unrelated content. See
+	// kb.HasAnyContentWordOverlap's doc comment for why this uses
+	// word overlap rather than an embedding similarity cutoff.
+	if !kb.HasAnyContentWordOverlap(question, results) {
+		return "No relevant knowledge found to answer this question.", nil, nil
+	}
+
 	items := kb.ExtractItems(results)
 	answer := kb.BuildListAnswer(items)
 
@@ -258,6 +270,12 @@ func (s *Service) askFreeform(question string) (string, []string, error) {
 	}
 
 	if len(results) == 0 {
+		return "No relevant knowledge found to answer this question.", nil, nil
+	}
+
+	// Same relevance gate as askEnumeration - see that function's
+	// comment for why this exists and why it uses word overlap.
+	if !kb.HasAnyContentWordOverlap(question, results) {
 		return "No relevant knowledge found to answer this question.", nil, nil
 	}
 

@@ -35,6 +35,21 @@ func TestIsEnumerationQuery(t *testing.T) {
 		{"Who is the coach for chess club?", false},
 		{"When is the next term starting?", false},
 		{"", false},
+
+		// Real bug found in manual testing: "what is the timings of
+		// sanskrit classes?" was misrouted to single-fact extraction
+		// (matched "what is the"), returning only 4 of 9 real
+		// entries from a single chunk instead of the full list. The
+		// word right after "the" ("timings") is plural, which should
+		// override the single-fact match back to enumeration.
+		{"what is the timings of sanskrit classes?", true},
+		{"what is the timings of sanskrit classes", true},
+
+		// Confirm the fix doesn't break the case it must not break:
+		// "what is the zoom meeting id" ("zoom" is not plural) must
+		// stay single-fact, exactly as verified in earlier live
+		// testing against real Ollama embeddings.
+		{"what is the zoom meeting id", false},
 	}
 
 	for _, c := range cases {

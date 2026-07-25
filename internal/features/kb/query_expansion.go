@@ -5,6 +5,17 @@ import (
 	"strings"
 )
 
+// whatIsThePattern is checked separately from the other
+// singleFactPatterns, because it is the one pattern in the list that
+// is genuinely ambiguous between "single fact" and "enumeration"
+// depending on what follows it. "what is the zoom meeting id" is a
+// single fact. "what is the timings of sanskrit classes" is asking
+// for every timing, despite starting with the identical three words
+// - a real bug found in manual testing, where this phrasing was
+// misrouted to single-fact extraction and silently dropped 5 of 9
+// real entries because ExtractiveAnswer only ever returns one chunk.
+var whatIsThePattern = regexp.MustCompile(`(?i)^\s*what is the\s+(\S+)`)
+
 // singleFactPatterns matches question phrasings that are clearly
 // asking for one specific fact about one specific named thing, as
 // opposed to enumerating everything in a category. Only questions
@@ -22,10 +33,24 @@ var singleFactPatterns = []*regexp.Regexp{
 	regexp.MustCompile(`(?i)^\s*was\b`),
 	regexp.MustCompile(`(?i)^\s*when (is|does|will)\b`),
 	regexp.MustCompile(`(?i)^\s*what time is\b`),
-	regexp.MustCompile(`(?i)^\s*what is the\b`),
+	whatIsThePattern,
 	regexp.MustCompile(`(?i)^\s*how much\b`),
 	regexp.MustCompile(`(?i)^\s*who is\b`),
 	regexp.MustCompile(`(?i)^\s*where is\b`),
+}
+
+// looksPlural is a deliberately simple heuristic (ends in "s", not
+// "ss") for whether a word is likely a plural noun. It is not
+// linguistically robust - words like "robotics" or "physics" would
+// be misclassified - but it is only used to decide whether to widen
+// an already-ambiguous match to the safer (enumeration) path, never
+// to narrow one. A false positive here (treating a genuinely
+// singular question as enumeration) costs a slightly more verbose
+// answer; a false negative (missing a real plural) costs a silently
+// incomplete answer, which is the actual bug this exists to prevent.
+func looksPlural(word string) bool {
+	lower := strings.ToLower(word)
+	return strings.HasSuffix(lower, "s") && !strings.HasSuffix(lower, "ss")
 }
 
 // IsEnumerationQuery reports whether a question should be treated as
@@ -60,9 +85,23 @@ func IsEnumerationQuery(question string) bool {
 	}
 
 	for _, p := range singleFactPatterns {
-		if p.MatchString(trimmed) {
-			return false
+		if !p.MatchString(trimmed) {
+			continue
 		}
+
+		// "what is the" is ambiguous - only treat it as single-fact
+		// if the word right after "the" doesn't look plural. Every
+		// other pattern in the list (is there, how much, who is,
+		// etc.) carries a clearer single-fact signal on its own and
+		// isn't second-guessed here.
+		if p == whatIsThePattern {
+			match := whatIsThePattern.FindStringSubmatch(trimmed)
+			if len(match) == 2 && looksPlural(match[1]) {
+				continue
+			}
+		}
+
+		return false
 	}
 
 	return true

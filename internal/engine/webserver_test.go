@@ -198,7 +198,7 @@ func TestHandleAPIAsk_WithDocuments(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	reqBody, _ := json.Marshal(askRequest{Question: "what does the document say"})
+	reqBody, _ := json.Marshal(askRequest{Question: "what does hello world say"})
 	req := httptest.NewRequest(http.MethodPost, "/api/ask", bytes.NewReader(reqBody))
 	rec := httptest.NewRecorder()
 
