@@ -77,6 +77,11 @@ END_TIME=$(date +%s)
 ELAPSED=$((END_TIME-START_TIME))
 
 echo
+echo "Generating machine-readable reports (reports/junit.xml, reports/regression.xml)..."
+go run ./cmd/dev -run=junit || true
+go run ./cmd/dev -run=regression-report -build="$BUILD_STATUS" -tests="$TEST_STATUS" -coverage-status="$COVERAGE_STATUS" -kbrag="$KBRAG_STATUS" -elapsed="$ELAPSED"
+
+echo
 echo "===================================="
 echo " Regression Summary"
 echo "===================================="
@@ -86,6 +91,7 @@ echo "Coverage   : $COVERAGE_STATUS"
 echo "KB & RAG   : $KBRAG_STATUS"
 echo "Elapsed    : ${ELAPSED} sec"
 echo "Log saved  : ${LOGFILE}"
+echo "Reports    : reports/junit.xml, reports/regression.xml"
 echo "===================================="
 
 if [ "$BUILD_STATUS" = "PASS" ] && [ "$TEST_STATUS" = "PASS" ] && [ "$COVERAGE_STATUS" = "PASS" ] && [ "$KBRAG_STATUS" = "PASS" ]; then

@@ -83,6 +83,11 @@ if "!COVERAGE_STATUS!"=="PASS" (
 )
 
 echo.
+echo Generating machine-readable reports ^(reports\junit.xml, reports\regression.xml^)...
+go run ./cmd/dev -run=junit
+go run ./cmd/dev -run=regression-report -build=!BUILD_STATUS! -tests=!TEST_STATUS! -coverage-status=!COVERAGE_STATUS! -kbrag=!KBRAG_STATUS! -elapsed=0
+
+echo.
 echo ====================================
 echo  Regression Summary
 echo ====================================
@@ -90,6 +95,7 @@ echo Build      : !BUILD_STATUS!
 echo Tests      : !TEST_STATUS!
 echo Coverage   : !COVERAGE_STATUS!
 echo KB ^& RAG   : !KBRAG_STATUS!
+echo Reports    : reports\junit.xml, reports\regression.xml
 echo ====================================
 
 if "!BUILD_STATUS!"=="PASS" if "!TEST_STATUS!"=="PASS" if "!COVERAGE_STATUS!"=="PASS" if "!KBRAG_STATUS!"=="PASS" (

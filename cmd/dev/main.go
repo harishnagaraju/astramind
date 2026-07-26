@@ -20,6 +20,8 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
+	"encoding/xml"
 	"flag"
 	"fmt"
 	"log"
@@ -30,7 +32,12 @@ import (
 )
 
 func main() {
-	task := flag.String("run", "help", "Automation task to execute: build, test, coverage, regression, clean")
+	task := flag.String("run", "help", "Automation task to execute: build, test, coverage, junit, regression-report, regression, clean")
+	buildStatus := flag.String("build", "SKIPPED", "Build step status: PASS, FAIL, or SKIPPED")
+	testStatus := flag.String("tests", "SKIPPED", "Tests step status: PASS, FAIL, or SKIPPED")
+	coverageStatus := flag.String("coverage-status", "SKIPPED", "Coverage step status: PASS, FAIL, or SKIPPED")
+	kbragStatus := flag.String("kbrag", "SKIPPED", "KB & RAG step status: PASS, FAIL, or SKIPPED")
+	elapsed := flag.String("elapsed", "0", "Total elapsed seconds for the regression run")
 	flag.Parse()
 
 	switch *task {
@@ -40,6 +47,10 @@ func main() {
 		executeTest()
 	case "coverage":
 		executeCoverage()
+	case "junit":
+		executeJUnit()
+	case "regression-report":
+		executeRegressionReport(*buildStatus, *testStatus, *coverageStatus, *kbragStatus, *elapsed)
 	case "regression":
 		executeRegression()
 	case "clean":
@@ -57,6 +68,7 @@ func printHelp() {
 	fmt.Println("  build       Compile astramind(.exe) to the repo root")
 	fmt.Println("  test        Run the full unit test suite")
 	fmt.Println("  coverage    Generate coverage reports in tests/output/coverage/")
+	fmt.Println("  junit       Generate reports/junit.xml for CI test-result display")
 	fmt.Println("  regression  Run the full regression suite (calls scripts/regression.sh or .bat)")
 	fmt.Println("  clean       Remove build artifacts and Go caches")
 }
@@ -210,6 +222,217 @@ func extractTotalCoverage(funcOutput string) string {
 		}
 	}
 	return "unknown"
+}
+
+// goTestEvent mirrors the JSON Lines format `go test -json` emits -
+// one line per event (a test starting, its output, and its final
+// pass/fail/skip). This is Go's own, already-structured test output;
+// parsing it directly avoids needing an external tool
+// (go-junit-report, gotestsum) that isn't part of the Go toolchain
+// itself - the same reasoning already applied to coverage.sh's
+// grep/sed/awk pipeline, rewritten in Go for the same reason.
+type goTestEvent struct {
+	Action  string  `json:"Action"`
+	Package string  `json:"Package"`
+	Test    string  `json:"Test"`
+	Output  string  `json:"Output"`
+	Elapsed float64 `json:"Elapsed"`
+}
+
+// JUnit XML schema structs - the format GitHub Actions' test-reporter
+// actions (and most CI systems) already know how to render natively.
+type junitTestSuites struct {
+	XMLName xml.Name         `xml:"testsuites"`
+	Suites  []junitTestSuite `xml:"testsuite"`
+}
+
+type junitTestSuite struct {
+	Name      string          `xml:"name,attr"`
+	Tests     int             `xml:"tests,attr"`
+	Failures  int             `xml:"failures,attr"`
+	Time      string          `xml:"time,attr"`
+	TestCases []junitTestCase `xml:"testcase"`
+}
+
+type junitTestCase struct {
+	ClassName string        `xml:"classname,attr"`
+	Name      string        `xml:"name,attr"`
+	Time      string        `xml:"time,attr"`
+	Failure   *junitFailure `xml:"failure,omitempty"`
+	Skipped   *junitSkipped `xml:"skipped,omitempty"`
+}
+
+type junitFailure struct {
+	Message string `xml:"message,attr"`
+	Content string `xml:",chardata"`
+}
+
+type junitSkipped struct {
+	Message string `xml:"message,attr"`
+}
+
+func executeJUnit() {
+	fmt.Println("Generating reports/junit.xml from `go test -json` output...")
+
+	if err := os.MkdirAll("reports", 0755); err != nil {
+		log.Fatalf("failed to create reports/ directory: %v", err)
+	}
+
+	cmd := exec.Command("go", "test", "-json", "./...")
+	output, _ := cmd.CombinedOutput() // test failures are expected; report them, don't abort on them
+
+	type testResult struct {
+		name    string
+		elapsed float64
+		failed  bool
+		output  strings.Builder
+	}
+
+	suites := map[string][]*testResult{}  // package -> ordered test results
+	testIndex := map[string]*testResult{} // "package/test" -> result, for fast lookup while streaming
+
+	scanner := bufio.NewScanner(strings.NewReader(string(output)))
+	scanner.Buffer(make([]byte, 1024*1024), 1024*1024)
+	for scanner.Scan() {
+		var ev goTestEvent
+		if err := json.Unmarshal(scanner.Bytes(), &ev); err != nil {
+			continue // non-JSON line (shouldn't happen with -json, but don't crash on it)
+		}
+		if ev.Test == "" {
+			continue // package-level event, not an individual test
+		}
+		key := ev.Package + "/" + ev.Test
+
+		switch ev.Action {
+		case "run":
+			r := &testResult{name: ev.Test}
+			testIndex[key] = r
+			suites[ev.Package] = append(suites[ev.Package], r)
+		case "output":
+			if r, ok := testIndex[key]; ok {
+				r.output.WriteString(ev.Output)
+			}
+		case "pass":
+			if r, ok := testIndex[key]; ok {
+				r.elapsed = ev.Elapsed
+			}
+		case "fail":
+			if r, ok := testIndex[key]; ok {
+				r.elapsed = ev.Elapsed
+				r.failed = true
+			}
+		}
+	}
+
+	var report junitTestSuites
+	for pkg, results := range suites {
+		suite := junitTestSuite{Name: pkg}
+		var suiteTime float64
+		for _, r := range results {
+			tc := junitTestCase{
+				ClassName: pkg,
+				Name:      r.name,
+				Time:      fmt.Sprintf("%.3f", r.elapsed),
+			}
+			suiteTime += r.elapsed
+			if r.failed {
+				suite.Failures++
+				tc.Failure = &junitFailure{
+					Message: "Test failed",
+					Content: r.output.String(),
+				}
+			}
+			suite.Tests++
+			suite.TestCases = append(suite.TestCases, tc)
+		}
+		suite.Time = fmt.Sprintf("%.3f", suiteTime)
+		report.Suites = append(report.Suites, suite)
+	}
+
+	xmlBytes, err := xml.MarshalIndent(report, "", "  ")
+	if err != nil {
+		log.Fatalf("failed to marshal JUnit XML: %v", err)
+	}
+
+	fullXML := []byte(xml.Header + string(xmlBytes) + "\n")
+	if err := os.WriteFile("reports/junit.xml", fullXML, 0644); err != nil {
+		log.Fatalf("failed to write reports/junit.xml: %v", err)
+	}
+
+	totalTests, totalFailures := 0, 0
+	for _, s := range report.Suites {
+		totalTests += s.Tests
+		totalFailures += s.Failures
+	}
+	fmt.Printf("reports/junit.xml written: %d tests, %d failures across %d packages\n", totalTests, totalFailures, len(report.Suites))
+
+	if totalFailures > 0 {
+		os.Exit(1)
+	}
+}
+
+// executeRegressionReport writes reports/regression.xml - a small
+// JUnit-format summary of the 4-step regression pipeline itself
+// (Build/Tests/Coverage/KB & RAG), distinct from junit.xml (every
+// individual Go test). Takes each step's already-captured real
+// status as input rather than re-deriving it, so this logic lives
+// in exactly one place: regression.sh and regression.bat both call
+// this with their real, honestly-tracked status variables, instead
+// of each separately reimplementing XML-writing in bash and batch -
+// the same duplication this whole task runner exists to eliminate.
+func executeRegressionReport(buildStatus, testStatus, coverageStatus, kbragStatus, elapsedSeconds string) {
+	fmt.Println("Generating reports/regression.xml...")
+
+	if err := os.MkdirAll("reports", 0755); err != nil {
+		log.Fatalf("failed to create reports/ directory: %v", err)
+	}
+
+	steps := []struct {
+		name   string
+		status string
+	}{
+		{"Build", buildStatus},
+		{"Tests", testStatus},
+		{"Coverage", coverageStatus},
+		{"KB & RAG", kbragStatus},
+	}
+
+	suite := junitTestSuite{
+		Name: "AstraMind Regression Pipeline",
+		Time: elapsedSeconds,
+	}
+
+	failures := 0
+	for _, step := range steps {
+		tc := junitTestCase{
+			ClassName: "regression",
+			Name:      step.name,
+		}
+		switch step.status {
+		case "FAIL":
+			failures++
+			tc.Failure = &junitFailure{Message: "Step failed", Content: step.name + " reported a non-zero exit code."}
+		case "SKIPPED":
+			tc.Skipped = &junitSkipped{Message: "Not run - an earlier step failed"}
+		}
+		suite.Tests++
+		suite.TestCases = append(suite.TestCases, tc)
+	}
+	suite.Failures = failures
+
+	report := junitTestSuites{Suites: []junitTestSuite{suite}}
+
+	xmlBytes, err := xml.MarshalIndent(report, "", "  ")
+	if err != nil {
+		log.Fatalf("failed to marshal regression.xml: %v", err)
+	}
+
+	fullXML := []byte(xml.Header + string(xmlBytes) + "\n")
+	if err := os.WriteFile("reports/regression.xml", fullXML, 0644); err != nil {
+		log.Fatalf("failed to write reports/regression.xml: %v", err)
+	}
+
+	fmt.Printf("reports/regression.xml written: %d steps, %d failures\n", suite.Tests, failures)
 }
 
 func executeRegression() {
