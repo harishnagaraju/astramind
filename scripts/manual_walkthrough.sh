@@ -39,7 +39,17 @@ if [ -z "$BIN" ]; then
 fi
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-LOGFILE="manual_test_${TIMESTAMP}.log"
+OSTAG=$(uname -s | tr '[:upper:]' '[:lower:]')
+LOGFILE="manual_walkthrough_${OSTAG}_${TIMESTAMP}.log"
+
+# Capture EVERYTHING this script prints from here on, not just the
+# main interactive session below - the sanity scan, content-fidelity
+# scan, and determinism scan results all happen AFTER that command
+# and were previously only reaching the terminal, never LOGFILE,
+# despite this script's own closing message claiming otherwise. Same
+# real bug, same fix, as check_rag_behavior.sh.
+exec > >(tee "$LOGFILE") 2>&1
+
 TMP_SESSION="manualtest_tmp_$$"
 KB_FILE_1="manualtest_kb1.md"
 KB_FILE_2="manualtest_kb2.md"
@@ -117,12 +127,13 @@ FIDELITY_QUERY="list out all the club and class timings"
 
 echo "=========================================="
 echo "AstraMind Manual Command Walkthrough"
+echo "Platform : $(uname -s) (bash / manual_walkthrough.sh)"
 echo "Binary : $BIN"
 echo "Log    : $LOGFILE"
 echo "=========================================="
 echo
 
-"$BIN" <<EOF | tee "$LOGFILE"
+"$BIN" <<EOF
 /help
 /about
 /history
@@ -296,7 +307,7 @@ echo
 WEB_ADDR="localhost:8420"
 WEB_FILE_1="manualtest_web1.md"
 WEB_FILE_2="manualtest_web2.md"
-WEB_LOG="manual_test_web_${TIMESTAMP}.log"
+WEB_LOG="manual_walkthrough_web_${OSTAG}_${TIMESTAMP}.log"
 
 echo "The Eiffel Tower is a wrought-iron lattice tower located in Paris, France." > "$WEB_FILE_1"
 echo "Photosynthesis allows plants to convert sunlight into chemical energy." > "$WEB_FILE_2"

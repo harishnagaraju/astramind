@@ -18,7 +18,7 @@
 set -e
 
 # Resolve repo root relative to this script's own location, matching
-# the pattern already used by manual_testing.sh - works whether
+# the pattern already used by manual_walkthrough.sh - works whether
 # invoked directly, or from scripts/regression.sh via a relative path.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -48,7 +48,19 @@ if [ -z "$BIN" ]; then
 fi
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-LOGFILE="test_output_${TIMESTAMP}.log"
+OSTAG=$(uname -s | tr '[:upper:]' '[:lower:]')
+LOGFILE="check_rag_behavior_${OSTAG}_${TIMESTAMP}.log"
+
+# Capture EVERYTHING this script prints from here on - both to the
+# terminal and to LOGFILE - not just the single astramind invocation
+# below. A prior version only wrapped that one command in `tee`,
+# meaning everything printed afterward (the "Expected results"
+# checklist, the "Web UI Smoke Test" section) only ever reached the
+# terminal, never the saved file - confirmed as a real, reproducible
+# gap by directly comparing a saved log against the full terminal
+# transcript.
+exec > >(tee "$LOGFILE") 2>&1
+
 CMDFILE=$(mktemp)
 
 cat > "$CMDFILE" << 'EOF'
@@ -99,12 +111,13 @@ EOF
 
 echo "=========================================="
 echo "v0.9.2 Regression Check"
+echo "Platform : $(uname -s) (bash / check_rag_behavior.sh)"
 echo "Binary : $BIN"
 echo "Log    : $LOGFILE"
 echo "=========================================="
 echo
 
-"$BIN" --script "$CMDFILE" 2>&1 | tee "$LOGFILE"
+"$BIN" --script "$CMDFILE" 2>&1
 
 rm -f "$CMDFILE"
 
@@ -154,7 +167,7 @@ echo "=========================================="
 echo
 
 WEB_ADDR="localhost:8420"
-WEB_LOG="test_output_web_${TIMESTAMP}.log"
+WEB_LOG="check_rag_behavior_web_${OSTAG}_${TIMESTAMP}.log"
 
 "$BIN" --web > "$WEB_LOG" 2>&1 &
 WEB_PID=$!
