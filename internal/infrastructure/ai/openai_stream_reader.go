@@ -15,7 +15,7 @@ func (p *OpenAIProvider) readStream(
 	body io.ReadCloser,
 	stream *openAIStream,
 ) {
-	defer body.Close()
+	defer body.Close() //nolint:errcheck // read-only handle; a close failure here doesn't lose data
 	defer close(stream.events)
 
 	scanner := bufio.NewScanner(body)

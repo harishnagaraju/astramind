@@ -57,7 +57,7 @@ func TestOpenAIProviderHTTPErrors(t *testing.T) {
 								tt.statusCode,
 							)
 
-							fmt.Fprint(
+							fmt.Fprint( //nolint:errcheck // mock HTTP server response in a test, cannot meaningfully fail
 								w,
 								`{"error":"test error"}`,
 							)

@@ -21,7 +21,7 @@ func TestOllamaProviderInvalidJSON(t *testing.T) {
 					"application/json",
 				)
 
-				fmt.Fprint(
+				fmt.Fprint( //nolint:errcheck // mock HTTP server response in a test, cannot meaningfully fail
 					w,
 					`{ invalid json`,
 				)

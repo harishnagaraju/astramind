@@ -34,19 +34,19 @@ func TestOpenAIProviderStreamIntegration(t *testing.T) {
 					t.Fatal("streaming unsupported")
 				}
 
-				fmt.Fprint(
+				fmt.Fprint( //nolint:errcheck // mock HTTP server response in a test, cannot meaningfully fail
 					w,
 					`data: {"choices":[{"delta":{"content":"Hello "}}]}`+"\n\n",
 				)
 				flusher.Flush()
 
-				fmt.Fprint(
+				fmt.Fprint( //nolint:errcheck // mock HTTP server response in a test, cannot meaningfully fail
 					w,
 					`data: {"choices":[{"delta":{"content":"World"}}]}`+"\n\n",
 				)
 				flusher.Flush()
 
-				fmt.Fprint(
+				fmt.Fprint( //nolint:errcheck // mock HTTP server response in a test, cannot meaningfully fail
 					w,
 					"data: [DONE]\n\n",
 				)

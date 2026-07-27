@@ -196,7 +196,7 @@ func (a *App) handleAPIAsk(w http.ResponseWriter, r *http.Request) {
 		sources = []string{}
 	}
 
-	json.NewEncoder(w).Encode(askResponse{
+	json.NewEncoder(w).Encode(askResponse{ //nolint:errcheck // response encoding failure means client disconnected, not a server-side data issue
 		Answer:  answer,
 		Sources: sources,
 	})

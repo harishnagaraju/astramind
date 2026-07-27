@@ -81,7 +81,7 @@ func TestOpenAIProvider_Embed(t *testing.T) {
 					t.Errorf("expected request to /embeddings, got: %s", r.URL.Path)
 				}
 				w.WriteHeader(tt.mockStatusCode)
-				fmt.Fprint(w, tt.mockResponse)
+				fmt.Fprint(w, tt.mockResponse) //nolint:errcheck // mock HTTP server response in a test, cannot meaningfully fail
 			}))
 			defer server.Close()
 
