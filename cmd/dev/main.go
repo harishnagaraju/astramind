@@ -150,7 +150,7 @@ func executeCoverage() {
 	packageFile := coverageDir + "/package_coverage.txt"
 
 	for _, f := range []string{outFile, htmlFile, txtFile, packageFile} {
-		os.Remove(f) // ignore error - fine if it didn't exist
+		os.Remove(f) //nolint:errcheck // ignore error - fine if it didn't exist
 	}
 
 	packageOutput, err := runCapture("go", "test", "-coverprofile="+outFile, "./...")

@@ -21,7 +21,7 @@ func (a *App) runScript() error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck // read-only handle; a close failure here doesn't lose data
 
 	scanner := bufio.NewScanner(file)
 

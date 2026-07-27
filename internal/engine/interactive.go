@@ -68,8 +68,7 @@ func (a *App) runInteractive() error {
 		switch userInput {
 
 		case "exit", "quit":
-			historyService.Save(a.activeSession, a.runtime.Conversation)
-			if err != nil {
+			if err := historyService.Save(a.activeSession, a.runtime.Conversation); err != nil {
 				return err
 			}
 			fmt.Println("Goodbye!")

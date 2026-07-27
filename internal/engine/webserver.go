@@ -57,7 +57,7 @@ func (a *App) runWeb(addr string) error {
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write(indexHTML)
+		w.Write(indexHTML) //nolint:errcheck // static page write; failure here means the client disconnected, nothing to recover
 	})
 
 	mux.HandleFunc("/api/status", a.handleAPIStatus)
@@ -72,7 +72,7 @@ func (a *App) runWeb(addr string) error {
 
 func (a *App) handleAPIStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(statusResponse{
+	json.NewEncoder(w).Encode(statusResponse{ //nolint:errcheck // response encoding failure means client disconnected, not a server-side data issue
 		Provider: a.providerName,
 	})
 }
@@ -111,7 +111,7 @@ func (a *App) listDocuments(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(summaries)
+	json.NewEncoder(w).Encode(summaries) //nolint:errcheck // response encoding failure means client disconnected, not a server-side data issue
 }
 
 func (a *App) importDocument(w http.ResponseWriter, r *http.Request) {
@@ -121,7 +121,7 @@ func (a *App) importDocument(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "no file provided", http.StatusBadRequest)
 		return
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck // read-only handle on the uploaded file; a close failure here doesn't lose data the way a write-destination close failure would
 
 	uploadDir := filepath.Join("data", "uploads")
 
@@ -137,10 +137,18 @@ func (a *App) importDocument(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	defer dest.Close()
+	defer dest.Close() //nolint:errcheck // safety-net close on early-return error paths below; the real close+flush is checked explicitly on the success path
 
 	if _, err := io.Copy(dest, file); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Explicit close (not just the deferred one) so a flush failure -
+	// which would mean the uploaded document was silently truncated
+	// or corrupted on disk - is actually surfaced, not swallowed.
+	if err := dest.Close(); err != nil {
+		http.Error(w, "failed to save uploaded file: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
