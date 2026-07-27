@@ -47,7 +47,7 @@ func extractDocxText(data []byte) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to open word/document.xml: %w", err)
 	}
-	defer rc.Close()
+	defer rc.Close() //nolint:errcheck // read-only handle on a zip entry; a close failure here doesn't lose data
 
 	decoder := xml.NewDecoder(rc)
 

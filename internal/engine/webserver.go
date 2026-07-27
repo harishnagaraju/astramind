@@ -181,14 +181,14 @@ func (a *App) handleAPIAsk(w http.ResponseWriter, r *http.Request) {
 
 	if req.Question == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(askResponse{Error: "question is required"})
+		json.NewEncoder(w).Encode(askResponse{Error: "question is required"}) //nolint:errcheck // response encoding failure means client disconnected
 		return
 	}
 
 	answer, sources, err := a.deps.ChatService.Ask(req.Question)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(askResponse{Error: err.Error()})
+		json.NewEncoder(w).Encode(askResponse{Error: err.Error()}) //nolint:errcheck // response encoding failure means client disconnected
 		return
 	}
 

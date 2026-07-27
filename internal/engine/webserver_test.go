@@ -144,7 +144,7 @@ func TestHandleAPIDocuments_ImportAndList(t *testing.T) {
 	}
 
 	// Clean up the upload artifact this test created outside t.TempDir().
-	os.Remove(filepath.Join("data", "uploads", "sample.txt"))
+	os.Remove(filepath.Join("data", "uploads", "sample.txt")) //nolint:errcheck // test cleanup, best-effort
 }
 
 func TestHandleAPIAsk_NoDocuments(t *testing.T) {

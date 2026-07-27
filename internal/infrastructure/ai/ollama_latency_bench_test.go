@@ -45,7 +45,7 @@ func skipIfOllamaUnreachable(b *testing.B) {
 	if err != nil {
 		b.Skipf("Ollama not reachable at %s - skipping (start Ollama to run this benchmark): %v", ollamaBenchmarkBaseURL, err)
 	}
-	resp.Body.Close()
+	resp.Body.Close() //nolint:errcheck // read-only handle in a benchmark; a close failure here doesn't lose data
 }
 
 // BenchmarkOllamaChatLatency measures real end-to-end latency for a

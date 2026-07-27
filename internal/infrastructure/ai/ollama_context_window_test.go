@@ -39,7 +39,7 @@ func TestOllamaRequestSetsContextWindow(t *testing.T) {
 
 			w.Header().Set("Content-Type", "application/json")
 
-			json.NewEncoder(w).Encode(OllamaChatResponse{
+			json.NewEncoder(w).Encode(OllamaChatResponse{ //nolint:errcheck // mock HTTP server response in a test, cannot meaningfully fail
 				Message: OllamaChatMessage{
 					Role:    "assistant",
 					Content: "ok",
