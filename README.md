@@ -269,7 +269,8 @@ The regression suite automatically performs:
 ```bash
 go run ./cmd/dev -run=junit
 ```
-```Parses `go test -json` output directly (no external tool - `go-junit-report`/`gotestsum` are not dependencies of this project) into real JUnit XML at `reports/junit.xml`. 
+```
+Parses `go test -json` output directly (no external tool - `go-junit-report`/`gotestsum` are not dependencies of this project) into real JUnit XML at `reports/junit.xml`. 
 A related task, `go run ./cmd/dev -run=regression-report`, writes `reports/regression.xml` - the 4 pipeline steps themselves (Build/Tests/Coverage/KB & RAG) as JUnit test cases, using each step's real, honestly-tracked status. 
 `scripts/regression.sh`/`.bat` generate both automatically. 
 Both are consumed by CI (`.github/workflows/go.yml`) to display real pass/fail results directly on each commit and pull request, on both Linux and Windows.
