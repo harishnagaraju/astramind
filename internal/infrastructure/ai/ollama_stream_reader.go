@@ -4,51 +4,88 @@ import (
 	"bufio"
 	"encoding/json"
 	"io"
+	"strings"
 )
 
-func readOllamaStream(
-	body io.Reader,
-	events chan<- StreamEvent,
+// readStream reads the OpenAI streaming response.
+//
+// In this phase it only owns the lifecycle of the response body.
+// SSE parsing will be implemented in the next phase.
+func (p *OpenAIProvider) readStream(
+	body io.ReadCloser,
+	stream *openAIStream,
 ) {
-
-	defer close(events)
+	defer body.Close() //nolint:errcheck // read-only handle; a close failure here doesn't lose data
+	defer close(stream.events)
 
 	scanner := bufio.NewScanner(body)
 
 	for scanner.Scan() {
 
-		var response OllamaStreamResponse
+		line := strings.TrimSpace(scanner.Text())
+
+		// Skip empty lines.
+		if line == "" {
+			continue
+		}
+
+		// Ignore anything that is not an SSE data event.
+		if !strings.HasPrefix(line, "data:") {
+			continue
+		}
+
+		// Remove the SSE prefix.
+		data := strings.TrimSpace(
+			strings.TrimPrefix(line, "data:"),
+		)
+
+		// End of stream.
+		if data == "[DONE]" {
+
+			stream.events <- StreamEvent{
+				Type: StreamEventDone,
+			}
+
+			return
+		}
+
+		var response OpenAIStreamResponse
 
 		err := json.Unmarshal(
-			scanner.Bytes(),
+			[]byte(data),
 			&response,
 		)
 
 		if err != nil {
-			events <- StreamEvent{
+			stream.events <- StreamEvent{
 				Type: StreamEventError,
 				Err:  err,
 			}
 			return
 		}
 
-		if response.Message.Content != "" {
-			events <- StreamEvent{
-				Type:    StreamEventToken,
-				Content: response.Message.Content,
-			}
+		// Token emission
+		if len(response.Choices) == 0 {
+			continue
 		}
 
-		if response.Done {
-			events <- StreamEvent{
-				Type: StreamEventDone,
-			}
-			return
+		content := response.Choices[0].Delta.Content
+
+		// Ignore empty chunks (for example, role-only events).
+		if content == "" {
+			continue
 		}
+
+		stream.events <- StreamEvent{
+			Type:    StreamEventToken,
+			Content: content,
+		}
+
 	}
 
 	if err := scanner.Err(); err != nil {
-		events <- StreamEvent{
+
+		stream.events <- StreamEvent{
 			Type: StreamEventError,
 			Err:  err,
 		}

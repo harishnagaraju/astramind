@@ -1,78 +1,90 @@
 package ai
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
-func TestOpenAIProviderHTTPErrors(t *testing.T) {
+func TestOllamaProviderHTTPErrors(t *testing.T) {
 
 	tests := []struct {
-		name string
-		code int
-		body string
+		name       string
+		statusCode int
 	}{
 		{
-			name: "BadRequest",
-			code: http.StatusBadRequest,
-			body: `{"error":{"message":"bad request"}}`,
+			name:       "BadRequest",
+			statusCode: http.StatusBadRequest,
 		},
 		{
-			name: "Unauthorized",
-			code: http.StatusUnauthorized,
-			body: `{"error":{"message":"invalid api key"}}`,
+			name:       "Unauthorized",
+			statusCode: http.StatusUnauthorized,
 		},
 		{
-			name: "Forbidden",
-			code: http.StatusForbidden,
-			body: `{"error":{"message":"forbidden"}}`,
+			name:       "NotFound",
+			statusCode: http.StatusNotFound,
 		},
 		{
-			name: "TooManyRequests",
-			code: http.StatusTooManyRequests,
-			body: `{"error":{"message":"quota exceeded"}}`,
+			name:       "TooManyRequests",
+			statusCode: http.StatusTooManyRequests,
 		},
 		{
-			name: "InternalServerError",
-			code: http.StatusInternalServerError,
-			body: `{"error":{"message":"internal error"}}`,
+			name:       "InternalServerError",
+			statusCode: http.StatusInternalServerError,
 		},
 	}
 
 	for _, tt := range tests {
 
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(
+			tt.name,
+			func(t *testing.T) {
 
-			server := httptest.NewServer(
-				http.HandlerFunc(
-					func(w http.ResponseWriter, r *http.Request) {
+				server := httptest.NewServer(
+					http.HandlerFunc(
+						func(
+							w http.ResponseWriter,
+							r *http.Request,
+						) {
 
-						w.WriteHeader(tt.code)
-						_, _ = w.Write([]byte(tt.body))
-					},
-				),
-			)
+							w.Header().Set(
+								"Content-Type",
+								"application/json",
+							)
 
-			defer server.Close()
+							w.WriteHeader(
+								tt.statusCode,
+							)
 
-			provider := &OpenAIProvider{
-				baseURL: server.URL,
-			}
-
-			_, err := provider.Chat(
-				ChatRequest{
-					Model:  "dummy",
-					APIKey: "dummy",
-				},
-			)
-
-			if err == nil {
-				t.Fatalf(
-					"expected error for HTTP %d",
-					tt.code,
+							fmt.Fprint( //nolint:errcheck // mock HTTP server response in a test, cannot meaningfully fail
+								w,
+								`{"error":"test error"}`,
+							)
+						},
+					),
 				)
-			}
-		})
+
+				defer server.Close()
+
+				provider := &OllamaProvider{
+					baseURL: server.URL,
+					model:   "gemma3:1b",
+				}
+
+				_, err := provider.Chat(
+					ChatRequest{
+						Model: "gemma3:1b",
+					},
+				)
+
+				if err == nil {
+					t.Fatalf(
+						"expected error for HTTP %d",
+						tt.statusCode,
+					)
+				}
+			},
+		)
 	}
 }
