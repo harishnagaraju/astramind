@@ -269,9 +269,11 @@ The regression suite automatically performs:
 ```bash
 go run ./cmd/dev -run=junit
 ```
-
-Parses `go test -json` output directly (no external tool - `go-junit-report`/`gotestsum` are not dependencies of this project) into real JUnit XML at `reports/junit.xml`. A related task, `go run ./cmd/dev -run=regression-report`, writes `reports/regression.xml` - the 4 pipeline steps themselves (Build/Tests/Coverage/KB & RAG) as JUnit test cases, using each step's real, honestly-tracked status. `scripts/regression.sh`/`.bat` generate both automatically. Both are consumed by CI (`.github/workflows/go.yml`) to display real pass/fail results directly on each commit and pull request, on both Linux and Windows.
-
+```Parses `go test -json` output directly (no external tool - `go-junit-report`/`gotestsum` are not dependencies of this project) into real JUnit XML at `reports/junit.xml`. 
+A related task, `go run ./cmd/dev -run=regression-report`, writes `reports/regression.xml` - the 4 pipeline steps themselves (Build/Tests/Coverage/KB & RAG) as JUnit test cases, using each step's real, honestly-tracked status. 
+`scripts/regression.sh`/`.bat` generate both automatically. 
+Both are consumed by CI (`.github/workflows/go.yml`) to display real pass/fail results directly on each commit and pull request, on both Linux and Windows.
+```
 ## Knowledge Base Integration Test
 
 Run only the basic Knowledge Base command smoke test (import/list/search/stats), without the full regression suite.
@@ -320,7 +322,7 @@ This folder holds only three kinds of things: input data, generated output, and 
 
 If you're looking for a script to run, it's in /scripts, not here.
 
-The rule
+```The rule
 Kind of thing	Lives in
 Anything you can run (build, test, coverage, checks)	/scripts
 Input data the scripts consume (documents, JSON fixtures, command files)	/tests/fixtures
@@ -349,7 +351,7 @@ tests/
 To actually run something
 
 See /scripts and its own explanation of what each script does. The short version: scripts/regression.sh (or scripts\regression.bat on Windows) runs everything - build, unit tests, coverage, and Knowledge Base/RAG behavioral checks - in one command.
-
+```
 ## Supported AI Providers
 
 | Provider   | Local | Streaming | Embeddings | Status |
