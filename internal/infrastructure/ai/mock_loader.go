@@ -24,7 +24,7 @@ func LoadMockData() ([]MockPair, error) {
 	file := filepath.Join(
 		root,
 		"tests",
-		"testdata",
+		"fixtures",
 		"mock_ai.json",
 	)
 

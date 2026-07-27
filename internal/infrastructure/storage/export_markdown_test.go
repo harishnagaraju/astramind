@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/harishnagaraju/astramind/internal/testutil"
+	"github.com/harishnagaraju/astramind/internal/utilityforunittest"
 )
 
 func TestExportMarkdown(t *testing.T) {
@@ -13,7 +13,7 @@ func TestExportMarkdown(t *testing.T) {
 
 	err := ExportMarkdown(
 		session,
-		testutil.LoadConversation(
+		utilityforunittest.LoadConversation(
 			t,
 			"short",
 		),
@@ -26,7 +26,7 @@ func TestExportMarkdown(t *testing.T) {
 		)
 	}
 
-	testutil.AssertFileExists(
+	utilityforunittest.AssertFileExists(
 		t,
 		"exports/unit-test.md",
 	)

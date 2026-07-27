@@ -1,11 +1,4 @@
 #!/usr/bin/env bash
-
 set -e
-
-echo
-echo "[Test] Running Unit & Integration Tests..."
-
-go test -v ./...
-
-echo
-echo "[Test] SUCCESS"
+cd "$(dirname "$0")/.."
+go run ./cmd/dev -run=test

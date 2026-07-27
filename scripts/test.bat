@@ -1,9 +1,3 @@
 @echo off
-
-echo.
-echo [Test] Running Unit ^& Integration Tests...
-
-go test -v ./...
-
-echo.
-echo [Test] SUCCESS
+cd /d "%~dp0.."
+go run ./cmd/dev -run=test

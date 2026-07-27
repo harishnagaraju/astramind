@@ -7,7 +7,7 @@ Created and maintained by Harish Nagaraju.
 ![Go](https://img.shields.io/badge/Go-1.24+-blue)
 ![License](https://img.shields.io/badge/License-Apache--2.0-green)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
-Current Release: **v0.9.0**
+Current Release: **v0.9.2**
 
 AstraMind is a modular, AI-powered command-line assistant built in Go that provides a clean, scalable foundation for developing intelligent applications using Large Language Models (LLMs). Designed with a production-ready architecture, it supports multiple AI providers, conversation and session management, persistent chat history, a local Knowledge Base with semantic search and Retrieval-Augmented Generation (RAG), a local web interface, export capabilities, automated testing, and a modern CI/CD pipeline.
 
@@ -211,6 +211,8 @@ ollama run gemma3:1b
 
 AstraMind includes a comprehensive automated testing framework covering unit, integration, and manual end-to-end testing.
 
+Every command below (build, test, coverage, JUnit report generation) is implemented exactly once, in `cmd/dev` - a small Go program, not shell script logic duplicated separately for `.sh` and `.bat`. The wrapper scripts in `scripts/` are thin, platform-appropriate entry points into it, so there is only ever one place to look for what any given step actually does.
+
 ## Unit Tests
 
 Run the complete unit test suite:
@@ -229,52 +231,69 @@ The unit test suite includes:
 * Mock provider tests
 * Regression tests
 
-## Integration Tests
+## Integration & Regression Tests
 
-Run the complete integration test suite.
+Run the complete regression suite: formatting, static analysis, build, full unit test run, coverage, and Knowledge Base/RAG behavioral checks. Each step's real pass/fail/skipped status is tracked honestly - a step is only reported PASS if it actually was, and later steps are marked SKIPPED (not silently assumed passing) if an earlier one failed.
 
 ### Windows
 
 ```cmd
-tests\integration\run_all.bat
+scripts\regression.bat
 ```
 
 ### Linux / macOS
 
 ```bash
-./tests/integration/run_all.sh
+./scripts/regression.sh
 ```
 
-The integration suite automatically performs:
+Add `--web` to also run the web UI (`--web` mode) smoke test:
+
+```bash
+./scripts/regression.sh --web
+```
+
+The regression suite automatically performs:
 
 * Code formatting validation
 * Static analysis (`go vet`)
 * Project build verification
 * Complete unit test execution
-* End-to-end Knowledge Base workflow testing
+* Coverage report generation
+* Knowledge Base command smoke test
+* `/kb ask` deterministic behavior checks (enumeration routing, single-fact precision, out-of-scope rejection)
+* Machine-readable report generation (see below)
+
+## Machine-Readable Test Reports
+
+```bash
+go run ./cmd/dev -run=junit
+```
+
+Parses `go test -json` output directly (no external tool - `go-junit-report`/`gotestsum` are not dependencies of this project) into real JUnit XML at `reports/junit.xml`. A related task, `go run ./cmd/dev -run=regression-report`, writes `reports/regression.xml` - the 4 pipeline steps themselves (Build/Tests/Coverage/KB & RAG) as JUnit test cases, using each step's real, honestly-tracked status. `scripts/regression.sh`/`.bat` generate both automatically. Both are consumed by CI (`.github/workflows/go.yml`) to display real pass/fail results directly on each commit and pull request, on both Linux and Windows.
 
 ## Knowledge Base Integration Test
 
-Run only the Knowledge Base integration tests.
+Run only the basic Knowledge Base command smoke test (import/list/search/stats), without the full regression suite.
 
 ### Windows
 
 ```cmd
-tests\integration\run_kb.bat
+scripts\check_knowledge_base.bat
 ```
 
 ### Linux / macOS
 
 ```bash
-./tests/integration/run_kb.sh
+./scripts/check_knowledge_base.sh
 ```
 
 ## Manual Testing
 
-A full interactive walkthrough script covers every command, including a live comparison of keyword vs. semantic search, the RAG loop, and a `--web` API smoke test:
+A full interactive walkthrough script covers every command, including a live comparison of keyword vs. semantic search, the RAG loop, and the web API smoke test (which always runs as part of this script, not behind a separate flag):
 
 ```bash
-bash tests/integration/manual_testing.sh
+bash scripts/manual_walkthrough.sh
 ```
 
 ## Script Execution
@@ -286,14 +305,50 @@ Example:
 ### Windows
 
 ```cmd
-astramind.exe --script tests\integration\commands\kb.txt
+astramind.exe --script tests\fixtures\commands\kb.txt
 ```
 
 ### Linux / macOS
 
 ```bash
-./astramind --script tests/integration/commands/kb.txt
+./astramind --script tests/fixtures/commands/kb.txt
 ```
+
+/tests
+
+This folder holds only three kinds of things: input data, generated output, and planning documents. It contains no runnable scripts.
+
+If you're looking for a script to run, it's in /scripts, not here.
+
+The rule
+Kind of thing	Lives in
+Anything you can run (build, test, coverage, checks)	/scripts
+Input data the scripts consume (documents, JSON fixtures, command files)	/tests/fixtures
+Generated output (coverage reports, logs)	/tests/output
+Planning/reference documents (test plans, templates)	/tests/docs
+Go unit tests	internal/*/*_test.go, next to the code they test (standard Go convention)
+Go test-helper code shared across unit tests	internal/utilityforunittest - not related to this folder, despite the similar name
+Structure
+tests/
+├── fixtures/
+│   ├── kb_documents/     Sample documents for /kb import (Sanskrit1.txt, sample_contract.docx, ...)
+│   ├── commands/         --script command files (kb.txt)
+│   ├── conversations/    Sample conversation history JSON, used by Go unit tests
+│   ├── sessions/         Session fixture data
+│   ├── exports/          Export fixture data
+│   ├── prompts/          Prompt fixture data
+│   ├── responses/        Response fixture data
+│   └── mock_ai.json      Mock AI provider fixture data
+├── output/
+│   ├── coverage/         Generated by scripts/coverage.sh - never hand-edited
+│   └── reports/          Generated test reports
+└── docs/
+    ├── TEST_PLAN.md
+    ├── TEST_CASE_TEMPLATE.md
+    └── TEST_REPORT.md
+To actually run something
+
+See /scripts and its own explanation of what each script does. The short version: scripts/regression.sh (or scripts\regression.bat on Windows) runs everything - build, unit tests, coverage, and Knowledge Base/RAG behavioral checks - in one command.
 
 ## Supported AI Providers
 
@@ -417,7 +472,9 @@ Benefits include:
 # Project Structure
 ```
 cmd/
-    astramind/
+    astramind/         - the application itself
+    dev/               - cross-platform task runner (build/test/coverage/junit/regression) -
+                         single source of truth called by every scripts/*.sh and *.bat wrapper
 internal/
     engine/            - command dispatch, app lifecycle, web server
         webui/         - embedded local web interface
@@ -433,8 +490,23 @@ internal/
         storage/       - file-based persistence
         models/        - shared data types
         renderer/      - terminal output
-        config/        - runtime configuration
-    testutil/
+        config/        - runtime constants (version, message limits, history file path)
+    utilityforunittest/ - shared Go test helper functions, used by *_test.go files
+                         across the codebase - not related to /tests or /scripts
+
+scripts/               - every runnable action lives here (build, test, coverage,
+                         regression, KB/RAG behavioral checks, manual walkthrough) -
+                         nothing runnable lives outside this folder
+tests/
+    fixtures/          - input data the scripts consume (sample documents, command files)
+    output/            - generated coverage reports (never hand-edited)
+    docs/              - test plan / template reference documents
+
+.github/workflows/     - CI: build, test, coverage, and JUnit-format test reporting,
+                         run on both Linux and Windows on every push/PR
+
+reports/               - generated machine-readable test reports (junit.xml,
+                         regression.xml) - regenerated fresh every run, not committed
 
 exports/
 data/
@@ -442,8 +514,39 @@ data/
 
 # Release Management
 
-## v0.9.1 (validation branch, not yet merged to main)
+## v0.9.2
+**`.docx` Import, Single-Fact Precision, Reliability Fixes & Cross-Platform Tooling**
+
+Started as four related changes and grew substantially after real manual testing on real Ollama, across Linux, MINGW64, and native Windows `cmd.exe`, surfaced further correctness and tooling issues - each found, root-caused, and fixed before release.
+
+**RAG correctness:**
+- `.docx` (modern Word) import, using only Go's standard library - no new dependency, no CGO.
+- Precise single-line extraction for single-fact `/kb ask` questions, refining v0.9.1's whole-chunk return with a deterministic, explainable content-word-overlap match.
+- Fixed a real reliability gap: the web UI (`/api/ask`) was silently still using the older free-form-LLM-only answer path after v0.9.1's redesign, never updated - now both CLI and web share a single `chat.Service.Ask` implementation.
+- Three further `/kb ask` correctness fixes found via real testing: plural "what is the" questions misrouting to single-fact extraction; out-of-scope questions confidently answered from unrelated content (no relevance threshold existed); a short-word substring collision (`"id"` matching inside `"confidentiality"`) in that same relevance gate.
+- Enumeration answers could bundle content from unrelated documents when a knowledge base's total chunk count was small - fixed with whole-chunk (never per-item) relevance filtering, deliberately avoiding an earlier, rejected per-item filtering approach that had silently dropped real, related entries.
+- Relicensed from AGPL-3.0 to Apache License 2.0.
+
+**Project reorganization & tooling:**
+- Every runnable script now lives in `scripts/`; `tests/` holds only fixture data, generated output, and docs. `internal/testutil` renamed to `internal/utilityforunittest`.
+- **New Go-native task runner** (`cmd/dev`) - build/test/coverage/regression logic now lives in exactly one place, callable identically from bash and `cmd.exe`, eliminating a real, recurring class of bug (a `.sh`/`.bat` pair silently diverging).
+- **Test coverage closed** in `ollama_embedding_test.go`/`openai_embedding_test.go` (0% → 90.9% on `Embed()`), `provider_manager_fallback_test.go` (documents: unlike `Chat()`, `Stream()`/`Embed()` have no fallback of their own), and `json_storage_delete_test.go` (50% → 100%, including a documented asymmetry between `DeleteDocument`/`DeleteChunks`'s handling of a missing file).
+- **Machine-readable test reports** (`reports/junit.xml`, `reports/regression.xml`) and a rebuilt CI workflow - now runs on both Linux and Windows (previously Linux-only), with results rendered directly on each commit/PR.
+- Honest release-pipeline status reporting: each step's real exit code now drives its reported PASS/FAIL/SKIPPED status, rather than an unconditionally-printed "PASS".
+
+**Real bugs found testing on real Linux, MINGW64, and native Windows machines - not just reading the code:**
+- `check_knowledge_base.bat` had a stale path from before the reorganization (two directory levels up instead of one) - root cause of a real `"Could not find astramind.exe"` failure.
+- A `cmd.exe` parser crash in `check_rag_behavior.bat` - literal parentheses in printed text inside a parenthesized `if` block caused `"Smoke was unexpected at this time."` Root-caused via a targeted debug line, fixed by escaping every literal parenthesis in the file.
+- Log files silently missing their own trailer content - found and fixed three separate times, in three different scripts, verified by diffing saved logs against real terminal output byte-for-byte.
+- `manual_walkthrough.sh` crashed when passed `--web` - its argument parser had no flag recognition at all.
+- A stale `.gitignore` was silently tracking generated coverage reports into git history on every run.
+
+See [CHANGELOG.md](CHANGELOG.md) for the complete list and full investigation detail on every fix above.
+
+## v0.9.1
 **Deterministic RAG & Real-Hardware Validation**
+
+
 
 Originally scoped as validation-only (no new features); real findings during validation required an architectural fix. Documented here rather than silently expanded.
 
@@ -603,7 +706,7 @@ AstraMind follows a modular, layered architecture:
 ## License
 Apache License 2.0
 
-This project is licensed under the Apache License, Version 2.0. See the [LICENSE](LICENSE) file for the full text. Permissive by design: AstraMind is intended as an open platform others can build on, adopt, and extend without restriction - commercial products and plugins built on top of it (including AstraMind's own school and legal-industry plugins) are separate, independently licensed works.
+This project is licensed under the Apache License, Version 2.0. See the [LICENSE](LICENSE) file for the full text. Permissive by design: AstraMind is intended as an open platform others can build on, adopt, and extend without restriction.
 
 # About
 ## Why AstraMind?

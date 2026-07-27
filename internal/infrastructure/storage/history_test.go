@@ -4,14 +4,14 @@ import (
 	"os"
 	"testing"
 
-	"github.com/harishnagaraju/astramind/internal/testutil"
+	"github.com/harishnagaraju/astramind/internal/utilityforunittest"
 )
 
 func TestSaveAndLoadHistory(t *testing.T) {
 
 	session := "unit-test"
 
-	expected := testutil.LoadConversation(
+	expected := utilityforunittest.LoadConversation(
 		t,
 		"short",
 	)
@@ -48,7 +48,7 @@ func TestSaveAndLoadHistory(t *testing.T) {
 		)
 	}
 
-	testutil.AssertFileExists(
+	utilityforunittest.AssertFileExists(
 		t,
 		"data/sessions/unit-test.json",
 	)

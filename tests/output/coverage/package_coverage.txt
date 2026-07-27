@@ -1,0 +1,15 @@
+	github.com/harishnagaraju/astramind/cmd/astramind		coverage: 0.0% of statements
+	github.com/harishnagaraju/astramind/cmd/dev		coverage: 0.0% of statements
+ok  	github.com/harishnagaraju/astramind/internal/engine	2.326s	coverage: 10.3% of statements
+ok  	github.com/harishnagaraju/astramind/internal/features/chat	2.220s	coverage: 41.7% of statements
+	github.com/harishnagaraju/astramind/internal/features/export		coverage: 0.0% of statements
+ok  	github.com/harishnagaraju/astramind/internal/features/history	1.909s	coverage: 100.0% of statements
+ok  	github.com/harishnagaraju/astramind/internal/features/kb	2.396s	coverage: 86.4% of statements
+ok  	github.com/harishnagaraju/astramind/internal/features/search	5.624s	coverage: 79.2% of statements
+ok  	github.com/harishnagaraju/astramind/internal/features/session	1.939s	coverage: 87.5% of statements
+ok  	github.com/harishnagaraju/astramind/internal/infrastructure/ai	1.506s	coverage: 78.9% of statements
+ok  	github.com/harishnagaraju/astramind/internal/infrastructure/config	1.854s	coverage: [no statements]
+ok  	github.com/harishnagaraju/astramind/internal/infrastructure/models	1.842s	coverage: [no statements]
+ok  	github.com/harishnagaraju/astramind/internal/infrastructure/renderer	1.955s	coverage: 25.6% of statements
+ok  	github.com/harishnagaraju/astramind/internal/infrastructure/storage	1.833s	coverage: 60.9% of statements
+ok  	github.com/harishnagaraju/astramind/internal/utilityforunittest	1.500s	coverage: 64.3% of statements

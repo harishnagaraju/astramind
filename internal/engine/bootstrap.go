@@ -66,6 +66,15 @@ func (a *App) initialize() error {
 		a.deps.KnowledgeBase.SetEmbedder(&providerEmbedder{
 			providerManager: a.deps.ProviderManager,
 			apiKey:          a.apiKey,
+			// OPENAI_EMBEDDING_MODEL is optional and new - if unset,
+			// this is "" and ai.OpenAIProvider.Embed falls back to
+			// its own default ("text-embedding-3-small"), exactly
+			// matching behavior before this field existed. Ollama's
+			// Embed does not consult this field at all (it uses
+			// whatever embedding model Ollama itself is configured
+			// with), so this only affects OpenAI-compatible
+			// providers (including OpenRouter).
+			embeddingModel: os.Getenv("OPENAI_EMBEDDING_MODEL"),
 		})
 	}
 

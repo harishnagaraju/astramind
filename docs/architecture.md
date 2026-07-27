@@ -158,91 +158,56 @@ Added during the v0.9.1 validation branch, replacing an earlier single-path desi
 astramind/
 │
 ├── cmd/
-│   └── astramind/
-│       └── main.go
+│   ├── astramind/
+│   │   └── main.go
+│   └── dev/
+│       └── main.go          - task runner: build/test/coverage/junit/regression
 │
 ├── internal/
-│   ├── ai/
-│   │   ├── provider.go
-│   │   ├── provider_manager.go
-│   │   ├── factory.go
-│   │   ├── openai_provider.go
-│   │   ├── mock_provider.go
-│   │   ├── stream.go
-│   │   ├── renderer.go
-│   │   ├── errors.go
-│   │   └── ...
-│   │
-│   ├── chat/
-│   │   └── service.go
-│   │
-│   ├── renderer/
-│   │
-│   ├── storage/
-│   │
-│   ├── config/
-│   │
-│   ├── models/
-│   │
-│   └── testutil/
+│   ├── engine/
+│   │   └── webui/            - embedded local web interface
+│   ├── features/
+│   │   ├── chat/
+│   │   ├── kb/
+│   │   │   ├── chunker.go              - paragraph-aware, CRLF-normalizing chunking
+│   │   │   ├── manager.go              - import, semantic search, ExtractiveAnswer
+│   │   │   ├── precise_match.go        - findPreciseLine, HasAnyContentWordOverlap,
+│   │   │   │                             FilterRelevantChunks
+│   │   │   ├── structured_extraction.go - ExtractItems, BuildListAnswer
+│   │   │   ├── query_expansion.go      - IsEnumerationQuery (question router)
+│   │   │   ├── json_storage.go
+│   │   │   └── ...
+│   │   ├── history/
+│   │   ├── session/
+│   │   ├── search/
+│   │   └── export/
+│   ├── infrastructure/
+│   │   ├── ai/                - provider.go, provider_manager.go, factory.go,
+│   │   │                        ollama_*.go, openai_*.go, mock_provider.go
+│   │   ├── storage/
+│   │   ├── models/
+│   │   ├── renderer/
+│   │   └── config/
+│   └── utilityforunittest/    - shared Go test helpers (not related to /tests)
+│
+├── scripts/                   - every runnable action (build/test/coverage/
+│                                 regression/check_knowledge_base/
+│                                 check_rag_behavior/manual_walkthrough), .sh + .bat
+├── tests/
+│   ├── fixtures/               - input data the scripts consume
+│   ├── output/                 - generated coverage reports
+│   └── docs/                   - test plan reference documents
+├── reports/                    - generated junit.xml / regression.xml (gitignored)
 │
 ├── data/
 ├── exports/
 ├── docs/
-├── .github/
+├── .github/workflows/          - CI: Linux + Windows, JUnit reporting
 ├── README.md
 ├── CHANGELOG.md
 ├── go.mod
 └── go.sum
 ```
-internal/
-    kb/
-        chunker.go        - paragraph-aware, CRLF-normalizing document chunking
-        manager.go         - import, semantic search, ExtractiveAnswer
-        repository.go
-        search.go
-        prompt.go          - BuildPrompt (keyword), BuildSemanticPrompt (LLM fallback)
-        structured_extraction.go  - ExtractItems, BuildListAnswer (deterministic enumeration)
-        query_expansion.go - IsEnumerationQuery (question router)
-        storage.go
-        json_storage.go
-        stats.go
-
-CLI
- │
- ├── Commands
- │
- ├── Search Renderer
- │
- ├── Chat Service
- │
- └── Storage
-
-Search System
-
-/search
-
-↓
-
-SearchMessages()
-
-↓
-
-Renderer
-
-/searchall
-
-↓
-
-SearchAllSessions()
-
-↓
-
-SearchMessages()
-
-↓
-
-Renderer
 
 ---
 
@@ -355,7 +320,7 @@ Supported endpoints include:
 
 # Testing Architecture
 
-The project includes multiple testing layers.
+The project includes multiple testing layers. Every build/test/coverage command is implemented exactly once, in `cmd/dev` (a Go program) - `scripts/*.sh` and `scripts/*.bat` are thin wrappers into it, not separate implementations that can silently diverge from each other.
 
 ## Unit Tests
 
@@ -365,6 +330,9 @@ The project includes multiple testing layers.
 - Storage tests
 - Chunker tests, including a CRLF-specific regression case built from real-world file content, not synthetic LF-only fixtures
 - Deterministic extraction tests (`ExtractItems`, `ExtractiveAnswer`), run against real previously-failing document content rather than idealized fixtures
+- `FilterRelevantChunks` tests, including the exact real failure case (an unrelated document bundled into an enumeration answer) and a regression guard confirming an earlier, rejected item-level filtering approach is never reintroduced
+- Embedding pipeline tests (`ollama_embedding_test.go`, `openai_embedding_test.go`) using `httptest.Server`, not a mocked client field - covering valid responses, empty results, HTTP errors, and malformed JSON for both providers
+- Provider fallback behavior tests, documenting that `Stream()`/`Embed()` have no fallback of their own (unlike `Chat()`, which permanently switches to the fallback provider on failure)
 
 ## Integration Tests
 
@@ -375,12 +343,19 @@ Using `httptest.Server`:
 - HTTP error handling
 - Invalid JSON responses
 
+## Regression Pipeline & Reporting
+
+`scripts/regression.sh`/`.bat` run build, test, coverage, and the KB/RAG behavioral checks in sequence. Each step's real exit code drives its reported status (PASS/FAIL/SKIPPED) - a step is only ever reported as having passed if it actually did, and steps after a failure are marked SKIPPED rather than silently assumed passing.
+
+`go run ./cmd/dev -run=junit` parses `go test -json` output directly into real JUnit XML (`reports/junit.xml`) - no external tool dependency. `go run ./cmd/dev -run=regression-report` writes `reports/regression.xml`, the 4 pipeline steps themselves as JUnit test cases. Both are generated automatically as part of the regression run, and consumed by CI (`.github/workflows/go.yml`) to render results directly on each commit/PR, on both Linux and Windows.
+
 ## Manual / Content-Fidelity Testing
 
-`tests/integration/manual_testing.sh` extends the interactive walkthrough with:
+`scripts/manual_walkthrough.sh` extends the interactive walkthrough with:
 
 - A content-fidelity scan - imports a fixture with known facts, asks `/kb ask` questions, and greps the transcript for every expected fact, rather than eyeballing output
 - A determinism scan - runs the same question multiple times and flags any fact that appears inconsistently across runs
+- A web API smoke test (Part 2) - always runs as part of this script; there is no separate flag to enable or disable it
 
 ## Runtime Validation
 
@@ -389,6 +364,7 @@ Using `httptest.Server`:
 - Streaming validation
 - Session persistence
 - Export validation
+- Cross-platform validation: real runs confirmed on Linux, MINGW64 (git-bash on Windows), and native `cmd.exe`, plus CI on Linux and Windows on every push/PR
 
 ---
 
@@ -486,12 +462,31 @@ Semantic Search
 
 ---
 
-## v0.9.1 (Current — validation branch)
+## v0.9.2 (Current)
+
+Started as four related, targeted changes; grew substantially after real cross-platform manual testing (Linux, MINGW64, native Windows `cmd.exe`) surfaced further correctness and tooling issues.
+
+- `.docx` import, single-fact precision refinement, and a real reliability gap closed (the web UI's `/api/ask` was silently still on the older free-form-LLM path after v0.9.1's redesign).
+- Three further `/kb ask` correctness fixes found via real testing, all documented in detail in CHANGELOG.md: plural-question misrouting, a missing relevance threshold for out-of-scope questions, and a short-word substring collision in that threshold's implementation.
+- A fourth relevance-filtering gap (enumeration answers bundling unrelated documents in small knowledge bases) found and fixed after release, deliberately at whole-chunk granularity to avoid reintroducing an earlier, rejected item-level filtering approach.
+- Project reorganized (`scripts/`, `tests/fixtures|output|docs/`) and a new Go-native task runner (`cmd/dev`) introduced, eliminating a real, recurring class of bug: a `.sh`/`.bat` pair silently diverging from each other. Real instances found and fixed during this release's own testing, on real Linux, MINGW64, and native Windows machines - not just by reading the code:
+    - `check_knowledge_base.bat`'s stale pre-reorganization path (root cause of a real `"Could not find astramind.exe"` failure)
+    - A `cmd.exe` parser crash in `check_rag_behavior.bat` - literal parentheses inside a parenthesized `if` block, misread as block structure (`"Smoke was unexpected at this time."`), root-caused via a targeted debug line
+    - Log files silently missing their own trailer content, in three separate scripts (`check_rag_behavior.sh`/`.bat`, `manual_walkthrough.sh`, `regression.sh`/`.bat`) - fixed via `exec > >(tee ...)` in bash and paired screen+file `echo` in batch, verified by diffing saved logs against real terminal output byte-for-byte
+    - `manual_walkthrough.sh` crashing on `--web` - no argument-flag recognition at all, silently misread as a binary path override
+    - A stale `.gitignore` silently tracking generated coverage reports into git history
+- Test coverage closed: `ollama_embedding_test.go`/`openai_embedding_test.go` (`Embed()` 0% → 90.9% each, `httptest.Server`-based, no mocked client field), `provider_manager_fallback_test.go` (documents `Stream()`/`Embed()` have no fallback of their own, unlike `Chat()`), `json_storage_delete_test.go` (`DeleteDocument`/`DeleteChunks` 50% → 100%, including a documented asymmetry in how each handles a missing file).
+- Machine-readable test reporting (`reports/junit.xml`, `reports/regression.xml`, generated by `cmd/dev` directly from `go test -json` - no external tool dependency) and a CI workflow rebuilt to run on both Linux and Windows - previously Linux-only, meaning it would have caught none of the Windows-specific bugs listed above.
+- **Real-user (lawyer) offline demo feedback** (#56) — still open, carried forward from v0.9.1.
+
+---
+
+## v0.9.1
 
 Originally scoped to two narrow validation loops only, with no new features intended:
 
 - **Validate gemma2:9b on real hardware** (#55) — **closed.** Runs correctly and produces accurate output on the target hardware (Intel i5-4210U, 16GB RAM, no GPU); brief UI stutter observed only under simultaneous heavy multitasking, not disqualifying for sequential use.
-- **Run the offline demo with real users (lawyer)** (#56) — **still open.**
+- **Run the offline demo with real users (lawyer)** (#56) — **still open**, carried forward to v0.9.2.
 
 **Deviation from original scope, noted explicitly rather than silently:** validating #55 required testing `/kb ask` output quality, which surfaced a real chunking bug and a hard limit on free-form LLM enumeration reliability. Fixing the second problem required an architectural change (see "RAG Query Routing" above), not a config tweak - so RAG completion, originally item 1 of the v1.0 backlog below, was substantially delivered on this branch as a direct consequence of investigating the hardware question, not as planned scope expansion. The free-form LLM path (item 1's original design) still exists, but only as a fallback.
 
@@ -499,9 +494,9 @@ Originally scoped to two narrow validation loops only, with no new features inte
 
 # Version 1.0 Vision
 
-Scope below is a *backlog*, not a commitment. Updated to reflect that RAG completion has substantially landed on the v0.9.1 branch (see above) - remaining priority order:
+Scope below is a *backlog*, not a commitment. Updated to reflect that RAG completion has substantially landed as of v0.9.1/v0.9.2 (see above) - remaining priority order:
 
-1. ~~**RAG completion**~~ — substantially delivered on v0.9.1 as a deterministic dual-path design (see "RAG Query Routing" above), not the free-form LLM design originally envisioned. Remaining under this heading: revisit after #56.
+1. ~~**RAG completion**~~ — substantially delivered as a deterministic dual-path design (see "RAG Query Routing" above), not the free-form LLM design originally envisioned. Remaining under this heading: revisit after #56.
 2. **Knowledge Base completion** — `/kb info`, `/kb update`, `/kb rebuild`, `/kb export`; PDF/Word/HTML import. Now the top active priority.
 3. **Vector store migration** — JSON/linear search → SQLite + vector index (FAISS not required yet)
 4. **Provider abstraction expansion** — Gemini, Claude, OpenRouter, LM Studio

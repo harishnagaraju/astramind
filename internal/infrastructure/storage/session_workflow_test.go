@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/harishnagaraju/astramind/internal/testutil"
+	"github.com/harishnagaraju/astramind/internal/utilityforunittest"
 )
 
 func TestSessionWorkflow(t *testing.T) {
@@ -21,7 +21,7 @@ func TestSessionWorkflow(t *testing.T) {
 	_ = os.Remove(mdFile)
 
 	// Sample conversation
-	expected := testutil.LoadConversation(
+	expected := utilityforunittest.LoadConversation(
 		t,
 		"long",
 	)
@@ -32,7 +32,7 @@ func TestSessionWorkflow(t *testing.T) {
 		t.Fatalf("SaveHistory failed: %v", err)
 	}
 
-	testutil.AssertFileExists(t, sessionFile)
+	utilityforunittest.AssertFileExists(t, sessionFile)
 
 	// Load session
 	actual, err := LoadHistory(session)
@@ -54,7 +54,7 @@ func TestSessionWorkflow(t *testing.T) {
 		t.Fatalf("ExportSession failed: %v", err)
 	}
 
-	testutil.AssertFileExists(t, txtFile)
+	utilityforunittest.AssertFileExists(t, txtFile)
 
 	// Export Markdown
 	err = ExportMarkdown(session, actual)
@@ -62,7 +62,7 @@ func TestSessionWorkflow(t *testing.T) {
 		t.Fatalf("ExportMarkdown failed: %v", err)
 	}
 
-	testutil.AssertFileExists(t, mdFile)
+	utilityforunittest.AssertFileExists(t, mdFile)
 
 	// Delete session
 	err = DeleteSession(session)
