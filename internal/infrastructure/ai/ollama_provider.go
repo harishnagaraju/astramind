@@ -44,12 +44,12 @@ func (o *OllamaProvider) Chat(
 		return "", err
 	}
 
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck // read-only handle; a close failure here doesn't lose data
 
 	if resp.StatusCode != http.StatusOK {
 
 		var body bytes.Buffer
-		body.ReadFrom(resp.Body)
+		body.ReadFrom(resp.Body) //nolint:errcheck // best-effort read of an error response body for a diagnostic message
 
 		return "", handleAPIError(
 			resp.StatusCode,
@@ -108,10 +108,10 @@ func (p *OllamaProvider) Stream(
 
 	if resp.StatusCode != http.StatusOK {
 
-		defer resp.Body.Close()
+		defer resp.Body.Close() //nolint:errcheck // read-only handle; a close failure here doesn't lose data
 
 		var body bytes.Buffer
-		body.ReadFrom(resp.Body)
+		body.ReadFrom(resp.Body) //nolint:errcheck // best-effort read of an error response body for a diagnostic message
 
 		return nil, handleAPIError(
 			resp.StatusCode,
@@ -120,7 +120,7 @@ func (p *OllamaProvider) Stream(
 	}
 
 	go func() {
-		defer resp.Body.Close()
+		defer resp.Body.Close() //nolint:errcheck // read-only handle; a close failure here doesn't lose data
 		readOllamaStream(
 			resp.Body,
 			stream.events,

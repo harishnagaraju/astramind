@@ -30,7 +30,7 @@ func ExportSession(
 		return err
 	}
 
-	defer f.Close()
+	defer f.Close() //nolint:errcheck // safety-net close on early-return error paths above; the real close+flush is checked explicitly on the success path
 
 	// Export Header
 	_, err = fmt.Fprintf(
@@ -84,6 +84,13 @@ End of Conversation
 	)
 
 	if err != nil {
+		return err
+	}
+
+	// Explicit close (not just the deferred one) so a flush failure -
+	// which would mean the exported conversation file was silently
+	// truncated on disk - is actually surfaced, not swallowed.
+	if err := f.Close(); err != nil {
 		return err
 	}
 

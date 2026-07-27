@@ -62,10 +62,10 @@ func BuildListAnswer(items []ExtractedItem) string {
 
 	var builder strings.Builder
 
-	builder.WriteString(fmt.Sprintf(
+	fmt.Fprintf(&builder, //nolint:errcheck // strings.Builder.Write is documented to never return an error
 		"Here is everything found in your knowledge base across %d relevant section(s):\n\n",
 		len(items),
-	))
+	)
 
 	seenSources := make(map[string]bool)
 	var orderedSources []string

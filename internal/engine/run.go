@@ -1,15 +1,11 @@
 package engine
 
-import "github.com/harishnagaraju/astramind/internal/infrastructure/models"
-
 import (
 	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
 )
-
-var conversation []models.Message
 
 // Run starts the AstraMind application.
 //
