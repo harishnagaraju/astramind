@@ -24,7 +24,20 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$REPO_ROOT"
 
-BIN="${1:-}"
+BIN=""
+for arg in "$@"; do
+    if [ "$arg" = "--web" ]; then
+        # This script's web smoke test (Part 2, below) already runs
+        # unconditionally on every invocation - there's no separate
+        # opt-in mode to enable here, unlike check_rag_behavior.sh.
+        # Accepted as a no-op so a habit formed from that other
+        # script doesn't crash this one by being misread as a binary
+        # path override instead.
+        :
+    else
+        BIN="$arg"
+    fi
+done
 
 if [ -z "$BIN" ]; then
     if [ -f "./astramind.exe" ]; then
@@ -292,12 +305,14 @@ else
 fi
 
 # ==========================================
-# PART 2: Web UI API smoke test (--web mode)
+# PART 2: Web UI API smoke test
 # ==========================================
 #
 # This drives the same backend through the local web server's JSON
 # API instead of stdin - the same code path the browser UI uses.
-# Also confirms --web launches correctly and stays up.
+# Always runs, unconditionally - unlike check_rag_behavior.sh, there
+# is no separate opt-in flag for this section. Confirms the AstraMind
+# binary's --web flag launches the server correctly and stays up.
 echo
 echo "=========================================="
 echo "Web UI API Smoke Test (--web mode)"

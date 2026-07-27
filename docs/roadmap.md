@@ -202,16 +202,44 @@ Enterprise integrations
 - `/kb ssearch` — embedding-based semantic search
 - Vector database work not yet started (still JSON + linear search)
 
-## v0.9.1 (Current) - Validation Branch, Deterministic RAG
+## v0.9.1 - Validation Branch, Deterministic RAG
 
 Originally scoped as a pure validation branch (no new features) to close two open loops before v1.0 gets named and scoped for real:
 
 - Validate gemma2:9b on real hardware (answer completeness + usability during generation) — **closed.** Model produces correct output on the target hardware (i5-4210U, 16GB RAM, no GPU); brief stutter only under simultaneous heavy multitasking.
-- Niece/lawyer offline demo — capture actual behavior, not just stated feedback — **still open.**
+- Niece/lawyer offline demo — capture actual behavior, not just stated feedback — **carried forward to v0.9.2, still open.**
 
 **Scope note:** validating the hardware question required testing `/kb ask` answer quality, which surfaced a real document-chunking bug and a hard reliability limit in free-form LLM enumeration - neither fixable by configuration alone. Fixing the second required an architectural change: `/kb ask` now routes enumeration and single-fact questions to deterministic, zero-LLM-call extraction, with the original free-form LLM path kept only as a fallback (no embedder configured). This is a real feature addition on a branch that was scoped to have none - flagged here explicitly rather than left implicit, since it changes what "RAG completion" (previously the #1 v1.0 backlog item) means going forward.
 
 Notes/Tasks/Calendar (previously slated for v0.9.0) remains deprioritized — ships as a plugin/feature after Knowledge Base completion, not as a near-term milestone.
+
+---
+
+## v0.9.2 (Current) - `.docx` Import, Reliability Fixes, Cross-Platform Tooling
+
+Started as four targeted changes (`.docx` import, single-fact precision, a web/CLI reliability gap, relicensing); grew substantially after real cross-platform manual testing (Linux, MINGW64, native Windows `cmd.exe`) surfaced further correctness and tooling issues - each found, root-caused, and fixed before release rather than shipped and patched later.
+
+**RAG correctness:**
+- `.docx` import (pure Go, no new dependency); precise single-line extraction refining v0.9.1's whole-chunk return.
+- Closed a real reliability gap: the web UI (`/api/ask`) was silently still on the older free-form-LLM-only path after v0.9.1's redesign, never updated.
+- Three further `/kb ask` correctness fixes found via real testing (plural-question misrouting, missing relevance threshold, a short-word substring collision in that threshold), plus a fourth found after release (enumeration bundling unrelated documents in small knowledge bases) - full detail in CHANGELOG.md.
+- Relicensed AGPL-3.0 → Apache License 2.0.
+
+**Reorganization & tooling:**
+- Project reorganized (`scripts/`, `tests/fixtures|output|docs/`); `internal/testutil` → `internal/utilityforunittest`.
+- New Go-native task runner (`cmd/dev`) - single implementation of build/test/coverage logic, callable identically from bash and `cmd.exe`.
+- Test coverage closed: `ollama_embedding_test.go`/`openai_embedding_test.go` (`Embed()` 0% → 90.9%), `provider_manager_fallback_test.go` (documents `Stream()`/`Embed()` have no fallback, unlike `Chat()`), `json_storage_delete_test.go` (`DeleteDocument`/`DeleteChunks` 50% → 100%).
+- Machine-readable test reporting (`reports/junit.xml`, `reports/regression.xml`) and CI rebuilt to run on both Linux and Windows - previously Linux-only.
+- Honest pipeline status reporting: each step's real exit code now drives PASS/FAIL/SKIPPED, replacing an unconditionally-printed "PASS".
+
+**Real bugs found testing on real machines, not just reading the code:**
+- `check_knowledge_base.bat`'s stale pre-reorganization path (root cause of a real `"Could not find astramind.exe"` failure)
+- A `cmd.exe` parser crash in `check_rag_behavior.bat` - literal parentheses inside a parenthesized `if` block (`"Smoke was unexpected at this time."`)
+- Log files silently missing their own trailer content, in three separate scripts - verified fixed by diffing saved logs against real terminal output byte-for-byte
+- `manual_walkthrough.sh` crashing on `--web` (no argument-flag recognition at all)
+- A stale `.gitignore` silently tracking generated coverage reports into git history
+
+- **Real-user (lawyer) offline demo feedback** (#56) — still open, carried forward from v0.9.1.
 
 ---
 
@@ -354,9 +382,11 @@ Enterprise items (Web Interface, Authentication, PostgreSQL memory, user profile
 ---
 ## Developer Experience
 
-- ✅ GitHub Actions CI
+- ✅ GitHub Actions CI (Linux + Windows)
+- ✅ Go-native cross-platform task runner (`cmd/dev`) - single source of truth for build/test/coverage/regression, eliminating .sh/.bat divergence
 - ✅ Automated testing
-- ✅ Regression suite
+- ✅ Regression suite with honest, per-step PASS/FAIL/SKIPPED status reporting
+- ✅ Machine-readable test reports (JUnit XML: `reports/junit.xml`, `reports/regression.xml`)
 - ✅ Content-fidelity and determinism test scans
 - ✅ Coverage reporting
 - ✅ Semantic Versioning
@@ -428,8 +458,9 @@ AstraMind follows the following engineering principles:
 | v0.6.0 | old Stable Release      							|
 | v0.7.0 | old Stable Release      							|
 | v0.8.0 | old Stable Release      							|
-| v0.9.0 | ✅ Latest Merged Release (semantic search; RAG completed on v0.9.1 branch, not yet merged) |
-| v0.9.1 | 🚧 Current — validation branch; #55 closed, RAG dual-path shipped, #56 (user demo) still open |
+| v0.9.0 | ✅ Merged Release (semantic search) |
+| v0.9.1 | ✅ Merged Release; #55 closed, RAG dual-path shipped, #56 (user demo) carried forward |
+| v0.9.2 | 🚧 Merged Release; — .docx import, RAG reliability fixes, project reorganization + cmd/dev task runner, real cross-platform bugs found and fixed (Linux/MINGW64/Windows), JUnit/CI reporting; 171/171 tests green on Linux and Windows CI. Engineering complete; pending merge to main + tag. #56 still open, carried forward. |
 | v1.0.0 | 📋 Planned (scope pending #56) 					|
 | v1.1.0 | 🎯 Long-Term Vision     							|
 
