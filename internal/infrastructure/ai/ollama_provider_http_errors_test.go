@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestOllamaProviderHTTPErrors(t *testing.T) {
+func TestOpenAIProviderHTTPErrors(t *testing.T) {
 
 	tests := []struct {
 		name       string

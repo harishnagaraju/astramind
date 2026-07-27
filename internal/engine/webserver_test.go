@@ -112,7 +112,7 @@ func TestHandleAPIDocuments_ImportAndList(t *testing.T) {
 		t.Fatal(err)
 	}
 	part.Write([]byte("hello world, this is a test document")) //nolint:errcheck // test helper writing to an in-memory buffer, cannot fail
-	writer.Close() //nolint:errcheck // test helper closing a multipart writer over an in-memory buffer, cannot fail
+	writer.Close()                                             //nolint:errcheck // test helper closing a multipart writer over an in-memory buffer, cannot fail
 
 	req := httptest.NewRequest(http.MethodPost, "/api/documents", &body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
