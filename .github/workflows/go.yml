@@ -66,6 +66,30 @@ jobs:
           tests/output/coverage/
           reports/
 
+  lint:
+    runs-on: ubuntu-latest
+    name: Lint (golangci-lint)
+    timeout-minutes: 5
+    # continue-on-error: this couldn't be verified locally against the
+    # real codebase before adding it (network-restricted environment
+    # during setup), so it's deliberately non-blocking until a real
+    # run shows what it actually finds - remove this line once that's
+    # confirmed clean, or fixed up if it finds real issues.
+    continue-on-error: true
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v7
+      with:
+        version: latest
+        args: --timeout=5m
+
   build-test-windows:
     runs-on: windows-latest
     name: Build & Test (Windows)
