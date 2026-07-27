@@ -18,12 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     name: golangci-lint
     timeout-minutes: 5
-    # continue-on-error: this couldn't be verified locally against the
-    # real codebase before adding it (network-restricted environment
-    # during setup), so it's deliberately non-blocking until a real
-    # run shows what it actually finds - remove this line once that's
-    # confirmed clean, or fixed up if it finds real issues.
-    continue-on-error: true
     steps:
     - uses: actions/checkout@v4
 
