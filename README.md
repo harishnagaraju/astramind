@@ -3,7 +3,7 @@ Intelligent Conversations. Infinite Possibilities.
 
 Created and maintained by Harish Nagaraju.
 
-[![Go Build](https://github.com/harishnagaraju/astramind/actions/workflows/go.yml/badge.svg)](https://github.com/harishnagaraju/astramind/actions)
+[![Go Build](https://github.com/harishnagaraju/astramind/actions/workflows/go.yml/badge.svg)](https://github.com/harishnagaraju/astramind/actions/workflows/go.yml)
 ![Go](https://img.shields.io/badge/Go-1.24+-blue)
 [![License](https://img.shields.io/github/license/harishnagaraju/astramind)](https://github.com/harishnagaraju/astramind/blob/main/LICENSE)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
