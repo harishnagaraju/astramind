@@ -521,6 +521,49 @@ data/
 
 # Release Management
 
+## v1.0.0 — Platform API v1
+
+**Domain-Neutral AstraMind Platform API**
+
+This release completes the first stable Platform API boundary for AstraMind. The API exposes existing AstraMind capabilities over HTTP without creating duplicate provider, Knowledge Base, embedding, or search subsystems.
+
+### Platform API
+
+- Versioned API base path: `/api/v1`
+- Health, status, and version endpoints
+- Active provider and model discovery
+- Non-streaming chat
+- Server-Sent Events (SSE) chat streaming
+- Knowledge Base document listing, import, retrieval, and deletion
+- Document analysis through the active model
+- Text embeddings
+- Keyword and semantic Knowledge Base search
+- Structured JSON errors
+- Request ID propagation through `X-Request-ID`
+- API-level tests and documentation
+
+### Architecture
+
+- Reuses the existing AstraMind `ProviderManager`
+- Reuses the existing Knowledge Base and embedding/search infrastructure
+- Preserves the legacy local web API
+- Keeps the Platform API domain-neutral so applications such as SkillSifter can consume it
+- No second AI/RAG/document subsystem was introduced
+
+### Deliberate Non-Goals
+
+Agents, tool orchestration, API-key management, RBAC, vector databases, reranking, distributed deployment, SDKs, and advanced observability remain deferred until a real application requires them.
+
+### Verification
+
+- Platform API v1 tests added
+- Existing AstraMind functionality preserved
+- CI and lint validated before merge
+- PR #61 merged to `main`
+
+The Platform API v1 is intentionally frozen at this scope. AstraMind development now returns to product work and application integration.
+
+
 ## v0.9.2
 **`.docx` Import, Single-Fact Precision, Reliability Fixes & Cross-Platform Tooling**
 
