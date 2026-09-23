@@ -4,6 +4,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+
+	platformapi "github.com/harishnagaraju/astramind/internal/api/v1"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/config"
 	"io"
 	"net/http"
 	"os"
@@ -63,6 +66,17 @@ func (a *App) runWeb(addr string) error {
 	mux.HandleFunc("/api/status", a.handleAPIStatus)
 	mux.HandleFunc("/api/documents", a.handleAPIDocuments)
 	mux.HandleFunc("/api/ask", a.handleAPIAsk)
+
+	// The versioned Platform API is mounted alongside the legacy local web API.
+	// Keeping the legacy handlers unchanged preserves existing CLI/web behavior.
+	platformapi.Mount(mux, platformapi.Config{
+		ProviderName: a.providerName,
+		Model:        a.model,
+		Version:         config.Version,
+		APIKey:           a.apiKey,
+		ProviderManager: a.deps.ProviderManager,
+		KnowledgeBase:    a.deps.KnowledgeBase,
+	})
 
 	fmt.Printf("AstraMind web UI running at http://%s\n", addr)
 	fmt.Println("Press Ctrl+C to stop.")
