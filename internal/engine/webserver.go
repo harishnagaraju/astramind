@@ -72,7 +72,10 @@ func (a *App) runWeb(addr string) error {
 	platformapi.Mount(mux, platformapi.Config{
 		ProviderName: a.providerName,
 		Model:        a.model,
-		Version:      config.Version,
+		Version:         config.Version,
+		APIKey:           a.apiKey,
+		ProviderManager: a.deps.ProviderManager,
+		KnowledgeBase:    a.deps.KnowledgeBase,
 	})
 
 	fmt.Printf("AstraMind web UI running at http://%s\n", addr)
