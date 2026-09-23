@@ -1,79 +1,101 @@
 package v1_test
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
-	v1 "github.com/harishnagaraju/astramind/internal/api/v1"
+	platformapi "github.com/harishnagaraju/astramind/internal/api/v1"
+	"github.com/harishnagaraju/astramind/internal/infrastructure/ai"
 )
 
-func TestPlatformAPIHealth(t *testing.T) {
-	handler := v1.New(v1.Config{
-		ProviderName: "mock",
-		Model:        "test-model",
-		Version:      "v0.9.2",
+func testHandler() http.Handler {
+	manager := ai.NewProviderManager(&ai.MockProvider{})
+	return platformapi.New(platformapi.Config{
+		ProviderName:    "mock",
+		Model:           "mock-model",
+		Version:         "v0.9.2",
+		APIKey:          "",
+		ProviderManager: manager,
 	})
+}
 
+func TestHealthAndRequestID(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
+	req.Header.Set("X-Request-ID", "test-request")
 	rec := httptest.NewRecorder()
 
-	handler.ServeHTTP(rec, req)
+	testHandler().ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", rec.Code)
 	}
-	if got := rec.Header().Get("X-Request-ID"); got == "" {
-		t.Fatal("expected X-Request-ID response header")
+	if got := rec.Header().Get("X-Request-ID"); got != "test-request" {
+		t.Fatalf("expected request id propagation, got %q", got)
 	}
-	if got := rec.Header().Get("Content-Type"); got != "application/json" {
-		t.Fatalf("expected application/json content type, got %q", got)
+	if !strings.Contains(rec.Body.String(), `"status":"ok"`) {
+		t.Fatalf("unexpected body: %s", rec.Body.String())
 	}
 }
 
-func TestPlatformAPIStatus(t *testing.T) {
-	handler := v1.New(v1.Config{
-		ProviderName: "ollama",
-		Model:        "gemma3",
-		Version:      "v0.9.2",
-	})
-
-	req := httptest.NewRequest(http.MethodGet, "/status", nil)
-	req.Header.Set("X-Request-ID", "test-request-id")
+func TestChat(t *testing.T) {
+	body := strings.NewReader(`{"messages":[{"role":"user","content":"hello"}]}`)
+	req := httptest.NewRequest(http.MethodPost, "/chat", body)
+	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 
-	handler.ServeHTTP(rec, req)
+	testHandler().ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusOK {
-		t.Fatalf("expected 200, got %d", rec.Code)
+		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
 	}
-	if got := rec.Header().Get("X-Request-ID"); got != "test-request-id" {
-		t.Fatalf("expected propagated request id, got %q", got)
+
+	var result struct {
+		Message struct {
+			Role    string `json:"role"`
+			Content string `json:"content"`
+		} `json:"message"`
+	}
+	if err := json.NewDecoder(rec.Body).Decode(&result); err != nil {
+		t.Fatal(err)
+	}
+	if result.Message.Role != "assistant" || result.Message.Content == "" {
+		t.Fatalf("unexpected response: %+v", result)
 	}
 }
 
-func TestPlatformAPIVersion(t *testing.T) {
-	handler := v1.New(v1.Config{Version: "v1.2.3"})
-
-	req := httptest.NewRequest(http.MethodGet, "/version", nil)
+func TestChatStream(t *testing.T) {
+	body := strings.NewReader(`{"messages":[{"role":"user","content":"hello"}]}`)
+	req := httptest.NewRequest(http.MethodPost, "/chat/stream", body)
+	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 
-	handler.ServeHTTP(rec, req)
+	testHandler().ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusOK {
-		t.Fatalf("expected 200, got %d", rec.Code)
+		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "event: token") {
+		t.Fatalf("missing token event: %s", rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "event: done") {
+		t.Fatalf("missing done event: %s", rec.Body.String())
 	}
 }
 
-func TestPlatformAPIMethodNotAllowed(t *testing.T) {
-	handler := v1.New(v1.Config{Version: "v0.9.2"})
-
-	req := httptest.NewRequest(http.MethodPost, "/health", nil)
+func TestEmbeddings(t *testing.T) {
+	body := strings.NewReader(`{"text":"hello world"}`)
+	req := httptest.NewRequest(http.MethodPost, "/embeddings", body)
 	rec := httptest.NewRecorder()
 
-	handler.ServeHTTP(rec, req)
+	testHandler().ServeHTTP(rec, req)
 
-	if rec.Code != http.StatusMethodNotAllowed {
-		t.Fatalf("expected 405, got %d", rec.Code)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "embedding") {
+		t.Fatalf("missing embedding response: %s", rec.Body.String())
 	}
 }
