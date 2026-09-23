@@ -258,7 +258,7 @@ func (h *Handler) importDocument(w http.ResponseWriter, r *http.Request) {
 		h.badRequest(w, r, "file is required")
 		return
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck // uploaded file handle
 
 	doc, err := saveAndImport(h.config.KnowledgeBase, file, header)
 	if err != nil {
@@ -436,7 +436,7 @@ func saveAndImport(manager *kb.Manager, file multipart.File, header *multipart.F
 		return nil, err
 	}
 	if _, err := io.Copy(dest, file); err != nil {
-		dest.Close()
+		dest.Close() //nolint:errcheck // cleanup after copy failure
 		return nil, err
 	}
 	if err := dest.Close(); err != nil {
@@ -447,7 +447,7 @@ func saveAndImport(manager *kb.Manager, file multipart.File, header *multipart.F
 
 func writeSSE(w http.ResponseWriter, event string, data any) {
 	payload, _ := json.Marshal(data)
-	fmt.Fprintf(w, "event: %s\ndata: %s\n\n", event, payload)
+	fmt.Fprintf(w, "event: %s\ndata: %s\n\n", event, payload) //nolint:errcheck // client disconnect
 }
 
 func (h *Handler) methodNotAllowed(w http.ResponseWriter, r *http.Request) {
