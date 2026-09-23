@@ -9,12 +9,14 @@ import (
 func New(config Config) http.Handler {
 	return router.New(router.Config{
 		ProviderName: config.ProviderName,
-		Model:        config.Model,
-		Version:      config.Version,
+		Model: config.Model,
+		Version: config.Version,
+		APIKey: config.APIKey,
+		ProviderManager: config.ProviderManager,
+		KnowledgeBase: config.KnowledgeBase,
 	})
 }
 
 func Mount(mux *http.ServeMux, config Config) {
-	handler := New(config)
-	mux.Handle("/api/v1/", http.StripPrefix("/api/v1", handler))
+	mux.Handle("/api/v1/", http.StripPrefix("/api/v1", New(config)))
 }
