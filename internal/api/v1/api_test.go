@@ -16,7 +16,7 @@ func testHandler() http.Handler {
 	return platformapi.New(platformapi.Config{
 		ProviderName:    "mock",
 		Model:           "mock-model",
-		Version:         "v0.9.2",
+		Version:         "v1.0.0",
 		APIKey:          "",
 		ProviderManager: manager,
 	})
